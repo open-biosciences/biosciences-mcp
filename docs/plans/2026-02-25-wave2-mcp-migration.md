@@ -21,7 +21,7 @@
 **Step 1: Copy source directory with new name**
 
 ```bash
-cd /home/donbr/open-biosciences/biosciences-mcp
+cd /open-biosciences/biosciences-mcp
 cp -r /home/donbr/graphiti-org/lifesciences-research/src/lifesciences_mcp src/biosciences_mcp
 ```
 
@@ -64,7 +64,7 @@ Expected: No output (zero matches)
 **Step 1: Copy tests directory**
 
 ```bash
-cd /home/donbr/open-biosciences/biosciences-mcp
+cd /open-biosciences/biosciences-mcp
 cp -r /home/donbr/graphiti-org/lifesciences-research/tests .
 ```
 
@@ -243,7 +243,7 @@ DRUGBANK_API_KEY=your_drugbank_api_key_here
 **Step 1: Install dependencies**
 
 ```bash
-cd /home/donbr/open-biosciences/biosciences-mcp
+cd /open-biosciences/biosciences-mcp
 uv sync --extra dev
 ```
 
@@ -272,7 +272,7 @@ Expected: >= 399
 **Step 1: Run ruff check**
 
 ```bash
-cd /home/donbr/open-biosciences/biosciences-mcp
+cd /open-biosciences/biosciences-mcp
 uv run ruff check .
 ```
 
@@ -318,7 +318,7 @@ Expected: All values are `your_*_here` placeholders
 **Step 3: Stage and commit**
 
 ```bash
-cd /home/donbr/open-biosciences/biosciences-mcp
+cd /open-biosciences/biosciences-mcp
 git add src/ tests/ pyproject.toml ruff.toml .env.example
 git status
 ```
@@ -356,7 +356,7 @@ git push
 **Step 1: Confirm memory repo config is in place**
 
 ```bash
-cd /home/donbr/open-biosciences/biosciences-memory
+cd /open-biosciences/biosciences-memory
 cat .mcp.json
 cat .env.example
 ```

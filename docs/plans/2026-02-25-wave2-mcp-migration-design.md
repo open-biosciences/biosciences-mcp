@@ -15,7 +15,7 @@ Validate with unit tests. Integration tests run separately post-commit.
 ## Source and Target
 
 - **Source**: `/home/donbr/graphiti-org/lifesciences-research/`
-- **Target**: `/home/donbr/open-biosciences/biosciences-mcp/`
+- **Target**: `/open-biosciences/biosciences-mcp/`
 
 ## What Moves
 
