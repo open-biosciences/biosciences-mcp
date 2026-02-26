@@ -33,9 +33,12 @@ pytestmark = pytest.mark.e2e
 async def client() -> AsyncGenerator[Client, None]:
     """Create a shared FastMCP Client connection for the module."""
     url = os.getenv("FASTMCP_CLOUD_ENDPOINT", DEFAULT_URL)
+    api_key = os.getenv("BIOSCIENCES_API_KEY")
+    if not api_key:
+        pytest.skip("BIOSCIENCES_API_KEY not set — required for FastMCP Cloud access")
     print(f"\nConnecting to MCP Server: {url}")
 
-    async with Client(url) as c:
+    async with Client(url, auth=api_key) as c:
         yield c
 
 

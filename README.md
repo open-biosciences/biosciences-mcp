@@ -38,16 +38,22 @@ Once deployed, the gateway endpoint will be:
 https://biosciences-mcp.fastmcp.app/mcp
 ```
 
-### Connecting via Claude Code (.mcp.json)
+### Authentication
 
-Add this to your `.mcp.json` to use the deployed gateway:
+FastMCP Cloud requires a Bearer API key. Set `BIOSCIENCES_API_KEY` in your environment
+(obtain from the Prefect Horizon console). Do not commit this key.
+
+### Connecting via Claude Code (.mcp.json)
 
 ```json
 {
   "mcpServers": {
     "biosciences-mcp": {
       "type": "http",
-      "url": "https://biosciences-mcp.fastmcp.app/mcp"
+      "url": "https://biosciences-mcp.fastmcp.app/mcp",
+      "headers": {
+        "Authorization": "Bearer ${BIOSCIENCES_API_KEY}"
+      }
     }
   }
 }

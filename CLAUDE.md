@@ -160,6 +160,21 @@ FASTMCP_CLOUD_ENDPOINT=https://biosciences-mcp.fastmcp.app/mcp \
 fastmcp dev src/biosciences_mcp/servers/gateway.py
 ```
 
+### Authentication
+
+FastMCP Cloud requires a Bearer API key for all clients. Set `BIOSCIENCES_API_KEY` in your
+environment — obtain the key from the Prefect Horizon console.
+
+```bash
+# In .env (gitignored) or shell environment
+BIOSCIENCES_API_KEY=fmcp_<your-key>
+```
+
+The key is passed automatically by:
+- **Python clients**: `Client(url, auth=os.getenv("BIOSCIENCES_API_KEY"))`
+- **Claude Code .mcp.json**: `"Authorization": "Bearer ${BIOSCIENCES_API_KEY}"` header
+- **E2E tests**: fixture reads `BIOSCIENCES_API_KEY` from env; skips if absent
+
 ### .mcp.json Integration (Claude Code)
 
 ```json
@@ -167,11 +182,16 @@ fastmcp dev src/biosciences_mcp/servers/gateway.py
   "mcpServers": {
     "biosciences-mcp": {
       "type": "http",
-      "url": "https://biosciences-mcp.fastmcp.app/mcp"
+      "url": "https://biosciences-mcp.fastmcp.app/mcp",
+      "headers": {
+        "Authorization": "Bearer ${BIOSCIENCES_API_KEY}"
+      }
     }
   }
 }
 ```
+
+Set `BIOSCIENCES_API_KEY` in your shell or `.env` before starting Claude Code.
 
 ## Dependencies
 
