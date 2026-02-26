@@ -8,10 +8,10 @@ FastMCP wrappers for life sciences APIs, enabling LLM agents to query biological
 
 ## What This Repo Contains
 
-- **12 FastMCP server implementations** covering HGNC, UniProt, ChEMBL, Open Targets, STRING, BioGRID, Ensembl, Entrez, PubChem, IUPHAR, WikiPathways, and ClinicalTrials.gov
+- **12 FastMCP server implementations** covering HGNC, UniProt, ChEMBL, Open Targets, STRING, BioGRID, Ensembl, Entrez, PubChem, IUPHAR/GtoPdb, WikiPathways, and ClinicalTrials.gov
 - **13 async client libraries** for programmatic access to all servers (httpx-based)
 - **Pydantic v2 models** including response envelopes, cross-reference schemas, and domain entities
-- **Unified gateway server** aggregating all 12 servers behind a single endpoint
+- **Unified gateway server** aggregating all 12 servers behind a single endpoint (`src/biosciences_mcp/servers/gateway.py`)
 - **697+ tests** organized by pytest marker (unit, integration, e2e)
 
 All servers implement the Fuzzy-to-Fact protocol (ADR-001 §3): natural language discovery followed by strict CURIE-based lookup.
@@ -26,13 +26,55 @@ uv sync --extra dev
 uv run pytest -m unit -v
 ```
 
+## Server Tiers
+
+| Tier | Label | Servers |
+|------|-------|---------|
+| 0 | Drug Discovery Core | ChEMBL, Open Targets |
+| 1 | Gene/Protein Foundation | HGNC, UniProt, STRING, BioGRID |
+| 2 | Pharmacology | IUPHAR/GtoPdb, PubChem |
+| 3 | Pathways & Trials | WikiPathways, ClinicalTrials.gov |
+| 4 | Genomics & Identifiers | Ensembl, Entrez |
+
+### Implemented Tools by Server
+
+| Server | Tools | CURIE Format |
+|--------|-------|--------------|
+| HGNC | `search_genes`, `get_gene` | `HGNC:1100` |
+| UniProt | `search_proteins`, `get_protein` | `UniProtKB:P38398` |
+| ChEMBL | `search_compounds`, `get_compound`, `get_compounds_batch` | `CHEMBL:25` |
+| Open Targets | `search_targets`, `get_target`, `get_associations` | `ENSG00000141510` |
+| STRING | `search_proteins`, `get_interactions`, `get_network_image_url` | `STRING:9606.ENSP*` |
+| BioGRID | `search_genes`, `get_interactions` | Gene symbol |
+| Ensembl | `search_genes`, `get_gene`, `get_transcript` | `ENSG*`, `ENST*` |
+| Entrez | `search_genes`, `get_gene`, `get_pubmed_links` | `NCBIGene:7157` |
+| PubChem | `search_compounds`, `get_compound` | `PubChem:CID2244` |
+| IUPHAR/GtoPdb | `search_ligands`, `get_ligand`, `search_targets`, `get_target` | `IUPHAR:2713` |
+| WikiPathways | `search_pathways`, `get_pathway`, `get_pathways_for_gene`, `get_pathway_components` | `WP:WP534` |
+| ClinicalTrials.gov | `search_trials`, `get_trial`, `get_trial_locations` | `NCT:00461032` |
+
+## Fuzzy-to-Fact Protocol
+
+All servers enforce a two-phase workflow (ADR-001 §3):
+
+1. **Phase 1 — Fuzzy Discovery**: Tools accept natural language, return ranked candidates with CURIEs
+2. **Phase 2 — Strict Lookup**: Tools accept only resolved CURIEs (e.g., `HGNC:1100`, `UniProtKB:P38398`)
+3. **Failure Mode**: Passing raw strings to strict tools returns `UNRESOLVED_ENTITY` error
+
+```python
+# Example: fuzzy search -> CURIE resolution -> strict lookup
+result = await client.call_tool("search_genes", {"query": "BRCA1"})
+curie = result["items"][0]["id"]  # "HGNC:1100"
+gene = await client.call_tool("get_gene", {"hgnc_id": curie})
+```
+
 ## FastMCP Cloud
 
 Deployment is managed via the Prefect Horizon web UI at [horizon.prefect.io](https://horizon.prefect.io) —
 there is no `fastmcp deploy` CLI command in FastMCP 2.x. See [CLAUDE.md](CLAUDE.md#deploying-to-fastmcp-cloud)
 for step-by-step instructions.
 
-Once deployed, the gateway endpoint will be:
+Once deployed, the gateway endpoint is:
 
 ```
 https://biosciences-mcp.fastmcp.app/mcp
@@ -59,7 +101,7 @@ FastMCP Cloud requires a Bearer API key. Set `BIOSCIENCES_API_KEY` in your envir
 }
 ```
 
-### Required Environment Variables (Deployment Secrets)
+### Required Environment Variables
 
 Set these in the Horizon console when creating the deployment:
 
@@ -67,9 +109,8 @@ Set these in the Horizon console when creating the deployment:
 |----------|-------------|----------|
 | `BIOGRID_API_KEY` | BioGRID interactions API key (free registration) | Yes for BioGRID |
 | `NCBI_API_KEY` | Entrez/PubMed rate limit increase (optional, free) | No |
-| `DRUGBANK_API_KEY` | DrugBank commercial API key | Yes for DrugBank |
 
-Most life sciences APIs (HGNC, UniProt, ChEMBL, Open Targets, STRING, Ensembl, PubChem, IUPHAR, WikiPathways, ClinicalTrials.gov) are fully public and require no API key.
+Most life sciences APIs (HGNC, UniProt, ChEMBL, Open Targets, STRING, Ensembl, PubChem, IUPHAR/GtoPdb, WikiPathways, ClinicalTrials.gov) are fully public and require no API key.
 
 ## Local Development
 
@@ -120,33 +161,18 @@ src/biosciences_mcp/
     └── ...           # 12 servers
 ```
 
-## Fuzzy-to-Fact Protocol
-
-All servers enforce a two-phase workflow (ADR-001 §3):
-
-1. **Phase 1 — Fuzzy Discovery**: Tools accept natural language, return ranked candidates with CURIEs
-2. **Phase 2 — Strict Lookup**: Tools accept only resolved CURIEs (e.g., `HGNC:1100`, `UniProtKB:P38398`)
-3. **Failure Mode**: Passing raw strings to strict tools returns `UNRESOLVED_ENTITY` error
-
-```python
-# Example: fuzzy search -> CURIE resolution -> strict lookup
-result = await client.call_tool("search_genes", {"query": "BRCA1"})
-curie = result["items"][0]["id"]  # "HGNC:1100"
-gene = await client.call_tool("get_gene", {"hgnc_id": curie})
-```
-
 ## Agent Ownership
 
-Maintained by the **MCP Platform Engineer** agent (Agent 3). See [AGENTS.md](../biosciences-program/AGENTS.md) for full team definitions.
+Maintained by the **MCP Platform Engineer** agent (Agent 3). See [AGENTS.md](https://github.com/open-biosciences/biosciences-program/blob/main/AGENTS.md) for full team definitions.
 
 ## Dependencies
 
 | Direction | Repository | Relationship |
 |-----------|------------|--------------|
-| Upstream | biosciences-architecture | Schemas and ADRs |
-| Downstream | biosciences-deepagents | LangGraph agents consume MCP tools |
-| Downstream | biosciences-temporal | Temporal activities call MCP tools |
-| Downstream | biosciences-research | Graph-builder workflows use MCP tools |
+| Upstream | [biosciences-architecture](https://github.com/open-biosciences/biosciences-architecture) | Schemas and ADRs (ADR-001, ADR-004) |
+| Downstream | [biosciences-deepagents](https://github.com/open-biosciences/biosciences-deepagents) | LangGraph agents consume MCP tools |
+| Downstream | [biosciences-temporal](https://github.com/open-biosciences/biosciences-temporal) | Temporal activities call MCP tools |
+| Downstream | [biosciences-research](https://github.com/open-biosciences/biosciences-research) | Graph-builder workflows use MCP tools |
 
 ## Related Repositories
 
