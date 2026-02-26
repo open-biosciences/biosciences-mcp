@@ -119,11 +119,61 @@ git switch -c implement/<id>-<description>
 - **DrugBank**: Requires commercial API key. Implementation complete, integration tests skip without key.
 - **ChEMBL**: Frequently returns 500 errors. Use Open Targets `knownDrugs` GraphQL as fallback.
 
+## FastMCP Deployment
+
+### fastmcp.json Role
+
+The `fastmcp.json` at the repo root declares the gateway entrypoint for the FastMCP CLI and FastMCP Cloud. Key fields:
+
+- `source.path`: `src/biosciences_mcp/servers/gateway.py`
+- `source.entrypoint`: `mcp` (the `FastMCP("Biosciences MCP Gateway")` variable)
+- `environment.python`: `>=3.11`
+- `environment.project`: `.` (uses `pyproject.toml` for dependency resolution)
+- `deployment.transport`: `http`
+
+Per the FastMCP documentation, only the `source` field is required. The `environment` and `deployment` sections are optional. **There is no `name` field in the `fastmcp.json` schema** — the deployment name (which determines the subdomain `biosciences-mcp.fastmcp.app`) is set via the FastMCP Cloud / Prefect Horizon web UI when creating the server, not in the config file.
+
+### Deploying to FastMCP Cloud
+
+Deployment is managed via the **Prefect Horizon web UI** at [horizon.prefect.io](https://horizon.prefect.io).
+There is no `fastmcp deploy` or `fastmcp auth` CLI command in FastMCP 2.x — deployment is web-UI-only.
+
+1. Go to [horizon.prefect.io](https://horizon.prefect.io) and sign in with GitHub
+2. Create a new server deployment pointing to this repo with entrypoint:
+   ```
+   src/biosciences_mcp/servers/gateway.py:mcp
+   ```
+3. Set secrets in the Horizon console UI: `BIOGRID_API_KEY`, `NCBI_API_KEY`
+4. Set the server name to `biosciences-mcp` in the UI — this determines the subdomain
+5. Endpoint after deployment: `https://biosciences-mcp.fastmcp.app/mcp`
+
+### Running E2E Tests Against Cloud
+
+```bash
+FASTMCP_CLOUD_ENDPOINT=https://biosciences-mcp.fastmcp.app/mcp \
+  uv run pytest -m e2e -v
+```
+
+### Local Development Server
+
+```bash
+fastmcp dev src/biosciences_mcp/servers/gateway.py
+```
+
+### .mcp.json Integration (Claude Code)
+
+```json
+{
+  "mcpServers": {
+    "biosciences-mcp": {
+      "type": "http",
+      "url": "https://biosciences-mcp.fastmcp.app/mcp"
+    }
+  }
+}
+```
+
 ## Dependencies
 
 - **Upstream**: `biosciences-architecture` (ADR schemas)
 - **Downstream**: `biosciences-deepagents`, `biosciences-temporal`, `biosciences-research` (tool consumers)
-
-## Pre-Migration Source
-
-Until Wave 2 migration: `/home/donbr/graphiti-org/lifesciences-research/`

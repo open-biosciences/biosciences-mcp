@@ -40,7 +40,7 @@ async def client() -> AsyncGenerator[Client, None]:
 
 
 @pytest.mark.asyncio
-@pytest.mark.timeout(30)
+@pytest.mark.timeout(45)
 async def test_connectivity(client: Client):
     """Verify basic connectivity and tool listing."""
     print("  > Listing tools...")
@@ -55,7 +55,7 @@ async def test_connectivity(client: Client):
 
 
 @pytest.mark.asyncio
-@pytest.mark.timeout(30)
+@pytest.mark.timeout(45)
 async def test_cq1_hgnc_search(client: Client):
     """CQ-1: Resolve TP53 (HGNC)."""
     print("  > Searching HGNC for 'TP53'...")
