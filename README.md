@@ -169,14 +169,14 @@ Maintained by the **MCP Platform Engineer** agent (Agent 3). See [AGENTS.md](htt
 
 | Direction | Repository | Relationship |
 |-----------|------------|--------------|
-| Upstream | [biosciences-architecture](https://github.com/open-biosciences/biosciences-architecture) | Schemas and ADRs (ADR-001, ADR-004) |
+| Upstream | [biosciences-program](https://github.com/open-biosciences/biosciences-program) | Schemas and ADRs (ADR-001, ADR-004) |
 | Downstream | [biosciences-deepagents](https://github.com/open-biosciences/biosciences-deepagents) | LangGraph agents consume MCP tools |
 | Downstream | [biosciences-temporal](https://github.com/open-biosciences/biosciences-temporal) | Temporal activities call MCP tools |
 | Downstream | [biosciences-research](https://github.com/open-biosciences/biosciences-research) | Graph-builder workflows use MCP tools |
 
 ## Related Repositories
 
-- [biosciences-architecture](https://github.com/open-biosciences/biosciences-architecture) — ADRs and schemas
+- [biosciences-program](https://github.com/open-biosciences/biosciences-program) — ADRs and schemas
 - [biosciences-deepagents](https://github.com/open-biosciences/biosciences-deepagents) — LangGraph multi-agent system
 - [biosciences-temporal](https://github.com/open-biosciences/biosciences-temporal) — Temporal durable workflows
 - [biosciences-research](https://github.com/open-biosciences/biosciences-research) — Research workflows
