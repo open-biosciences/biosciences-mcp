@@ -35,17 +35,21 @@ async def check_iuphar_available():
 
 @pytest.fixture(scope="function")
 async def check_wikipathways_available():
-    """Check if WikiPathways service is reachable before running tests."""
+    """Check if the WikiPathways static JSON host is reachable before running tests.
+
+    The legacy REST webservice was decommissioned; we now hit the CDN-served
+    bulk JSON files used by the WikiPathways Python client.
+    """
     try:
         async with httpx.AsyncClient(
-            timeout=httpx.Timeout(connect=5.0, read=5.0, write=5.0, pool=5.0)
+            timeout=httpx.Timeout(connect=10.0, read=10.0, write=10.0, pool=10.0)
         ) as client:
-            response = await client.get(
-                "https://webservice.wikipathways.org/listPathways",
-                params={"organism": "Homo sapiens"},
+            response = await client.head(
+                "https://www.wikipathways.org/json/findPathwaysByText.json",
             )
             if response.status_code == 200:
                 return True
+            pytest.skip(f"WikiPathways JSON unhealthy: status={response.status_code}")
     except (httpx.TimeoutException, httpx.ConnectError) as e:
         pytest.skip(f"WikiPathways service unavailable: {e}")
     except Exception as e:
