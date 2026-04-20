@@ -1,24 +1,22 @@
-"""WikiPathways API client with rate limiting and exponential backoff.
+"""WikiPathways client backed by the static JSON bulk files.
 
-This client implements:
-- Async httpx client for WikiPathways REST API
-- Conservative rate limiting (1 req/sec with asyncio.Lock)
-- Exponential backoff for 429/503 responses
-- Client-side cursor pagination (base64-encoded offsets)
-- Bulk cross-reference file fetching and caching
-- Cross-reference mapping to Agentic Biolink 22-key schema
+The legacy REST webservice at ``webservice.wikipathways.org`` was
+decommissioned in 2024 and now returns a GitHub Pages 404 for every path.
+WikiPathways' own ``pywikipathways`` library was rewritten to read the
+static JSON files published at ``https://www.wikipathways.org/json/``
+(CDN-served, refreshed weekly). This client follows the same migration.
 
-Base URL: http://webservice.wikipathways.org
-Bulk Files: https://www.wikipathways.org/json/
+Base URL: https://www.wikipathways.org/json/
+
+Files consumed:
+    - findPathwaysByText.json  — corpus with name/description/datanodes/annotations
+    - findPathwaysByXref.json  — corpus with ncbigene/ensembl/hgnc/uniprot xrefs
 """
 
 import asyncio
 import base64
 import re
-from datetime import datetime, timedelta
 from typing import Any
-
-import httpx
 
 from biosciences_mcp.clients.base import LifeSciencesClient
 from biosciences_mcp.models import (
@@ -32,248 +30,160 @@ from biosciences_mcp.models import (
     RevisionMetadata,
 )
 
-# Constants
-WIKIPATHWAYS_BASE_URL = "http://webservice.wikipathways.org"
 WIKIPATHWAYS_JSON_BASE = "https://www.wikipathways.org/json"
+FIND_BY_TEXT_URL = f"{WIKIPATHWAYS_JSON_BASE}/findPathwaysByText.json"
+FIND_BY_XREF_URL = f"{WIKIPATHWAYS_JSON_BASE}/findPathwaysByXref.json"
 PATHWAY_ID_PATTERN = re.compile(r"^WP:WP\d+$")
 
 
 class WikiPathwaysClient(LifeSciencesClient):
-    """WikiPathways API client with rate limiting.
+    """WikiPathways client using static JSON bulk files.
 
-    Features:
-    - 1 req/sec rate limiting with thundering herd prevention
-    - Exponential backoff for 429/503 responses (3 retries, base 2s)
-    - Client-side cursor pagination
-    - Bulk cross-reference caching
+    Each bulk file is fetched at most once per client instance and cached
+    in memory; a double-checked ``asyncio.Lock`` prevents thundering herd
+    on concurrent first access.
     """
 
     def __init__(self) -> None:
-        """Initialize the WikiPathways client."""
         super().__init__(
-            base_url=WIKIPATHWAYS_BASE_URL,
-            timeout=10.0,  # Per FR-048
+            base_url=WIKIPATHWAYS_JSON_BASE,
+            timeout=30.0,
             max_connections=5,
         )
 
-        # Rate limiting (1 req/sec per research.md)
-        self._rate_limit_lock = asyncio.Lock()
-        self._last_request_time: datetime | None = None
-        self._min_request_interval = timedelta(seconds=1)
+        self._text_cache: dict[str, dict[str, Any]] | None = None
+        self._text_cache_lock = asyncio.Lock()
 
-        # Cross-reference cache (loaded on demand)
         self._xref_cache: dict[str, dict[str, Any]] | None = None
         self._xref_cache_lock = asyncio.Lock()
 
-    async def _enforce_rate_limit(self) -> None:
-        """Enforce rate limit with thundering herd prevention.
-
-        Implements conservative 1 req/sec rate limiting per research.md §4.
-        Uses double-check locking pattern to prevent thundering herd.
-        """
-        async with self._rate_limit_lock:
-            if self._last_request_time:
-                elapsed = datetime.now() - self._last_request_time
-                if elapsed < self._min_request_interval:
-                    sleep_time = (self._min_request_interval - elapsed).total_seconds()
-                    await asyncio.sleep(sleep_time)
-
-            # Re-check after lock acquisition (thundering herd prevention)
-            if self._last_request_time:
-                elapsed = datetime.now() - self._last_request_time
-                if elapsed < self._min_request_interval:
-                    sleep_time = (self._min_request_interval - elapsed).total_seconds()
-                    await asyncio.sleep(sleep_time)
-
-            self._last_request_time = datetime.now()
-
-    async def _request_with_retry(
+    async def _fetch_bulk(
         self,
-        method: str,
         url: str,
-        max_retries: int = 3,
-        **kwargs: Any,
-    ) -> httpx.Response:
-        """Make HTTP request with exponential backoff.
+        cache_attr: str,
+        lock: asyncio.Lock,
+    ) -> dict[str, dict[str, Any]]:
+        """Lazy-load a bulk JSON file into a ``{pathway_id: entry}`` dict."""
+        existing = getattr(self, cache_attr)
+        if existing is not None:
+            return existing
 
-        Implements exponential backoff for 429/503 responses per research.md §4.
+        async with lock:
+            existing = getattr(self, cache_attr)
+            if existing is not None:
+                return existing
 
-        Args:
-            method: HTTP method (GET, POST, etc.)
-            url: Request URL
-            max_retries: Maximum retry attempts (default 3)
-            **kwargs: Additional request parameters
+            client = await self._get_client()
+            response = await client.get(url)
+            response.raise_for_status()
+            data = response.json()
 
-        Returns:
-            HTTP response
+            by_id: dict[str, dict[str, Any]] = {}
+            for entry in data.get("pathwayInfo", []):
+                pathway_id = entry.get("id", "")
+                if pathway_id:
+                    by_id[pathway_id] = entry
 
-        Raises:
-            ErrorEnvelope: On rate limit exhaustion or upstream errors
-        """
-        base_delay = 2.0  # Base delay 2 seconds
+            setattr(self, cache_attr, by_id)
+            return by_id
 
-        for attempt in range(max_retries + 1):
-            try:
-                await self._enforce_rate_limit()
-                client = await self._get_client()
-                response = await client.request(method, url, **kwargs)
+    async def _fetch_text_bulk(self) -> dict[str, dict[str, Any]]:
+        return await self._fetch_bulk(FIND_BY_TEXT_URL, "_text_cache", self._text_cache_lock)
 
-                # Handle rate limiting and service unavailable
-                if response.status_code in (429, 503):
-                    if attempt == max_retries:
-                        raise ValueError("RATE_LIMITED: WikiPathways rate limit exceeded")
-
-                    # Exponential backoff
-                    delay = base_delay * (2**attempt)
-                    await asyncio.sleep(delay)
-                    continue
-
-                return response
-
-            except httpx.TimeoutException as e:
-                if attempt == max_retries:
-                    raise ValueError("UPSTREAM_ERROR: WikiPathways API timeout") from e
-                await asyncio.sleep(base_delay * (2**attempt))
-
-            except httpx.RequestError as e:
-                if attempt == max_retries:
-                    raise ValueError(f"UPSTREAM_ERROR: Request failed: {e}") from e
-                await asyncio.sleep(base_delay * (2**attempt))
-
-        # This should never be reached, but satisfy type checker
-        raise ValueError("UPSTREAM_ERROR: Request failed after retries")
+    async def _fetch_cross_references_bulk(self) -> dict[str, dict[str, Any]]:
+        return await self._fetch_bulk(FIND_BY_XREF_URL, "_xref_cache", self._xref_cache_lock)
 
     def _encode_cursor(self, offset: int) -> str:
-        """Encode offset as opaque cursor (base64).
-
-        Args:
-            offset: Pagination offset
-
-        Returns:
-            Base64-encoded cursor string
-        """
         return base64.b64encode(str(offset).encode()).decode()
 
     def _decode_cursor(self, cursor: str) -> int:
-        """Decode cursor to offset.
-
-        Args:
-            cursor: Base64-encoded cursor
-
-        Returns:
-            Pagination offset
-
-        Raises:
-            ValueError: If cursor is invalid
-        """
         try:
             return int(base64.b64decode(cursor).decode())
         except (ValueError, UnicodeDecodeError) as e:
             raise ValueError(f"Invalid cursor format: {e}") from e
 
     def _validate_pathway_id(self, pathway_id: str) -> bool:
-        """Validate pathway ID matches WP:WPNNNNN format.
-
-        Args:
-            pathway_id: Pathway identifier to validate
-
-        Returns:
-            True if valid, False otherwise
-        """
         return bool(PATHWAY_ID_PATTERN.match(pathway_id))
 
-    async def _fetch_cross_references_bulk(self) -> dict[str, dict[str, Any]]:
-        """Fetch and cache all pathway cross-references from JSON bulk file.
-
-        Loads findPathwaysByXref.json once and caches for session lifetime.
-        Thread-safe with async lock.
-
-        Returns:
-            Dictionary mapping pathway ID → cross-references dict
-        """
-        if self._xref_cache is not None:
-            return self._xref_cache
-
-        async with self._xref_cache_lock:
-            # Double-check after lock acquisition
-            if self._xref_cache is not None:
-                return self._xref_cache
-
-            # Fetch bulk file (no rate limiting - different domain)
-            url = f"{WIKIPATHWAYS_JSON_BASE}/findPathwaysByXref.json"
-            client = await self._get_client()
-            response = await client.get(url)
-            data = response.json()
-
-            # Build pathway_id → cross_references lookup
-            self._xref_cache = {}
-            for pathway in data.get("pathwayInfo", []):
-                pathway_id = pathway.get("id", "")
-                if pathway_id:
-                    self._xref_cache[pathway_id] = pathway
-
-            return self._xref_cache
+    def _normalize_gene_symbol(self, gene_symbol: str) -> str:
+        return gene_symbol.upper()
 
     def _map_cross_references(
         self, pathway_id: str, pathway_data: dict[str, Any]
     ) -> dict[str, str | list[str]]:
-        """Map WikiPathways cross-references to Agentic Biolink 22-key schema.
+        """Map WikiPathways xref fields to Agentic Biolink keys (omit-if-null)."""
+        xrefs: dict[str, str | list[str]] = {}
 
-        Mapping per research.md §5:
-        - ncbigene → entrez
-        - ensembl → ensembl_gene
-        - hgnc.symbol → hgnc
-        - uniprot → uniprot (handle semicolon-separated isoforms)
-
-        Args:
-            pathway_id: Pathway identifier (WP### numeric portion)
-            pathway_data: Pathway cross-reference data from bulk JSON
-
-        Returns:
-            Dict of cross-references using Agentic Biolink keys (omit-if-null pattern)
-        """
-        xrefs = {}
-
-        # Map ncbigene → entrez
         if "ncbigene" in pathway_data:
             entries = pathway_data["ncbigene"].split(", ")
             xrefs["entrez"] = [e.replace("ncbigene:", "") for e in entries if e]
 
-        # Map ensembl → ensembl_gene
         if "ensembl" in pathway_data:
             entries = pathway_data["ensembl"].split(", ")
             xrefs["ensembl_gene"] = [e.replace("ensembl:", "") for e in entries if e]
 
-        # Map hgnc.symbol → hgnc
         if "hgnc" in pathway_data:
             entries = pathway_data["hgnc"].split(", ")
             xrefs["hgnc"] = [e.replace("hgnc.symbol:", "") for e in entries if e]
 
-        # Map uniprot → uniprot (handle semicolon-separated isoforms)
         if "uniprot" in pathway_data:
             entries = pathway_data["uniprot"].split(", ")
             uniprot_list = []
             for entry in entries:
-                # Remove uniprot: prefix, then split on semicolon and take first (canonical)
                 primary = entry.replace("uniprot:", "").split(";")[0]
                 if primary:
                     uniprot_list.append(primary)
             if uniprot_list:
                 xrefs["uniprot"] = uniprot_list
 
-        # Omit empty values per ADR-001 §4
         return {k: v for k, v in xrefs.items() if v}
 
-    def _normalize_gene_symbol(self, gene_symbol: str) -> str:
-        """Normalize gene symbol to uppercase.
+    @staticmethod
+    def _split_xref_field(raw: str, prefix: str) -> list[str]:
+        """Split a comma-separated, prefixed xref string into raw IDs."""
+        if not raw:
+            return []
+        return [token.replace(prefix, "").strip() for token in raw.split(",") if token.strip()]
 
-        Args:
-            gene_symbol: Gene symbol (e.g., "brca1", "TP53")
+    @staticmethod
+    def _split_uniprot_field(raw: str) -> list[str]:
+        """UniProt groups use ``,`` between positions and ``;`` between isoforms."""
+        if not raw:
+            return []
+        out: list[str] = []
+        for group in raw.split(","):
+            group = group.strip()
+            if not group:
+                continue
+            primary = group.replace("uniprot:", "").split(";")[0].strip()
+            if primary:
+                out.append(primary)
+        return out
 
-        Returns:
-            Uppercase gene symbol (e.g., "BRCA1", "TP53")
-        """
-        return gene_symbol.upper()
+    @staticmethod
+    def _pathway_url(wp_numeric_id: str, fallback: str | None = None) -> str:
+        if fallback:
+            return fallback
+        return f"https://www.wikipathways.org/pathways/{wp_numeric_id}.html"
+
+    def _score_text_match(self, query_tokens: list[str], entry: dict[str, Any]) -> float:
+        """Weight name hits 3x; description/datanodes/annotations 1x. 0.0 == no match."""
+        if not query_tokens:
+            return 0.0
+        name = (entry.get("name") or "").lower()
+        blob = " ".join(
+            (entry.get(f) or "") for f in ("name", "description", "datanodes", "annotations")
+        ).lower()
+        if not blob:
+            return 0.0
+
+        name_hits = sum(1 for t in query_tokens if t in name)
+        blob_hits = sum(1 for t in query_tokens if t in blob)
+        if blob_hits == 0:
+            return 0.0
+
+        raw = 3.0 * name_hits + blob_hits
+        return min(1.0, raw / (4.0 * len(query_tokens)))
 
     async def search_pathways(
         self,
@@ -282,18 +192,7 @@ class WikiPathwaysClient(LifeSciencesClient):
         cursor: str | None = None,
         page_size: int = 50,
     ) -> PaginationEnvelope | ErrorEnvelope:
-        """Fuzzy search for pathways by name, description, or gene.
-
-        Args:
-            query: Search term (minimum 2 characters)
-            organism: Optional organism filter (e.g., "Homo sapiens")
-            cursor: Opaque cursor for pagination
-            page_size: Results per page (1-100, default 50)
-
-        Returns:
-            PaginationEnvelope with PathwaySearchCandidate items, or ErrorEnvelope
-        """
-        # Validation
+        """Fuzzy search against name, description, datanodes, and annotations."""
         if len(query) < 2:
             return ErrorEnvelope(
                 success=False,
@@ -305,7 +204,6 @@ class WikiPathwaysClient(LifeSciencesClient):
                 },
             )
 
-        # Validate page_size
         if page_size < 1 or page_size > 100:
             return ErrorEnvelope(
                 success=False,
@@ -318,64 +216,42 @@ class WikiPathwaysClient(LifeSciencesClient):
             )
 
         try:
-            # Build request parameters
-            params = {"query": query, "format": "json"}
-            if organism:
-                params["species"] = organism
+            text_cache = await self._fetch_text_bulk()
 
-            # Make API request with retry logic
-            response = await self._request_with_retry(
-                "GET",
-                "/findPathwaysByText",
-                params=params,
-            )
+            query_tokens = [t for t in query.lower().split() if t]
+            scored: list[tuple[float, dict[str, Any]]] = []
+            for entry in text_cache.values():
+                if organism and entry.get("species") != organism:
+                    continue
+                score = self._score_text_match(query_tokens, entry)
+                if score > 0.0:
+                    scored.append((score, entry))
 
-            # Check for error response
-            if isinstance(response, ErrorEnvelope):
-                return response
+            scored.sort(key=lambda pair: pair[0], reverse=True)
 
-            # Parse response
-            data = response.json()
-            all_results = data.get("result", [])
-
-            # Convert to PathwaySearchCandidate with position decay scoring
-            candidates = []
-            for position, item in enumerate(all_results):
-                # Parse score (comes as {"0": "4.639924"})
-                score_obj = item.get("score", {})
-                base_score = float(score_obj.get("0", "0.0")) if score_obj else 0.0
-
-                # Apply position decay: score - (position * 0.05)
-                # Normalize to 0.0-1.0 range (WikiPathways scores typically 0-5)
-                normalized_score = max(0.0, min(1.0, (base_score - (position * 0.05)) / 5.0))
-
-                # Extract description (use name if no description available)
-                description = item.get("name", "")[:200]  # First 200 chars
-
-                # Create candidate with WP:WPNNNNN format
-                wp_id = item.get("id", "")
-                candidate = PathwaySearchCandidate(
-                    id=f"WP:{wp_id}",
-                    title=item.get("name", ""),
-                    organism=item.get("species", ""),
-                    description=description,
-                    score=normalized_score,
+            candidates: list[PathwaySearchCandidate] = []
+            for score, entry in scored:
+                wp_id = entry.get("id", "")
+                description = (entry.get("description") or entry.get("name") or "")[:200]
+                candidates.append(
+                    PathwaySearchCandidate(
+                        id=f"WP:{wp_id}",
+                        title=entry.get("name", ""),
+                        organism=entry.get("species", ""),
+                        description=description,
+                        score=score,
+                    )
                 )
-                candidates.append(candidate)
 
-            # Client-side cursor pagination
             offset = self._decode_cursor(cursor) if cursor else 0
-            page_candidates = candidates[offset : offset + page_size]
-
-            # Calculate next cursor
+            page = candidates[offset : offset + page_size]
             next_offset = offset + page_size
             next_cursor = (
                 self._encode_cursor(next_offset) if next_offset < len(candidates) else None
             )
 
-            # Return PaginationEnvelope
             return PaginationEnvelope(
-                items=[candidate.model_dump() for candidate in page_candidates],
+                items=[c.model_dump() for c in page],
                 pagination={
                     "cursor": next_cursor,
                     "total_count": len(candidates),
@@ -384,7 +260,6 @@ class WikiPathwaysClient(LifeSciencesClient):
             )
 
         except ValueError as e:
-            # Handle cursor decode errors
             if "Invalid cursor" in str(e):
                 return ErrorEnvelope(
                     success=False,
@@ -395,7 +270,6 @@ class WikiPathwaysClient(LifeSciencesClient):
                         "invalid_input": cursor or "",
                     },
                 )
-            # Re-raise other ValueError
             raise
 
         except Exception as e:
@@ -409,127 +283,69 @@ class WikiPathwaysClient(LifeSciencesClient):
             )
 
     async def get_pathway(self, pathway_id: str) -> Pathway | ErrorEnvelope:
-        """Get complete pathway record by WikiPathways CURIE.
-
-        Args:
-            pathway_id: WikiPathways CURIE in format 'WP:WPNNNNN'
-
-        Returns:
-            Pathway record with cross_references, or ErrorEnvelope
-        """
-        # Validation
+        """Strict lookup for a pathway by WikiPathways CURIE."""
         if not self._validate_pathway_id(pathway_id):
             return ErrorEnvelope(
                 success=False,
                 error={
                     "code": "UNRESOLVED_ENTITY",
-                    "message": f"Invalid pathway ID format '{pathway_id}'. Expected WP:WPNNNNN format",
+                    "message": (
+                        f"Invalid pathway ID format '{pathway_id}'. Expected WP:WPNNNNN format"
+                    ),
                     "recovery_hint": "Call search_pathways to resolve pathway identifier first",
                     "invalid_input": pathway_id,
                 },
             )
 
         try:
-            # Extract numeric WP ID (e.g., "WP:WP534" -> "WP534")
             wp_numeric_id = pathway_id.replace("WP:", "")
 
-            # 1. Get pathway metadata from /getPathwayInfo
-            response = await self._request_with_retry(
-                "GET",
-                "/getPathwayInfo",
-                params={"pwId": wp_numeric_id, "format": "json"},
-            )
+            text_cache = await self._fetch_text_bulk()
+            info = text_cache.get(wp_numeric_id)
 
-            # Check for error response
-            if isinstance(response, ErrorEnvelope):
-                return response
-
-            data = response.json()
-            pathway_info = data.get("pathwayInfo", {})
-
-            # Check if pathway exists
-            # WikiPathways API returns ID even for non-existent pathways, but leaves name empty
-            if not pathway_info or not pathway_info.get("id") or not pathway_info.get("name"):
+            if not info or not info.get("name"):
                 return ErrorEnvelope(
                     success=False,
                     error={
                         "code": "ENTITY_NOT_FOUND",
                         "message": f"Pathway {pathway_id} not found in WikiPathways database",
-                        "recovery_hint": "Verify pathway ID or use search_pathways to find valid pathway",
+                        "recovery_hint": (
+                            "Verify pathway ID or use search_pathways to find valid pathway"
+                        ),
                         "invalid_input": pathway_id,
                     },
                 )
 
-            # 2. Fetch cross-references from bulk JSON file
             xref_cache = await self._fetch_cross_references_bulk()
-            pathway_xref_data = xref_cache.get(wp_numeric_id, {})
-            cross_references = self._map_cross_references(wp_numeric_id, pathway_xref_data)
+            xref_entry = xref_cache.get(wp_numeric_id, {})
+            cross_references = self._map_cross_references(wp_numeric_id, xref_entry)
 
-            # 3. Get component counts by calling getXrefList for different codes
-            # Code L = genes, S = proteins, Ce = metabolites
-            gene_count = 0
-            protein_count = 0
-            metabolite_count = 0
+            gene_ids = self._split_xref_field(xref_entry.get("ncbigene", ""), "ncbigene:")
+            protein_ids = self._split_uniprot_field(xref_entry.get("uniprot", ""))
 
-            try:
-                # Get gene count (code L = NCBI Gene)
-                gene_response = await self._request_with_retry(
-                    "GET",
-                    "/getXrefList",
-                    params={"pwId": wp_numeric_id, "code": "L", "format": "json"},
-                )
-                if not isinstance(gene_response, ErrorEnvelope):
-                    gene_data = gene_response.json()
-                    gene_count = len(gene_data.get("xrefs", []))
+            description = info.get("description") or info.get("name") or ""
 
-                # Get protein count (code S = UniProt)
-                protein_response = await self._request_with_retry(
-                    "GET",
-                    "/getXrefList",
-                    params={"pwId": wp_numeric_id, "code": "S", "format": "json"},
-                )
-                if not isinstance(protein_response, ErrorEnvelope):
-                    protein_data = protein_response.json()
-                    protein_count = len(protein_data.get("xrefs", []))
-
-                # Get metabolite count (code Ce = ChEBI)
-                metabolite_response = await self._request_with_retry(
-                    "GET",
-                    "/getXrefList",
-                    params={"pwId": wp_numeric_id, "code": "Ce", "format": "json"},
-                )
-                if not isinstance(metabolite_response, ErrorEnvelope):
-                    metabolite_data = metabolite_response.json()
-                    metabolite_count = len(metabolite_data.get("xrefs", []))
-
-            except Exception:
-                # If component count fetching fails, use zeros (non-critical)
-                pass
-
-            # 4. Build Pathway model
-            pathway = Pathway(
+            return Pathway(
                 id=pathway_id,
-                title=pathway_info.get("name", ""),
-                organism=pathway_info.get("species", ""),
-                description=pathway_info.get("name", "")[:200],  # Use name as description
+                title=info.get("name", ""),
+                organism=info.get("species", ""),
+                description=description,
                 revision=RevisionMetadata(
-                    version=pathway_info.get("revision", ""),
-                    last_modified=None,  # Not available in API response
-                    curators=[],  # Not available in API response
+                    version=info.get("revision", ""),
+                    last_modified=info.get("revision") or None,
+                    curators=[
+                        a.strip() for a in (info.get("authors") or "").split(",") if a.strip()
+                    ],
                 ),
                 component_counts=ComponentCounts(
-                    gene_count=gene_count,
-                    protein_count=protein_count,
-                    metabolite_count=metabolite_count,
-                    interaction_count=0,  # Not available without GPML parsing
+                    gene_count=len(gene_ids),
+                    protein_count=len(protein_ids),
+                    metabolite_count=0,
+                    interaction_count=0,
                 ),
                 cross_references=cross_references,
-                url=pathway_info.get(
-                    "url", f"https://classic.wikipathways.org/index.php/Pathway:{wp_numeric_id}"
-                ),
+                url=self._pathway_url(wp_numeric_id, info.get("url")),
             )
-
-            return pathway
 
         except Exception as e:
             return ErrorEnvelope(
@@ -548,18 +364,7 @@ class WikiPathwaysClient(LifeSciencesClient):
         cursor: str | None = None,
         page_size: int = 50,
     ) -> PaginationEnvelope | ErrorEnvelope:
-        """Find all pathways containing a specific gene.
-
-        Args:
-            gene_id: Gene identifier (symbol, Entrez ID, or Ensembl ID)
-            organism: Optional organism filter (exact scientific name match)
-            cursor: Opaque cursor for pagination
-            page_size: Results per page (1-100, default 50)
-
-        Returns:
-            PaginationEnvelope with PathwaySearchCandidate items, or ErrorEnvelope
-        """
-        # Validation
+        """Find pathways whose xref set contains ``gene_id`` in any ID system."""
         if not gene_id or not gene_id.strip():
             return ErrorEnvelope(
                 success=False,
@@ -571,7 +376,6 @@ class WikiPathwaysClient(LifeSciencesClient):
                 },
             )
 
-        # Validate page_size
         if page_size < 1 or page_size > 100:
             return ErrorEnvelope(
                 success=False,
@@ -584,69 +388,52 @@ class WikiPathwaysClient(LifeSciencesClient):
             )
 
         try:
-            # Normalize gene symbol to uppercase (per contract)
-            normalized_gene = self._normalize_gene_symbol(gene_id.strip())
+            raw = gene_id.strip()
+            normalized = self._normalize_gene_symbol(raw)
 
-            # Build request parameters
-            params = {"ids": normalized_gene, "format": "json"}
+            xref_cache = await self._fetch_cross_references_bulk()
+            text_cache = await self._fetch_text_bulk()
 
-            # Make API request with retry logic
-            response = await self._request_with_retry(
-                "GET",
-                "/findPathwaysByXref",
-                params=params,
-            )
+            candidates: list[PathwaySearchCandidate] = []
+            for wp_id, entry in xref_cache.items():
+                species = entry.get("species", "")
+                if organism and species != organism:
+                    continue
 
-            # Check for error response
-            if isinstance(response, ErrorEnvelope):
-                return response
+                entrez_ids = self._split_xref_field(entry.get("ncbigene", ""), "ncbigene:")
+                ensembl_ids = self._split_xref_field(entry.get("ensembl", ""), "ensembl:")
+                hgnc_ids = self._split_xref_field(entry.get("hgnc", ""), "hgnc.symbol:")
+                uniprot_ids = self._split_uniprot_field(entry.get("uniprot", ""))
 
-            # Parse response
-            data = response.json()
-            all_results = data.get("result", [])
+                xref_union = set(entrez_ids) | set(ensembl_ids) | set(uniprot_ids)
+                xref_union.update(s.upper() for s in hgnc_ids)
 
-            # Filter by organism if provided (exact match)
-            if organism:
-                all_results = [r for r in all_results if r.get("species") == organism]
+                if raw in xref_union or normalized in xref_union:
+                    text_entry = text_cache.get(wp_id, entry)
+                    description = (text_entry.get("description") or text_entry.get("name") or "")[
+                        :200
+                    ]
+                    candidates.append(
+                        PathwaySearchCandidate(
+                            id=f"WP:{wp_id}",
+                            title=text_entry.get("name", entry.get("name", "")),
+                            organism=species,
+                            description=description,
+                            score=1.0,
+                        )
+                    )
 
-            # Convert to PathwaySearchCandidate with position decay scoring
-            candidates = []
-            for position, item in enumerate(all_results):
-                # Parse score (comes as {"0": "4.639924"})
-                score_obj = item.get("score", {})
-                base_score = float(score_obj.get("0", "0.0")) if score_obj else 0.0
+            candidates.sort(key=lambda c: c.id)
 
-                # Apply position decay: score - (position * 0.05)
-                # Normalize to 0.0-1.0 range (WikiPathways scores typically 0-5)
-                normalized_score = max(0.0, min(1.0, (base_score - (position * 0.05)) / 5.0))
-
-                # Extract description (use name if no description available)
-                description = item.get("name", "")[:200]  # First 200 chars
-
-                # Create candidate with WP:WPNNNNN format
-                wp_id = item.get("id", "")
-                candidate = PathwaySearchCandidate(
-                    id=f"WP:{wp_id}",
-                    title=item.get("name", ""),
-                    organism=item.get("species", ""),
-                    description=description,
-                    score=normalized_score,
-                )
-                candidates.append(candidate)
-
-            # Client-side cursor pagination
             offset = self._decode_cursor(cursor) if cursor else 0
-            page_candidates = candidates[offset : offset + page_size]
-
-            # Calculate next cursor
+            page = candidates[offset : offset + page_size]
             next_offset = offset + page_size
             next_cursor = (
                 self._encode_cursor(next_offset) if next_offset < len(candidates) else None
             )
 
-            # Return PaginationEnvelope
             return PaginationEnvelope(
-                items=[candidate.model_dump() for candidate in page_candidates],
+                items=[c.model_dump() for c in page],
                 pagination={
                     "cursor": next_cursor,
                     "total_count": len(candidates),
@@ -655,7 +442,6 @@ class WikiPathwaysClient(LifeSciencesClient):
             )
 
         except ValueError as e:
-            # Handle cursor decode errors
             if "Invalid cursor" in str(e):
                 return ErrorEnvelope(
                     success=False,
@@ -666,7 +452,6 @@ class WikiPathwaysClient(LifeSciencesClient):
                         "invalid_input": cursor or "",
                     },
                 )
-            # Re-raise other ValueError
             raise
 
         except Exception as e:
@@ -683,130 +468,95 @@ class WikiPathwaysClient(LifeSciencesClient):
         self,
         pathway_id: str,
     ) -> PathwayComponents | ErrorEnvelope:
-        """Extract all biological entities from pathway.
+        """Extract gene and protein components from the bulk xref file.
 
-        Args:
-            pathway_id: WikiPathways CURIE in format 'WP:WPNNNNN'
-
-        Returns:
-            PathwayComponents with genes, proteins, metabolites, interactions or ErrorEnvelope
+        Metabolites and interactions are not present in the static JSON corpus
+        and are returned as empty lists.
         """
-        # Validation
         if not self._validate_pathway_id(pathway_id):
             return ErrorEnvelope(
                 success=False,
                 error={
                     "code": "UNRESOLVED_ENTITY",
-                    "message": f"Invalid pathway ID format '{pathway_id}'. Expected WP:WPNNNNN format",
+                    "message": (
+                        f"Invalid pathway ID format '{pathway_id}'. Expected WP:WPNNNNN format"
+                    ),
                     "recovery_hint": "Call search_pathways to resolve pathway identifier first",
                     "invalid_input": pathway_id,
                 },
             )
 
         try:
-            # Extract numeric WP ID (e.g., "WP:WP534" -> "WP534")
             wp_numeric_id = pathway_id.replace("WP:", "")
+            xref_cache = await self._fetch_cross_references_bulk()
+            entry = xref_cache.get(wp_numeric_id)
 
-            # First, verify pathway exists
-            verify_response = await self._request_with_retry(
-                "GET",
-                "/getPathwayInfo",
-                params={"pwId": wp_numeric_id, "format": "json"},
-            )
-
-            if isinstance(verify_response, ErrorEnvelope):
-                return verify_response
-
-            verify_data = verify_response.json()
-            pathway_info = verify_data.get("pathwayInfo", {})
-
-            if not pathway_info or not pathway_info.get("id"):
+            if entry is None:
                 return ErrorEnvelope(
                     success=False,
                     error={
                         "code": "ENTITY_NOT_FOUND",
                         "message": f"Pathway {pathway_id} not found in WikiPathways database",
-                        "recovery_hint": "Verify pathway ID or use search_pathways to find valid pathway",
+                        "recovery_hint": (
+                            "Verify pathway ID or use search_pathways to find valid pathway"
+                        ),
                         "invalid_input": pathway_id,
                     },
                 )
 
-            # Fetch components by BridgeDb code
             genes: list[DataNode] = []
             proteins: list[DataNode] = []
-            metabolites: list[DataNode] = []
 
-            # BridgeDb codes: L=Entrez, H=HGNC, En=Ensembl, S=UniProt, Ce=ChEMBL, Ch=CHEBI
-            code_mappings = [
-                ("L", "Gene", "Entrez Gene", "ncbigene", "entrez"),
-                ("H", "Gene", "HGNC", "hgnc", "hgnc"),
-                ("En", "Gene", "Ensembl", "ensembl", "ensembl_gene"),
-                ("S", "Protein", "UniProt", "uniprot", "uniprot"),
-                ("Ce", "Metabolite", "ChEMBL", "chembl", "chembl"),
-                ("Ch", "Metabolite", "CHEBI", "chebi", "chebi"),
-            ]
-
-            for code, entity_type, database, id_prefix, xref_key in code_mappings:
-                try:
-                    response = await self._request_with_retry(
-                        "GET",
-                        "/getXrefList",
-                        params={"pwId": wp_numeric_id, "code": code, "format": "json"},
+            for entrez in self._split_xref_field(entry.get("ncbigene", ""), "ncbigene:"):
+                genes.append(
+                    DataNode(
+                        id=f"ncbigene:{entrez}",
+                        label=entrez,
+                        type="Gene",
+                        database="Entrez Gene",
+                        cross_references={"entrez": entrez},
                     )
+                )
 
-                    if isinstance(response, ErrorEnvelope):
-                        continue  # Skip if this code fails
+            for symbol in self._split_xref_field(entry.get("hgnc", ""), "hgnc.symbol:"):
+                genes.append(
+                    DataNode(
+                        id=f"hgnc:{symbol}",
+                        label=symbol,
+                        type="Gene",
+                        database="HGNC",
+                        cross_references={"hgnc": symbol},
+                    )
+                )
 
-                    data = response.json()
-                    xrefs = data.get("xrefs", [])
+            for ensg in self._split_xref_field(entry.get("ensembl", ""), "ensembl:"):
+                genes.append(
+                    DataNode(
+                        id=f"ensembl:{ensg}",
+                        label=ensg,
+                        type="Gene",
+                        database="Ensembl",
+                        cross_references={"ensembl_gene": ensg},
+                    )
+                )
 
-                    # API returns raw ID strings, not objects (AGE-131 fix)
-                    for xref_id in xrefs:
-                        # xref_id is a raw string like "1737", not an object
-                        if not xref_id:
-                            continue
+            for acc in self._split_uniprot_field(entry.get("uniprot", "")):
+                proteins.append(
+                    DataNode(
+                        id=f"uniprot:{acc}",
+                        label=acc,
+                        type="Protein",
+                        database="UniProt",
+                        cross_references={"uniprot": acc},
+                    )
+                )
 
-                        # Use ID as label for now (TODO: fetch human-readable names)
-                        xref_label = str(xref_id)
-
-                        # Handle UniProt isoforms (split on semicolon, use first)
-                        if id_prefix == "uniprot" and ";" in xref_id:
-                            xref_id = xref_id.split(";")[0]
-
-                        # Create DataNode
-                        node = DataNode(
-                            id=f"{id_prefix}:{xref_id}",
-                            label=xref_label,
-                            type=entity_type,
-                            database=database,
-                            cross_references={xref_key: xref_id},
-                        )
-
-                        # Add to appropriate list
-                        if entity_type == "Gene":
-                            genes.append(node)
-                        elif entity_type == "Protein":
-                            proteins.append(node)
-                        elif entity_type == "Metabolite":
-                            metabolites.append(node)
-
-                except Exception:
-                    # Skip failed API calls (non-critical)
-                    continue
-
-            # Build PathwayComponents (omit empty lists per ADR-001 §4)
-            components_data = {}
-            if genes:
-                components_data["genes"] = genes
-            if proteins:
-                components_data["proteins"] = proteins
-            if metabolites:
-                components_data["metabolites"] = metabolites
-
-            # Always include interactions (even if empty, per contract)
-            components_data["interactions"] = []
-
-            return PathwayComponents(**components_data)
+            return PathwayComponents(
+                genes=genes,
+                proteins=proteins,
+                metabolites=[],
+                interactions=[],
+            )
 
         except Exception as e:
             return ErrorEnvelope(
