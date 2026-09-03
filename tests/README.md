@@ -4,7 +4,7 @@
 
 ## Executive Summary
 
-**691+ tests** validate that AI agents can reliably navigate 12 life sciences databases.
+**875+ tests** validate that AI agents can reliably navigate 12 life sciences databases.
 
 This isn't just about code coverage. It's about **trust**. When an AI agent tells a researcher that BRCA1 interacts with MDM2 with a STRING score of 0.999, that claim must be verifiable. Our tests ensure every step of that journey—from fuzzy search to strict lookup to cross-reference extraction—works exactly as documented.
 
@@ -13,6 +13,7 @@ This isn't just about code coverage. It's about **trust**. When an AI agent tell
 - The Fuzzy-to-Fact protocol that resolves "BRCA1" → `HGNC:1100` → complete gene record
 - Cross-database workflows that traverse gene → protein → drug → clinical trial
 - Error recovery paths that guide agents back from mistakes
+- The wire contract: what an agent actually receives from every tool, checked against ADR-001
 
 ---
 
@@ -223,6 +224,65 @@ uv run pytest tests/e2e/ -v -m e2e
 
 ---
 
+### Act IV: Contract Tests — What the Agent Actually Receives
+
+**Location:** `tests/contract/` (registry, catalogue, one unit module, one wire module)
+
+**Purpose:** Assert ADR-001 on the JSON that leaves the server, not on the Pydantic
+object inside it.
+
+**Why this tier exists:** FastMCP serialises tool results with
+`pydantic_core.to_json` (text block) and `pydantic_core.to_jsonable_python`
+(structured block). Neither calls `model_dump()`. For eight months every
+server passed its unit tests while emitting `null` for every absent
+cross-reference key, because the tests called `model_dump()` and the wire did
+not. `get_gene("HGNC:1100")` returned 15 nulls. No unit or integration test
+could see it.
+
+**Two modules, two markers:**
+
+| Module | Markers | Network | What it asserts |
+|---|---|---|---|
+| `test_serialization_unit.py` | `contract`, `unit` | No | Every entity model, built with only its required fields, produces no `null` through either of FastMCP's real serialisation paths |
+| `test_wire_contracts.py` | `contract`, `integration`, per-server | Yes | For every server, through `fastmcp.Client`: raw strings to strict tools return `UNRESOLVED_ENTITY` (§3); list tools return the pagination envelope (§8A); entities and candidates carry no `null` (§4); `cross_references` keys, formats, and cardinality match Appendix A (`registry.py`) |
+
+**The registry is data.** `tests/contract/registry.py` holds ADR-001 v1.4
+Appendix A (23 keys, regex, cardinality) as a table. When the ADR is amended,
+this table changes in the same commit.
+
+**Deviations are recorded, not hidden.** `test_wire_contracts.py` carries a
+deviation table keyed by `server.tool` with the evidence observed on the wire.
+A listed case xfails while the deviation reproduces and **fails** once it
+stops, so an entry cannot outlive its bug. As of 2026-09-02 there are twelve:
+ten cross-reference registry violations awaiting a client fix or the ADR-001
+v1.5 decision, and two IUPHAR strict tools whose parameter `pattern=` makes
+FastMCP return a pydantic validation string instead of the error envelope.
+
+**The rule the unit module enforces:** every entity model inherits
+`OmitNoneModel` (`models/base.py`), whose wrap-mode `model_serializer` drops
+`None` on every path. Do not add `model_dump` overrides or
+`ConfigDict(exclude_none=True)`; the first is invisible on the wire and the
+second is not a Pydantic v2 key. Envelopes stay on `BaseModel` because §8
+defines `cursor` and `total_count` as nullable.
+
+**Running contract tests:**
+```bash
+# Serialisation contract, no network, sub-second
+uv run pytest -m "contract and unit" -v
+
+# Wire contract for every server (network; BIOGRID_API_KEY / DRUGBANK_API_KEY skip without keys)
+uv run pytest -m "contract and integration" -v
+
+# One server
+uv run pytest -m "contract and hgnc" -v
+```
+
+The wire module pins one event loop per module (`loop_scope="module"`)
+because servers hold module-level singleton clients (ADR-004) that cannot
+survive a per-test loop.
+
+---
+
 ### Supporting Cast: Manual & Gap Tests
 
 **Manual Tests** (`tests/manual/`)
@@ -235,7 +295,7 @@ uv run pytest tests/e2e/ -v -m e2e
 - Identify missing features for future development
 
 **Contract Tests** (`tests/contract/`)
-- Reserved for API contract testing (not yet implemented)
+- See Act IV below
 
 ---
 
@@ -269,7 +329,7 @@ uv run pytest tests/e2e/ -v -m e2e
                             ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │  Step 4: Verification                                           │
-│  Runs: Unit → Integration → E2E                                │
+│  Runs: Unit → Contract → Integration → E2E                     │
 │        All tests must pass before merge                        │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -284,11 +344,15 @@ Every server tests the two-phase resolution:
 - Phase 2: `get_*()` requires resolved CURIE
 
 ### 2. Cross-Reference Extraction
-Every `get_*` response validates the 22-key Agentic Biolink schema:
+Every `get_*` response validates the 23-key Agentic Biolink registry
+(ADR-001 v1.4 Appendix A). Integration tests check that expected keys are
+populated; the contract tier checks, on the wire, that no key is `null` and
+that every present value matches the registry's format and cardinality:
 ```python
-assert gene.cross_references.ensembl_gene is not None
-assert gene.cross_references.uniprot is not None
-# Keys are omitted (not null) if no data exists
+# tests/contract/test_wire_contracts.py
+present = {k: v for k, v in data["cross_references"].items() if v is not None}
+assert not check_cross_references(present)   # keys, regex, String vs List[String]
+assert not find_nulls(data, skip={"pagination", "error"})
 ```
 
 ### 3. Performance Benchmarking (SC-001)
@@ -331,7 +395,13 @@ uv run pytest tests/ -v
 # Unit only (fast, no network)
 uv run pytest tests/unit/ -v
 
-# Integration only (requires network)
+# Contract, serialisation only (no network)
+uv run pytest -m "contract and unit" -v
+
+# Contract, wire level (requires network)
+uv run pytest -m "contract and integration" -v
+
+# Integration only (requires network; includes the wire contract)
 uv run pytest -m integration -v
 
 # E2E only (requires cloud deployment)
@@ -356,8 +426,11 @@ asyncio_mode = "auto"
 testpaths = ["tests"]
 norecursedirs = ["tests/manual", "tests/gaps"]
 markers = [
+    "unit: marks tests as unit tests (no network required)",
     "integration: marks tests as integration tests (require network)",
     "e2e: marks tests as end-to-end tests (require live server)",
+    "contract: wire-level ADR-001 contract tests (run through fastmcp.Client)",
+    # plus one marker per server: hgnc, uniprot, chembl, ...
 ]
 timeout = 60
 ```
@@ -438,6 +511,13 @@ def check_api_available():
 
 *ClinicalTrials.gov integration tests blocked by Cloudflare; use manual curl testing.
 
+Contract tier (all servers, not per-server): **106** serialisation cases (unit) and
+**69** wire cases (integration), of which 12 are recorded deviations (xfail) and 5
+skip without `DRUGBANK_API_KEY`.
+
+Marker totals on 2026-09-02: `unit` 510 (404 + 106 contract), `integration` 363
+(294 + 69 contract), `e2e` 4.
+
 ---
 
 ## Further Reading
@@ -449,4 +529,4 @@ def check_api_available():
 
 ---
 
-**Last Updated:** 2026-01-09
+**Last Updated:** 2026-09-02

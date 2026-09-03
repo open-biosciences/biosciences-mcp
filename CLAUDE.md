@@ -22,7 +22,7 @@ FastMCP wrappers for life sciences APIs, enabling LLM agents to query biological
 | WikiPathways | v0.1.0 | 17 | ✅ Complete |
 | ClinicalTrials.gov | v0.1.0 | 13 | ✅ Complete |
 
-**Total: 12 active servers, 697+ tests (399 unit + 294 integration + 4 e2e)**
+**Total: 12 active servers, 875+ tests (510 unit + 363 integration + 4 e2e; the `contract` marker selects the 175-case wire-level ADR-001 tier inside those)**
 
 ## Architecture (ADR-001 v1.4)
 
@@ -78,9 +78,11 @@ uv sync                          # Install dependencies
 uv sync --extra dev              # Install with dev dependencies
 
 # Testing (marker-based)
-uv run pytest -m unit -v                              # Unit tests (399 tests, no network)
-uv run pytest -m integration -v                       # Integration tests (294 tests)
+uv run pytest -m unit -v                              # Unit tests (510 tests, no network)
+uv run pytest -m integration -v                       # Integration tests (363 tests)
 uv run pytest -m e2e -v                               # End-to-end tests (4 tests)
+uv run pytest -m "contract and unit" -v               # ADR-001 serialisation contract (106, no network)
+uv run pytest -m "contract and integration" -v        # ADR-001 wire contract per server (69, network)
 uv run pytest -m "not integration" -v                 # Fast local dev
 uv run pytest -m "unit and clinicaltrials" -v         # API-specific unit tests
 uv run pytest -m "integration and chembl" -v          # API-specific integration tests
@@ -115,6 +117,7 @@ git switch -c implement/<id>-<description>
 
 ## Known Issues
 
+- **Serialisation (ADR-001 §4)**: every entity model MUST inherit `OmitNoneModel` from `models/base.py`. FastMCP never calls `model_dump()`, so `model_dump` overrides and `ConfigDict(exclude_none=True)` do not reach the wire; `tests/contract/` fails on either. Envelopes stay on `BaseModel` (§8 allows null `cursor`/`total_count`).
 - **ClinicalTrials.gov**: Cloudflare blocks Python httpx clients (403). Use curl for manual testing. Unit tests with mocks verify parameter logic.
 - **DrugBank**: Requires commercial API key. Implementation complete, integration tests skip without key.
 - **ChEMBL**: Frequently returns 500 errors. Use Open Targets `knownDrugs` GraphQL as fallback.

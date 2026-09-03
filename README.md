@@ -4,7 +4,7 @@ FastMCP wrappers for life sciences APIs, enabling LLM agents to query biological
 
 ## Status
 
-**Active — Wave 2 (Platform) migration complete.** 12 FastMCP servers, 697+ tests (399 unit + 294 integration + 4 e2e), unified gateway ready for FastMCP Cloud deployment.
+**Active — Wave 2 (Platform) migration complete.** 12 FastMCP servers, 875+ tests (510 unit + 363 integration + 4 e2e, including a 175-case wire-level ADR-001 contract tier), unified gateway ready for FastMCP Cloud deployment.
 
 ## What This Repo Contains
 
@@ -12,7 +12,7 @@ FastMCP wrappers for life sciences APIs, enabling LLM agents to query biological
 - **13 async client libraries** for programmatic access to all servers (httpx-based)
 - **Pydantic v2 models** including response envelopes, cross-reference schemas, and domain entities
 - **Unified gateway server** aggregating all 12 servers behind a single endpoint (`src/biosciences_mcp/servers/gateway.py`)
-- **697+ tests** organized by pytest marker (unit, integration, e2e)
+- **875+ tests** organized by pytest marker (unit, integration, e2e, contract)
 
 All servers implement the Fuzzy-to-Fact protocol (ADR-001 §3): natural language discovery followed by strict CURIE-based lookup.
 
@@ -127,9 +127,11 @@ uv run fastmcp dev src/biosciences_mcp/servers/<server>.py
 
 ```bash
 # By tier
-uv run pytest -m unit -v                              # 399 unit tests — no network
-uv run pytest -m integration -v                       # 294 integration tests — live APIs
+uv run pytest -m unit -v                              # 510 unit tests — no network
+uv run pytest -m integration -v                       # 363 integration tests — live APIs
 uv run pytest -m e2e -v                               # 4 e2e tests — requires live gateway
+uv run pytest -m "contract and unit" -v               # ADR-001 serialisation contract — no network
+uv run pytest -m "contract and integration" -v        # ADR-001 wire contract, every server — live APIs
 uv run pytest -m "not integration" -v                 # Fast local dev (unit only)
 
 # By API
