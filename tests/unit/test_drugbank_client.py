@@ -155,7 +155,7 @@ class TestDrugBankClientMocked:
         assert result["id"] == "DrugBank:DB00945"
         assert result["name"] == "Aspirin"
         assert "cross_references" in result
-        assert result["cross_references"]["chembl"] == "CHEMBL:25"
+        assert result["cross_references"]["chembl"] == "CHEMBL25"
         assert result["cross_references"]["kegg"] == "D00109"
         assert len(result["cross_references"]["uniprot"]) == 2
 

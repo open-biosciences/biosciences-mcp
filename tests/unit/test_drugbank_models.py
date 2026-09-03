@@ -56,13 +56,13 @@ class TestDrugCrossReferences:
     def test_partial_cross_references(self):
         """Test creating partial cross-references."""
         refs = DrugCrossReferences(
-            drugbank="DrugBank:DB00945",
-            chembl="CHEMBL:25",
+            drugbank="DB00945",
+            chembl="CHEMBL25",
         )
         dumped = refs.model_dump()
         assert dumped == {
-            "drugbank": "DrugBank:DB00945",
-            "chembl": "CHEMBL:25",
+            "drugbank": "DB00945",
+            "chembl": "CHEMBL25",
         }
         assert "uniprot" not in dumped
         assert "kegg" not in dumped
@@ -70,16 +70,16 @@ class TestDrugCrossReferences:
     def test_full_cross_references(self):
         """Test creating full cross-references."""
         refs = DrugCrossReferences(
-            drugbank="DrugBank:DB00945",
-            chembl="CHEMBL:25",
-            uniprot=["UniProtKB:P23219", "UniProtKB:P35354"],
+            drugbank="DB00945",
+            chembl="CHEMBL25",
+            uniprot=["P23219", "P35354"],
             kegg="D00109",
             pubchem_compound="2244",
             pdb=["1PTH", "2PTH"],
         )
         dumped = refs.model_dump()
-        assert dumped["drugbank"] == "DrugBank:DB00945"
-        assert dumped["chembl"] == "CHEMBL:25"
+        assert dumped["drugbank"] == "DB00945"
+        assert dumped["chembl"] == "CHEMBL25"
         assert len(dumped["uniprot"]) == 2
         assert dumped["kegg"] == "D00109"
         assert dumped["pubchem_compound"] == "2244"
@@ -88,7 +88,7 @@ class TestDrugCrossReferences:
     def test_omit_empty_values(self):
         """Test that empty strings and lists are omitted."""
         refs = DrugCrossReferences(
-            drugbank="DrugBank:DB00945",
+            drugbank="DB00945",
             chembl="",  # Empty string
             uniprot=[],  # Empty list
         )
@@ -170,13 +170,13 @@ class TestDrug:
             mechanism_of_action="Inhibits COX enzymes.",
             half_life="15-20 minutes",
             cross_references=DrugCrossReferences(
-                drugbank="DrugBank:DB00945",
-                chembl="CHEMBL:25",
+                drugbank="DB00945",
+                chembl="CHEMBL25",
             ),
         )
         assert drug.id == "DrugBank:DB00945"
         assert drug.name == "Aspirin"
-        assert drug.cross_references.drugbank == "DrugBank:DB00945"
+        assert drug.cross_references.drugbank == "DB00945"
 
     def test_minimal_drug(self):
         """Test creating minimal drug."""

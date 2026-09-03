@@ -6,64 +6,17 @@ Models follow the Agentic Biolink schema defined in ADR-001.
 import re
 from typing import Annotated, ClassVar
 
-from pydantic import ConfigDict, Field, field_validator, model_validator
+from pydantic import ConfigDict, Field, field_validator
 
 from biosciences_mcp.models.base import OmitNoneModel
+from biosciences_mcp.models.cross_references import CrossReferences
 
 # DrugBank CURIE pattern: DrugBank:DBXXXXX (5-digit ID)
 DRUGBANK_CURIE_PATTERN = re.compile(r"^DrugBank:DB\d{5}$")
 
 
-class DrugCrossReferences(OmitNoneModel):
-    """External database identifiers for drugs per ADR-001 22-key registry.
-
-    Keys are omitted if no value exists (never null or empty string).
-    DrugBank provides mappings to: chembl, uniprot, kegg, pubchem_compound,
-    pubchem_substance, pdb.
-    """
-
-    # Drug identifiers
-    drugbank: str | None = Field(
-        default=None,
-        description="DrugBank CURIE (self-reference)",
-    )
-    chembl: str | None = Field(
-        default=None,
-        description="ChEMBL compound ID (e.g., CHEMBL:25)",
-    )
-
-    # Target identifiers
-    uniprot: list[str] | None = Field(
-        default=None,
-        description="UniProt target accessions",
-    )
-
-    # Compound identifiers
-    kegg: str | None = Field(
-        default=None,
-        description="KEGG Drug ID",
-    )
-    pubchem_compound: str | None = Field(
-        default=None,
-        description="PubChem compound ID (CID)",
-    )
-    pubchem_substance: str | None = Field(
-        default=None,
-        description="PubChem substance ID (SID)",
-    )
-    pdb: list[str] | None = Field(
-        default=None,
-        description="PDB structure IDs",
-    )
-
-    @model_validator(mode="after")
-    def omit_empty_values(self) -> "DrugCrossReferences":
-        """Ensure no empty strings or empty lists are stored (omit instead)."""
-        for field_name in type(self).model_fields:
-            value = getattr(self, field_name)
-            if value == "" or value == []:
-                setattr(self, field_name, None)
-        return self
+# DrugBank uses the shared registry type (ADR-001 §9); the name is kept for imports.
+DrugCrossReferences = CrossReferences
 
 
 class DrugSearchCandidate(OmitNoneModel):
@@ -233,9 +186,9 @@ class Drug(OmitNoneModel):
                     "mechanism_of_action": "Irreversibly inhibits cyclooxygenase (COX) enzymes.",
                     "half_life": "15-20 minutes (aspirin); 2-3 hours (salicylate)",
                     "cross_references": {
-                        "drugbank": "DrugBank:DB00945",
-                        "chembl": "CHEMBL:25",
-                        "uniprot": ["UniProtKB:P23219", "UniProtKB:P35354"],
+                        "drugbank": "DB00945",
+                        "chembl": "CHEMBL25",
+                        "uniprot": ["P23219", "P35354"],
                         "kegg": "D00109",
                         "pubchem_compound": "2244",
                     },
