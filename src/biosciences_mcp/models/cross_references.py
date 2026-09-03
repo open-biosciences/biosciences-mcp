@@ -25,6 +25,45 @@ CROSS_REF_PATTERNS = {
 }
 
 
+def _strip_prefixes(value: str, prefixes: tuple[str, ...]) -> str:
+    """Remove any of the given prefixes, repeatedly, case-insensitively."""
+    changed = True
+    while changed:
+        changed = False
+        for prefix in prefixes:
+            if value.lower().startswith(prefix.lower()):
+                value = value[len(prefix) :]
+                changed = True
+    return value
+
+
+def normalize_xref(key: str, value: str) -> str:
+    """Return ``value`` in the ADR-001 Appendix A registry form for ``key``.
+
+    Upstream APIs spell the same identifier several ways (``521``, ``CHEMBL521``,
+    ``CHEMBL:CHEMBL521``). Every client must call this before storing a value in
+    ``cross_references`` so the wire form is the registry form. Keys without a
+    rewrite rule are returned unchanged (apart from surrounding whitespace).
+    """
+    value = value.strip()
+    if key == "hgnc":
+        return f"HGNC:{_strip_prefixes(value, ('HGNC:',))}"
+    if key == "chembl":
+        return f"CHEMBL{_strip_prefixes(value, ('CHEMBL:', 'CHEMBL'))}"
+    if key == "drugbank":
+        return _strip_prefixes(value, ("DrugBank:", "DB:"))
+    if key == "uniprot":
+        # NCBI product records carry a sequence version (P04637.4); the registry does not
+        return _strip_prefixes(value, ("UniProtKB:", "UniProt:")).split(".", 1)[0]
+    if key == "orphanet":
+        return f"ORPHA:{_strip_prefixes(value, ('ORPHA:', 'ORPHA', 'Orphanet:'))}"
+    if key == "pubmed":
+        return f"PMID:{_strip_prefixes(value, ('PMID:',))}"
+    if key in ("ensembl_gene", "ensembl_transcript"):
+        return value.split(".", 1)[0]
+    return value
+
+
 class CrossReferences(OmitNoneModel):
     """External database identifiers per ADR-001 22-key registry.
 
