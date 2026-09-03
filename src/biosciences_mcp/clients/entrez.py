@@ -23,6 +23,7 @@ import defusedxml.ElementTree as ET
 import httpx
 
 from biosciences_mcp.clients.base import LifeSciencesClient
+from biosciences_mcp.models.cross_references import normalize_xref
 from biosciences_mcp.models.entrez import (
     NCBI_GENE_CURIE_PATTERN,
     EntrezCrossReferences,
@@ -323,23 +324,30 @@ class EntrezClient(LifeSciencesClient):
                 if match:
                     chromosome = match.group(1)
 
-            # Extract cross-references
+            # Extract cross-references. Gene-level identifiers (ENSG, HGNC, MIM)
+            # live under Gene-ref_db and Entrezgene_xref; Gene-commentary
+            # sections carry one Dbtag per transcript/protein product, so they
+            # are consulted last and only for databases not already seen (AGE-693).
             xrefs: dict[str, str | list[str]] = {}
-            for dbtag in gene_elem.findall(".//Entrezgene_xref/Dbtag"):
-                db_name = dbtag.findtext("Dbtag_db")
-                obj_id = dbtag.findtext(".//Object-id_id") or dbtag.findtext(".//Object-id_str")
-                if db_name and obj_id:
-                    # Handle multiple values for same database
-                    if db_name in xrefs:
-                        existing = xrefs[db_name]
-                        if isinstance(existing, list):
-                            existing.append(obj_id)
-                        else:
-                            xrefs[db_name] = [existing, obj_id]
-                    else:
-                        xrefs[db_name] = obj_id
 
-            # Also check for external references in Gene-commentary sections
+            def _add(db_name: str | None, obj_id: str | None) -> None:
+                if not (db_name and obj_id):
+                    return
+                if db_name not in xrefs:
+                    xrefs[db_name] = obj_id
+                    return
+                existing = xrefs[db_name]
+                values = existing if isinstance(existing, list) else [existing]
+                if obj_id not in values:
+                    xrefs[db_name] = [*values, obj_id]
+
+            for xpath in (".//Gene-ref_db/Dbtag", ".//Entrezgene_xref/Dbtag"):
+                for dbtag in gene_elem.findall(xpath):
+                    _add(
+                        dbtag.findtext("Dbtag_db"),
+                        dbtag.findtext(".//Object-id_id") or dbtag.findtext(".//Object-id_str"),
+                    )
+
             for commentary in gene_elem.findall(".//Gene-commentary"):
                 for dbtag in commentary.findall(".//Dbtag"):
                     db_name = dbtag.findtext("Dbtag_db")
@@ -382,12 +390,19 @@ class EntrezClient(LifeSciencesClient):
                 hgnc_id = hgnc_id[0]
             result["hgnc"] = f"HGNC:{hgnc_id}" if not str(hgnc_id).startswith("HGNC:") else hgnc_id
 
-        # Ensembl - use as-is
+        # Ensembl - NCBI lists gene, transcript and protein ids under one tag;
+        # route by prefix into the registry keys (AGE-693)
         if "Ensembl" in xrefs:
-            ensembl_id = xrefs["Ensembl"]
-            if isinstance(ensembl_id, list):
-                ensembl_id = ensembl_id[0]
-            result["ensembl_gene"] = ensembl_id
+            raw = xrefs["Ensembl"]
+            values = raw if isinstance(raw, list) else [raw]
+            genes = [normalize_xref("ensembl_gene", v) for v in values if v.startswith("ENSG")]
+            transcripts = [
+                normalize_xref("ensembl_transcript", v) for v in values if v.startswith("ENST")
+            ]
+            if genes:
+                result["ensembl_gene"] = genes[0]
+            if transcripts:
+                result["ensembl_transcript"] = transcripts
 
         # OMIM (MIM in NCBI) - use numeric value
         if "MIM" in xrefs:
@@ -396,23 +411,18 @@ class EntrezClient(LifeSciencesClient):
                 omim_id = omim_id[0]
             result["omim"] = str(omim_id)
 
-        # UniProt - add prefix if needed, handle multiple values
+        # UniProt - registry form is the bare accession, always a list (AGE-693)
+        uniprot_ids: list[str] = []
         for key in ["UniProtKB/Swiss-Prot", "UniProtKB/TrEMBL"]:
             if key in xrefs:
-                uniprot_ids = xrefs[key]
-                if not isinstance(uniprot_ids, list):
-                    uniprot_ids = [uniprot_ids]
-                formatted = [
-                    f"UniProtKB:{uid}" if not uid.startswith("UniProtKB:") else uid
-                    for uid in uniprot_ids
-                ]
-                if "uniprot" in result:
-                    existing = result["uniprot"]
-                    if not isinstance(existing, list):
-                        existing = [existing]
-                    result["uniprot"] = existing + formatted
-                else:
-                    result["uniprot"] = formatted[0] if len(formatted) == 1 else formatted
+                raw = xrefs[key]
+                values = raw if isinstance(raw, list) else [raw]
+                for uid in values:
+                    accession = normalize_xref("uniprot", uid)
+                    if accession not in uniprot_ids:
+                        uniprot_ids.append(accession)
+        if uniprot_ids:
+            result["uniprot"] = uniprot_ids
 
         # RefSeq - may have multiple entries
         refseq_values = []

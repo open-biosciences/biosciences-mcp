@@ -114,13 +114,13 @@ class EntrezCrossReferences(OmitNoneModel):
         examples=["ENSG00000141510"],
     )
 
-    ensembl_transcript: str | None = Field(
+    ensembl_transcript: list[str] | None = Field(
         None,
         description="Ensembl transcript ID",
         examples=["ENST00000269305"],
     )
 
-    uniprot: str | list[str] | None = Field(
+    uniprot: list[str] | None = Field(
         None,
         description="UniProt accession(s)",
         examples=["UniProtKB:P04637", ["UniProtKB:P04637", "UniProtKB:P04637-2"]],

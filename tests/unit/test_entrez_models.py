@@ -234,14 +234,14 @@ class TestEntrezCrossReferencesModel:
         xrefs = EntrezCrossReferences(hgnc="HGNC:11998")
         assert xrefs.hgnc == "HGNC:11998"
 
-    def test_uniprot_prefix_formatting(self):
-        """Test UniProt cross-reference formatting (single value)."""
-        xrefs = EntrezCrossReferences(uniprot="UniProtKB:P04637")
-        assert xrefs.uniprot == "UniProtKB:P04637"
+    def test_uniprot_is_bare_accession_list(self):
+        """Registry form (ADR-001 Appendix A): bare accessions, always a list."""
+        xrefs = EntrezCrossReferences(uniprot=["P04637"])
+        assert xrefs.uniprot == ["P04637"]
 
     def test_uniprot_list_handling(self):
         """Test that uniprot field accepts list of values."""
-        uniprot_ids = ["UniProtKB:P04637", "UniProtKB:P04637-2"]
+        uniprot_ids = ["P04637", "P04637-2"]
         xrefs = EntrezCrossReferences(uniprot=uniprot_ids)
         assert xrefs.uniprot == uniprot_ids
         assert isinstance(xrefs.uniprot, list)
@@ -264,8 +264,8 @@ class TestEntrezCrossReferencesModel:
         xrefs = EntrezCrossReferences(
             hgnc="HGNC:11998",
             ensembl_gene="ENSG00000141510",
-            ensembl_transcript="ENST00000269305",
-            uniprot=["UniProtKB:P04637"],
+            ensembl_transcript=["ENST00000269305"],
+            uniprot=["P04637"],
             refseq=["NM_000546.6", "NP_000537.3"],
             omim="191170",
             kegg="hsa:7157",

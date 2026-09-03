@@ -301,3 +301,52 @@ class TestEntrezClientQueryValidation:
             assert isinstance(result, PaginationEnvelope)
 
         await client.close()
+
+
+class TestCrossReferenceRegistryForm:
+    """AGE-693: ensembl_gene must hold an ENSG id; uniprot values are bare accessions."""
+
+    def test_uniprot_values_are_bare_accessions_in_a_list(self):
+        client = EntrezClient()
+        refs = client._build_cross_references(
+            {"UniProtKB/Swiss-Prot": "P04637", "UniProtKB/TrEMBL": ["UniProtKB:A0A386NC20"]}
+        )
+        assert refs.uniprot == ["P04637", "A0A386NC20"]
+
+    def test_ensembl_gene_picks_the_gene_id_and_drops_version(self):
+        client = EntrezClient()
+        refs = client._build_cross_references(
+            {"Ensembl": ["ENSP00000269305.4", "ENST00000269305.9", "ENSG00000141510.18"]}
+        )
+        assert refs.ensembl_gene == "ENSG00000141510"
+        assert refs.ensembl_transcript == ["ENST00000269305"]
+
+    def test_protein_only_ensembl_xref_does_not_land_in_ensembl_gene(self):
+        client = EntrezClient()
+        refs = client._build_cross_references({"Ensembl": "ENSP00000269305.4"})
+        assert refs.ensembl_gene is None
+
+    def test_parser_prefers_gene_ref_db_over_gene_commentary_products(self):
+        client = EntrezClient()
+        xml = """<?xml version="1.0"?>
+<Entrezgene-Set><Entrezgene>
+  <Entrezgene_track-info><Gene-track><Gene-track_geneid>7157</Gene-track_geneid></Gene-track></Entrezgene_track-info>
+  <Entrezgene_gene><Gene-ref><Gene-ref_locus>TP53</Gene-ref_locus><Gene-ref_desc>tumor protein p53</Gene-ref_desc>
+    <Gene-ref_db><Dbtag><Dbtag_db>Ensembl</Dbtag_db><Dbtag_tag><Object-id><Object-id_str>ENSG00000141510</Object-id_str></Object-id></Dbtag_tag></Dbtag></Gene-ref_db>
+  </Gene-ref></Entrezgene_gene>
+  <Entrezgene_comments>
+    <Gene-commentary><Gene-commentary_source><Other-source><Other-source_src>
+      <Dbtag><Dbtag_db>Ensembl</Dbtag_db><Dbtag_tag><Object-id><Object-id_str>ENSP00000269305.4</Object-id_str></Object-id></Dbtag_tag></Dbtag>
+    </Other-source_src></Other-source></Gene-commentary_source></Gene-commentary>
+    <Gene-commentary><Gene-commentary_source><Other-source><Other-source_src>
+      <Dbtag><Dbtag_db>UniProtKB/Swiss-Prot</Dbtag_db><Dbtag_tag><Object-id><Object-id_str>P04637.4</Object-id_str></Object-id></Dbtag_tag></Dbtag>
+    </Other-source_src></Other-source></Gene-commentary_source></Gene-commentary>
+  </Entrezgene_comments>
+</Entrezgene></Entrezgene-Set>"""
+        parsed = client._parse_gene_xml(xml)
+        assert parsed is not None
+        assert parsed["xrefs"]["Ensembl"] == "ENSG00000141510"
+        assert parsed["xrefs"]["UniProtKB/Swiss-Prot"] == "P04637.4"
+        refs = client._build_cross_references(parsed["xrefs"])
+        assert refs.ensembl_gene == "ENSG00000141510"
+        assert refs.uniprot == ["P04637"]
