@@ -106,7 +106,7 @@ def test_ligand_field_validation():
         who_essential=True,
         withdrawn=False,
         synonyms=["Advil", "Motrin"],
-        cross_references=CrossReferences(chembl="521", drugbank="DB01050"),
+        cross_references=CrossReferences(chembl="CHEMBL521", drugbank="DB01050"),
     )
     assert ligand.id == "IUPHAR:2713"
     assert ligand.ligand_id == 2713
@@ -122,9 +122,11 @@ def test_ligand_cross_references_mapping():
         ligand_id=2713,
         name="ibuprofen",
         type="Synthetic organic",
-        cross_references=CrossReferences(chembl="521", drugbank="DB01050", pubchem_compound="3672"),
+        cross_references=CrossReferences(
+            chembl="CHEMBL521", drugbank="DB01050", pubchem_compound="3672"
+        ),
     )
-    assert ligand.cross_references.chembl == "521"
+    assert ligand.cross_references.chembl == "CHEMBL521"
     assert ligand.cross_references.drugbank == "DB01050"
     assert ligand.cross_references.pubchem_compound == "3672"
 

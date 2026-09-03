@@ -174,7 +174,7 @@ async def get_ligand(
             "who_essential": true,
             "synonyms": ["Advil", "Motrin", "Nurofen"],
             "cross_references": {
-                "chembl": "521",
+                "chembl": "CHEMBL521",
                 "drugbank": "DB01050",
                 "pubchem_compound": "3672"
             }
