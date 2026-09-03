@@ -563,3 +563,5 @@ With multiple developers:
 - [ ] T284 Fix the `search_targets` docstring example in `src/biosciences_mcp/servers/iuphar.py:264-265`, which labels IUPHAR:214 as "D2 receptor" (214 is the D1 receptor; the `get_target` docstring at line 329 and quickstart.md use IUPHAR:215 for D2) per T159 (partial)
 - [ ] T285 Update `specs/011-iuphar-mcp-server/quickstart.md` run commands and paths (lines 14, 21, 26 reference `lifesciences-research` and `src/lifesciences_mcp/`; the package is `src/biosciences_mcp/`) and align the UNRESOLVED_ENTITY / ENTITY_NOT_FOUND example messages and recovery hints (lines 234-235, 259-260) with actual client output per T225 / T264-T267 (partial)
 - [ ] T286 Add `pytest.mark.iuphar` to `pytestmark` in `tests/unit/test_pharmacology_models.py:19` so `uv run pytest -m "unit and iuphar"` (documented in CLAUDE.md) selects the pharmacology model tests per plan: Testing (partial)
+
+> Note (2026-09-03, after baseline converge): T275 and T276 are closed by PR #10. T274 (rate-limiter deadlock) is tracked as AGE-704.

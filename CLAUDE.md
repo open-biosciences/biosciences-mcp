@@ -122,7 +122,8 @@ Spec Kit v1.0.4 (upgraded 2026-09-03, AGE-702). Commands are skills under `.clau
 - Select the feature explicitly: `SPECIFY_FEATURE_DIRECTORY=specs/NNN-<name>` in the environment, or `.specify/feature.json` (per-checkout, git-ignored). The branch name does not select it.
 - `/speckit-converge` audits the code against `spec.md`, `plan.md`, `tasks.md`, and the constitution and **appends** a `## Phase N: Convergence` section to `tasks.md`; it never edits code or specs. Run it per feature after changing that feature's code; it is the artifact-side gate that pairs with `pytest -m contract`.
 - `/speckit-analyze` reads artifacts only; it cannot see code drift.
-- The constitution (`.specify/memory/constitution.md`) was preserved byte-for-byte by the upgrade; the four stock templates and four scripts were refreshed (no local customizations existed).
+- Converge grades against the constitution as written (v1.1.0, which predates ADR-007 and the ADR-001 v1.4 registry). Constitution-derived CRITICAL items are re-graded against accepted-ADR precedence before they become work items: a task that asks for a per-client rate limiter is pointed at ADR-007 §2 (one implementation in the base client, AGE-698), not implemented as written.
+- The constitution (`.specify/memory/constitution.md`) was preserved byte-for-byte by the upgrade; five stock templates and six scripts were refreshed (no local customizations existed).
 
 ## Known Issues
 
@@ -209,3 +210,7 @@ Set `BIOSCIENCES_API_KEY` in your shell or `.env` before starting Claude Code.
 
 - **Upstream**: `biosciences-architecture` (ADR schemas)
 - **Downstream**: `biosciences-deepagents`, `biosciences-temporal`, `biosciences-research` (tool consumers)
+
+## Spec Kit process record
+
+`docs/speckit-process-record.md` records which Spec Kit commands actually ran per feature and when (AGE-699). Append a row in the PR that carries the artifact whenever you run one. `docs/speckit-standard-prompt-v2.md` is the intended process, not the log.

@@ -449,3 +449,5 @@ T001 → T004 → T005 → T006 → T007 → T008 → T009 → T010 → T017 →
 - [ ] T065 Change the AMBIGUOUS_QUERY `recovery_hint` in `search_targets()` in src/biosciences_mcp/clients/opentargets.py (line 463) to state "Minimum query length is 2 characters" as specified (the text currently appears only in `message`) per US4/AC1, FR-029, contracts/search_targets.json (partial)
 - [ ] T066 Export `Target`, `TargetSearchCandidate`, and `Association` from src/biosciences_mcp/__init__.py (`__all__` currently omits them) per task T045 (missing)
 - [ ] T067 Review and justify the broadened DISEASE_ID_PATTERN (`EFO|MONDO|Orphanet|HP|DOID|OTAR`) in src/biosciences_mcp/clients/opentargets.py and src/biosciences_mcp/models/target.py against contracts/get_associations.json and data-model.md, which specify `^EFO_\d+$`: either update those artifacts to document the accepted ontologies or restrict the pattern per spec Assumption 4 (unrequested)
+
+> Note (2026-09-03, after baseline converge): T053 is closed by PR #10 (`_normalize_curie` delegates to `normalize_xref`; unit tests added in tests/unit/test_opentargets_client.py).
