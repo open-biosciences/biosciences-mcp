@@ -35,14 +35,13 @@ ENVELOPE_KEYS = frozenset({"pagination", "error"})
 # keys). They are recorded here so the harness stays green while the decision
 # is pending, and so a fix is forced to delete its entry.
 REGISTRY_DEVIATIONS: dict[str, str] = {
-    "chembl.get_compound": "chembl is a list and carries a CHEMBL: prefix (registry: bare String)",
-    "pubchem.get_compound": "pubchem_compound is a list (registry: String)",
     "wikipathways.get_pathway": (
-        "hgnc holds gene symbols; entrez and ensembl_gene are lists (registry: String)"
+        "deferred to ADR-001 v1.5 (AGE-700): pathway membership lists under entrez/ensembl_gene "
+        "and symbols under hgnc need a registry decision, not a client fix"
     ),
     "clinicaltrials.get_trial": (
-        "clinicaltrials_gov, mesh_conditions, mesh_interventions are not registry keys; "
-        "pubmed is an unprefixed string"
+        "deferred to ADR-001 v1.5 (AGE-700): clinicaltrials_gov, mesh_conditions, "
+        "mesh_interventions are not registry keys (pubmed is fixed)"
     ),
 }
 

@@ -51,7 +51,8 @@ def normalize_xref(key: str, value: str) -> str:
     if key == "chembl":
         return f"CHEMBL{_strip_prefixes(value, ('CHEMBL:', 'CHEMBL'))}"
     if key == "drugbank":
-        return _strip_prefixes(value, ("DrugBank:", "DB:"))
+        local = _strip_prefixes(value, ("DrugBank:", "DB:"))
+        return f"DB{local.zfill(5)}" if local.isdigit() else local
     if key == "uniprot":
         # NCBI product records carry a sequence version (P04637.4); the registry does not
         return _strip_prefixes(value, ("UniProtKB:", "UniProt:")).split(".", 1)[0]
@@ -187,3 +188,9 @@ class CrossReferences(OmitNoneModel):
             if value == "" or value == []:
                 setattr(self, field_name, None)
         return self
+
+
+#: Registry keys with List[String] cardinality (ADR-001 Appendix A), derived from the model.
+MULTI_VALUE_KEYS: frozenset[str] = frozenset(
+    name for name, f in CrossReferences.model_fields.items() if "list[" in str(f.annotation)
+)

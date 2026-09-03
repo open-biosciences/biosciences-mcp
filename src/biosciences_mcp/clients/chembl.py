@@ -24,6 +24,11 @@ from chembl_webresource_client.new_client import new_client
 
 from biosciences_mcp.clients.base import LifeSciencesClient
 from biosciences_mcp.models.compound import Compound, CompoundSearchCandidate
+from biosciences_mcp.models.cross_references import (
+    MULTI_VALUE_KEYS,
+    CrossReferences,
+    normalize_xref,
+)
 from biosciences_mcp.models.envelopes import (
     ErrorCode,
     ErrorDetail,
@@ -305,25 +310,25 @@ class ChEMBLClient(LifeSciencesClient):
             is_parent=is_parent,
         )
 
-    def _build_cross_references(self, sdk_result: dict[str, Any]) -> dict[str, list[str]]:
-        """Build cross-references dict from ChEMBL SDK result.
+    def _build_cross_references(self, sdk_result: dict[str, Any]) -> CrossReferences:
+        """Build CrossReferences from a ChEMBL SDK result.
 
-        Maps ChEMBL's cross_references array to flat object using 22-key registry.
-        Omits keys entirely if no cross-reference exists (Constitution Principle III).
+        Values are in ADR-001 Appendix A registry form (AGE-687): String keys hold
+        the first identifier seen, List keys accumulate. Keys with no value are
+        omitted (Constitution Principle III).
 
         Args:
             sdk_result: Raw result from ChEMBL SDK
 
         Returns:
-            Dict mapping registry keys to lists of CURIEs
+            CrossReferences in registry form
         """
         xrefs: dict[str, list[str]] = {}
 
-        # Add self-reference (SDK returns "CHEMBL25", we need "CHEMBL:25")
+        # Self-reference: registry form is the bare ChEMBL id (CHEMBL25)
         raw_id = sdk_result.get("molecule_chembl_id")
-        if raw_id and raw_id.startswith("CHEMBL"):
-            numeric_part = raw_id[6:]  # Remove "CHEMBL" prefix
-            xrefs["chembl"] = [f"CHEMBL:{numeric_part}"]
+        if raw_id:
+            xrefs["chembl"] = [normalize_xref("chembl", raw_id)]
 
         # Process cross_references array
         raw_xrefs = sdk_result.get("cross_references") or []
@@ -348,7 +353,10 @@ class ChEMBLClient(LifeSciencesClient):
             if normalized_id not in xrefs[registry_key]:
                 xrefs[registry_key].append(normalized_id)
 
-        return xrefs
+        # Collapse String-cardinality keys to their first value
+        return CrossReferences(
+            **{k: v if k in MULTI_VALUE_KEYS else v[0] for k, v in xrefs.items()}
+        )
 
     def _normalize_xref_id(self, registry_key: str, xref_id: str) -> str:
         """Normalize cross-reference ID to CURIE format.
@@ -360,23 +368,10 @@ class ChEMBLClient(LifeSciencesClient):
         Returns:
             Normalized CURIE string
         """
-        if registry_key == "uniprot":
-            # Add UniProtKB: prefix if not present
-            if not xref_id.startswith("UniProtKB:"):
-                return f"UniProtKB:{xref_id}"
-            return xref_id
-
-        if registry_key == "drugbank":
-            # Normalize to DB:NNNNN format
-            clean_id = xref_id.replace("DB", "").replace(":", "").strip()
-            return f"DB:{clean_id.zfill(5)}"
-
         if registry_key == "pdb":
             # PDB IDs are uppercase, no prefix
             return xref_id.upper()
-
-        # Default: return as-is
-        return xref_id
+        return normalize_xref(registry_key, xref_id)
 
     def _transform_to_compound(
         self,
@@ -439,7 +434,7 @@ class ChEMBLClient(LifeSciencesClient):
                     synonyms.append(syn_name)
 
         # Build cross-references (skip in slim mode)
-        cross_references: dict[str, list[str]] = {}
+        cross_references = CrossReferences()
         if not slim:
             cross_references = self._build_cross_references(sdk_result)
 

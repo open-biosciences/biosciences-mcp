@@ -24,6 +24,7 @@ pytestmark = [pytest.mark.unit]
         ("drugbank", "DB08363", "DB08363"),
         ("drugbank", "DB:DB08363", "DB08363"),
         ("drugbank", "DrugBank:DB00945", "DB00945"),
+        ("drugbank", "00945", "DB00945"),
         # uniprot: registry bare accession
         ("uniprot", "P04637", "P04637"),
         ("uniprot", "UniProtKB:P04637", "P04637"),
