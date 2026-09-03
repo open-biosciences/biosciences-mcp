@@ -4,7 +4,10 @@ Deterministic replays used as the empirical gate for schema changes (see
 AGE-687 "Competency-question validation"). They call the in-process gateway of
 whichever checkout you run them from, so run each once on `main` and once on
 the branch, then diff. Calls are spaced by `CQ_REPLAY_DELAY` seconds (default 3)
-to respect upstream rate limits; run one checkout at a time.
+to respect upstream rate limits; run one checkout at a time. Each call is
+bounded by `CQ_CALL_TIMEOUT` seconds (default 90) so a hung client is recorded
+instead of stalling the run; `wire_probe.py` skips files already captured, so
+an interrupted run can be resumed.
 
 ```bash
 # 1. dataset (once; needs the `datasets` package, not a project dependency)

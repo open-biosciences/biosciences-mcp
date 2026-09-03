@@ -15,6 +15,7 @@ from pathlib import Path
 from fastmcp import Client
 
 DELAY = float(os.environ.get("CQ_REPLAY_DELAY", "3"))
+CALL_TIMEOUT = float(os.environ.get("CQ_CALL_TIMEOUT", "90"))
 
 
 async def probe(names: list[str], dst: Path) -> None:
@@ -30,13 +31,21 @@ async def probe(names: list[str], dst: Path) -> None:
                 print("skip (no tool):", name)
                 continue
             param = (schema.get("required") or list(schema["properties"]))[0]
+            if (dst / name).exists():
+                print(f"{name:55} (already captured)")
+                continue
             started = time.monotonic()
-            res = await client.call_tool(gw_tool, {param: arg}, raise_on_error=False)
-            text = res.content[0].text if res.content else ""
             try:
-                payload = json.loads(text)
-            except ValueError:
-                payload = {"_raw": text[:500]}
+                res = await asyncio.wait_for(
+                    client.call_tool(gw_tool, {param: arg}, raise_on_error=False), CALL_TIMEOUT
+                )
+                text = res.content[0].text if res.content else ""
+                try:
+                    payload = json.loads(text)
+                except ValueError:
+                    payload = {"_raw": text[:500]}
+            except TimeoutError:
+                payload = {"_probe_error": f"no response within {CALL_TIMEOUT}s (client hang?)"}
             await asyncio.to_thread(
                 (dst / name).write_text, json.dumps(payload, indent=1, sort_keys=True)
             )

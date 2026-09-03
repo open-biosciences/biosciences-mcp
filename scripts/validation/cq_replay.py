@@ -19,6 +19,7 @@ CALL = re.compile(r"\b([a-z]+_[a-z_]+)\((.*?)\)")
 ARG = re.compile(r"(\w+)=('[^']*'|\"[^\"]*\"|[^,]+)|('[^']*'|\"[^\"]*\")")
 SKIP = {"add_memory"}
 DELAY = float(os.environ.get("CQ_REPLAY_DELAY", "3"))
+CALL_TIMEOUT = float(os.environ.get("CQ_CALL_TIMEOUT", "90"))
 
 
 def parse_calls(rows: list[dict]) -> list[dict]:
@@ -80,12 +81,16 @@ async def replay(calls: list[dict], dry: bool) -> list[dict]:
                 continue
             started = time.monotonic()
             try:
-                res = await client.call_tool(call["tool"], call["args"], raise_on_error=False)
+                res = await asyncio.wait_for(
+                    client.call_tool(call["tool"], call["args"], raise_on_error=False), CALL_TIMEOUT
+                )
                 text = res.content[0].text if res.content else ""
                 try:
                     call["result"] = json.loads(text)
                 except ValueError:
                     call["raw"] = text[:500]
+            except TimeoutError:
+                call["error"] = f"no response within {CALL_TIMEOUT}s (client hang?)"
             except Exception as exc:  # record and continue
                 call["error"] = f"{type(exc).__name__}: {exc}"[:300]
             call["seconds"] = round(time.monotonic() - started, 2)
