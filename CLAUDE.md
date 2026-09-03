@@ -196,6 +196,17 @@ The key is passed automatically by:
 
 Set `BIOSCIENCES_API_KEY` in your shell or `.env` before starting Claude Code.
 
+## Pull Request Review
+
+Run `/pr-review <pr-number>` to review a PR with the three-agent team under
+`.claude/agents/pr-review/` (ADR compliance, wire contract, correctness). The
+shared standard the team applies, including decision precedence, the ADR
+decision matrix, severity levels, and the finding format, lives in
+`.claude/skills/pr-review-standard/SKILL.md`. Add `--comment` to post the
+merged report to the PR. `REVIEW.md` at the repo root carries the same
+calibration for Claude Code Review. Reviewers are read-only and never
+approve or merge.
+
 ## Dependencies
 
 - **Upstream**: `biosciences-architecture` (ADR schemas)
