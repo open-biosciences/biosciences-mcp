@@ -163,6 +163,8 @@ Use the template above, substituting:
 /speckit.implement  # Execute bounded implementation
 ```
 
+> **Process record (AGE-699).** Every `/speckit.*` run for a feature appends one row to `docs/speckit-process-record.md` — feature, command, artifact produced, date, commit — in the same commit as the artifact. The standard prompt records the intended sequence; the process record records what ran. A feature whose artifacts exist without rows in the record is treated as unrecorded, not as compliant.
+
 > ⚠️ **PROMPT SIZE LIMIT (v1.4.0)**: When using `claude -p` for non-interactive execution, the `-p` flag has a ~20KB prompt limit. If your `tasks.md` exceeds ~20KB (typically >150 tasks), you must use **interactive mode**:
 > ```bash
 > # Check file sizes first

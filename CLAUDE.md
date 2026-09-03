@@ -200,3 +200,7 @@ Set `BIOSCIENCES_API_KEY` in your shell or `.env` before starting Claude Code.
 
 - **Upstream**: `biosciences-architecture` (ADR schemas)
 - **Downstream**: `biosciences-deepagents`, `biosciences-temporal`, `biosciences-research` (tool consumers)
+
+## Spec Kit process record
+
+`docs/speckit-process-record.md` records which `/speckit.*` commands actually ran per feature and when (AGE-699). Append a row whenever you run one. `docs/speckit-standard-prompt-v2.md` is the intended process, not the log.
