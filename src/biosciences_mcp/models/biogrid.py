@@ -11,14 +11,16 @@ Token Budget:
 import re
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import Field, field_validator
+
+from biosciences_mcp.models.base import OmitNoneModel
 
 # Gene symbol validation pattern (allows alphanumeric, hyphens, underscores, and special chars)
 # BioGRID returns diverse gene symbols including viral genes and non-standard nomenclature
 GENE_SYMBOL_PATTERN = re.compile(r"^[A-Z0-9][A-Z0-9\-_@.]{0,29}$")
 
 
-class BioGridSearchCandidate(BaseModel):
+class BioGridSearchCandidate(OmitNoneModel):
     """Gene search result confirmed to exist in BioGRID (Fuzzy Phase 1)."""
 
     symbol: str = Field(..., description="Gene symbol (uppercase normalized)")
@@ -37,7 +39,7 @@ class BioGridSearchCandidate(BaseModel):
         return v
 
 
-class GeneticInteraction(BaseModel):
+class GeneticInteraction(OmitNoneModel):
     """Single genetic or protein-protein interaction from BioGRID."""
 
     biogrid_interaction_id: int = Field(
@@ -65,19 +67,17 @@ class GeneticInteraction(BaseModel):
         return v
 
 
-class BioGridCrossReferences(BaseModel):
+class BioGridCrossReferences(OmitNoneModel):
     """Cross-database identifiers for BioGRID query gene.
 
     Per Constitution Principle III: Omit keys entirely if no reference exists.
     Never use null or empty string.
     """
 
-    model_config = ConfigDict(exclude_none=True)
-
     entrez: str | None = Field(None, description="Entrez Gene ID", pattern=r"^[0-9]+$")
 
 
-class InteractionResult(BaseModel):
+class InteractionResult(OmitNoneModel):
     """Complete interaction network response from BioGRID."""
 
     query_gene: str = Field(..., description="Gene symbol queried")

@@ -8,15 +8,17 @@ Per ADR-001 §4 (Agentic Biolink Schema) and Constitution Principle III (Schema 
 """
 
 import re
-from typing import Any
+from typing import Any, ClassVar
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import ConfigDict, Field, field_validator
+
+from biosciences_mcp.models.base import OmitNoneModel
 
 # CURIE validation pattern for ChEMBL IDs
 CHEMBL_CURIE_PATTERN = re.compile(r"^CHEMBL:[0-9]+$")
 
 
-class CompoundSearchCandidate(BaseModel):
+class CompoundSearchCandidate(OmitNoneModel):
     """Lightweight compound search result for fuzzy discovery.
 
     Token Budget: ~20-30 tokens in slim mode, ~40-50 tokens in full mode
@@ -61,7 +63,7 @@ class CompoundSearchCandidate(BaseModel):
             )
         return v
 
-    model_config = {
+    model_config: ClassVar[ConfigDict] = {
         "json_schema_extra": {
             "examples": [
                 {
@@ -76,7 +78,7 @@ class CompoundSearchCandidate(BaseModel):
     }
 
 
-class Compound(BaseModel):
+class Compound(OmitNoneModel):
     """Complete ChEMBL compound record with Agentic Biolink cross-references.
 
     Token Budget: ~115-300 tokens in full mode, ~20 tokens in slim mode
@@ -157,7 +159,7 @@ class Compound(BaseModel):
             "molecular_formula": self.molecular_formula,
         }
 
-    model_config = {
+    model_config: ClassVar[ConfigDict] = {
         "json_schema_extra": {
             "examples": [
                 {

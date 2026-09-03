@@ -12,15 +12,17 @@ Reference: specs/009-entrez-mcp-server/data-model.md
 """
 
 import re
-from typing import Any
+from typing import Any, ClassVar
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import ConfigDict, Field, field_validator, model_validator
+
+from biosciences_mcp.models.base import OmitNoneModel
 
 # CURIE validation pattern for NCBIGene identifiers per research.md R6
 NCBI_GENE_CURIE_PATTERN = re.compile(r"^NCBIGene:\d+$")
 
 
-class GeneSearchCandidate(BaseModel):
+class GeneSearchCandidate(OmitNoneModel):
     """Lightweight gene search result for fuzzy discovery.
 
     Token Budget: ~30-40 tokens in slim mode, ~60-80 tokens in full mode
@@ -77,7 +79,7 @@ class GeneSearchCandidate(BaseModel):
             )
         return v
 
-    model_config = {
+    model_config: ClassVar[ConfigDict] = {
         "json_schema_extra": {
             "examples": [
                 {
@@ -93,7 +95,7 @@ class GeneSearchCandidate(BaseModel):
     }
 
 
-class EntrezCrossReferences(BaseModel):
+class EntrezCrossReferences(OmitNoneModel):
     """Cross-references to biological databases for Entrez genes.
 
     Follows the 22-key Agentic Biolink registry per ADR-001 Section 4.
@@ -171,10 +173,12 @@ class EntrezCrossReferences(BaseModel):
             return {k: v for k, v in data.items() if v is not None and v != "" and v != []}
         return data
 
-    model_config = {"extra": "allow"}  # Allow additional keys from 22-key registry
+    model_config: ClassVar[ConfigDict] = {
+        "extra": "allow"
+    }  # Allow additional keys from 22-key registry
 
 
-class EntrezGene(BaseModel):
+class EntrezGene(OmitNoneModel):
     """Complete NCBI Gene record with Agentic Biolink cross-references.
 
     Token Budget: ~115-300 tokens in full mode, ~25 tokens in slim mode
@@ -269,7 +273,7 @@ class EntrezGene(BaseModel):
             "organism": self.organism,
         }
 
-    model_config = {
+    model_config: ClassVar[ConfigDict] = {
         "json_schema_extra": {
             "examples": [
                 {

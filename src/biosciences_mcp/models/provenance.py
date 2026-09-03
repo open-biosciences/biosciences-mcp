@@ -29,10 +29,12 @@ Architecture Decision Record:
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from biosciences_mcp.models.base import OmitNoneModel
 
 
-class Provenance(BaseModel):
+class Provenance(OmitNoneModel):
     """Structured provenance metadata for MCP-derived data.
 
     Attributes:
@@ -91,7 +93,7 @@ class Provenance(BaseModel):
         return ", ".join(parts)
 
 
-class MCPClaim(BaseModel):
+class MCPClaim(OmitNoneModel):
     """Base class for all MCP-derived claims with provenance.
 
     Attributes:
@@ -134,7 +136,7 @@ class MCPClaim(BaseModel):
         return f"{self.claim} ({self.provenance.to_citation_string()})"
 
 
-class BatchProvenance(BaseModel):
+class BatchProvenance(OmitNoneModel):
     """Provenance for batch operations (e.g., chembl.get_compounds_batch).
 
     Attributes:

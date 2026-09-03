@@ -5,15 +5,17 @@ ADR-001 v1.2 (Agentic Biolink Schema) and Constitution Principle III.
 """
 
 import re
-from typing import Any
+from typing import Any, ClassVar
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import ConfigDict, Field, field_validator
+
+from biosciences_mcp.models.base import OmitNoneModel
 
 # CURIE validation pattern (T018)
 PUBCHEM_CURIE_PATTERN = re.compile(r"^PubChem:CID\d+$")
 
 
-class PubChemSearchCandidate(BaseModel):
+class PubChemSearchCandidate(OmitNoneModel):
     """Lightweight compound search result for fuzzy discovery.
 
     Token Budget: ~20-30 tokens in slim mode, ~40-50 tokens in full mode
@@ -56,7 +58,7 @@ class PubChemSearchCandidate(BaseModel):
             raise ValueError(msg)
         return v
 
-    model_config = {
+    model_config: ClassVar[ConfigDict] = {
         "json_schema_extra": {
             "examples": [
                 {
@@ -76,7 +78,7 @@ class PubChemSearchCandidate(BaseModel):
     }
 
 
-class PubChemCompound(BaseModel):
+class PubChemCompound(OmitNoneModel):
     """Complete PubChem compound record with Agentic Biolink cross-references.
 
     Token Budget:
@@ -165,7 +167,7 @@ class PubChemCompound(BaseModel):
             "molecular_formula": self.molecular_formula,
         }
 
-    model_config = {
+    model_config: ClassVar[ConfigDict] = {
         "json_schema_extra": {
             "examples": [
                 {

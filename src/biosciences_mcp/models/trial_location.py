@@ -4,10 +4,12 @@ This module defines Pydantic models for clinical trial facility/location data
 following the Agentic Biolink schema with omit-if-null pattern.
 """
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import ConfigDict, Field
+
+from biosciences_mcp.models.base import OmitNoneModel
 
 
-class TrialLocation(BaseModel):
+class TrialLocation(OmitNoneModel):
     """Trial facility with contact information.
 
     Token Budget: ~50-100 tokens per location
