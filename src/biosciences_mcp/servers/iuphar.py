@@ -141,7 +141,6 @@ async def get_ligand(
     iuphar_id: Annotated[
         str,
         Field(
-            pattern=r"^IUPHAR:\d+$",
             description="IUPHAR ligand CURIE (e.g., 'IUPHAR:2713' for ibuprofen)",
         ),
     ],
@@ -304,7 +303,6 @@ async def get_target(
     iuphar_id: Annotated[
         str,
         Field(
-            pattern=r"^IUPHAR:\d+$",
             description="IUPHAR target CURIE (e.g., 'IUPHAR:215' for D2 receptor)",
         ),
     ],

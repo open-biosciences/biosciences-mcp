@@ -59,10 +59,7 @@ REGISTRY_DEVIATIONS: dict[str, str] = {
 # Strict tools whose raw-string rejection is done by FastMCP parameter
 # validation, which returns a plain-text pydantic error instead of the
 # ErrorEnvelope that ADR-001 §3 requires.
-RAW_STRING_DEVIATIONS: dict[str, str] = {
-    "iuphar.get_ligand": "pattern= on the tool parameter short-circuits to a pydantic validation string",
-    "iuphar.get_target": "pattern= on the tool parameter short-circuits to a pydantic validation string",
-}
+RAW_STRING_DEVIATIONS: dict[str, str] = {}
 
 
 def _xfail_if_known(case_id: str, table: dict[str, str]) -> None:
