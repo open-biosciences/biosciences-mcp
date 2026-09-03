@@ -213,7 +213,7 @@ class TestGetCompoundIntegration:
         assert len(result.synonyms) > 0
 
         # Verify cross-references (at minimum should have self-reference)
-        assert "pubchem_compound" in result.cross_references
+        assert result.cross_references.pubchem_compound
         assert result.cross_references.pubchem_compound == "2244"
         assert check_cross_references(result.cross_references.model_dump(exclude_none=True)) == []
 
@@ -253,7 +253,7 @@ class TestGetCompoundIntegration:
         # (They might not be in first 20 synonyms from live API)
         chembl_in_synonyms = any("CHEMBL" in syn for syn in result.synonyms)
         if chembl_in_synonyms:
-            assert "chembl" in result.cross_references
+            assert result.cross_references.chembl
 
         await client.close()
 
@@ -276,7 +276,7 @@ class TestGetCompoundIntegration:
             syn.startswith("DB") and len(syn) == 7 for syn in result.synonyms
         )
         if drugbank_in_synonyms:
-            assert "drugbank" in result.cross_references
+            assert result.cross_references.drugbank
 
         await client.close()
 
@@ -351,7 +351,7 @@ class TestGetCompoundIntegration:
         assert compound.molecular_formula is not None
         # At least one SMILES should be present
         assert compound.canonical_smiles is not None or compound.isomeric_smiles is not None
-        assert len(compound.cross_references) > 0
+        assert compound.cross_references.model_dump(exclude_none=True)
 
         await client.close()
 
@@ -382,6 +382,6 @@ class TestGetCompoundIntegration:
         assert result.molecular_formula == "C8H10N4O2"
 
         # Should have cross-references
-        assert "pubchem_compound" in result.cross_references
+        assert result.cross_references.pubchem_compound
 
         await client.close()
