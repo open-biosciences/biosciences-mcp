@@ -35,11 +35,6 @@ ENVELOPE_KEYS = frozenset({"pagination", "error"})
 # keys). They are recorded here so the harness stays green while the decision
 # is pending, and so a fix is forced to delete its entry.
 REGISTRY_DEVIATIONS: dict[str, str] = {
-    "uniprot.get_protein": (
-        "omim and orphanet are comma-joined strings; orphanet lacks ORPHA: prefix; "
-        "ensembl_transcript carries version suffixes; refseq NP_ accessions are outside "
-        "the ^[NX][MR]_ regex"
-    ),
     "chembl.get_compound": "chembl is a list and carries a CHEMBL: prefix (registry: bare String)",
     "pubchem.get_compound": "pubchem_compound is a list (registry: String)",
     "wikipathways.get_pathway": (

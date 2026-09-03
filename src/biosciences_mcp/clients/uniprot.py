@@ -3,7 +3,6 @@
 This module provides the UniProtClient for querying the UniProt protein
 database for protein search and cross-references.
 
-Status: FROZEN - Do not modify during parallel implementation.
 """
 
 import asyncio
@@ -13,7 +12,7 @@ from typing import Any
 import httpx
 
 from biosciences_mcp.clients.base import LifeSciencesClient
-from biosciences_mcp.models.cross_references import CrossReferences
+from biosciences_mcp.models.cross_references import CrossReferences, normalize_xref
 from biosciences_mcp.models.envelopes import (
     ErrorCode,
     ErrorDetail,
@@ -122,20 +121,53 @@ class UniProtClient(LifeSciencesClient):
         Returns:
             CrossReferences model with omit-if-null pattern per Constitution III.
         """
-        # Extract single-value references
-        hgnc = next((r["id"] for r in uniprot_refs if r["database"] == "HGNC"), None)
-        entrez = next((r["id"] for r in uniprot_refs if r["database"] == "GeneID"), None)
-        string = next((r["id"] for r in uniprot_refs if r["database"] == "STRING"), None)
-        biogrid = next((r["id"] for r in uniprot_refs if r["database"] == "BioGRID"), None)
 
-        # Extract multi-value references (arrays)
-        pdb_ids = [r["id"] for r in uniprot_refs if r["database"] == "PDB"]
-        omim_ids = [r["id"] for r in uniprot_refs if r["database"] == "MIM"]
-        orphanet_ids = [r["id"] for r in uniprot_refs if r["database"] == "Orphanet"]
-        refseq_ids = [r["id"] for r in uniprot_refs if r["database"] == "RefSeq"]
+        def _prop(ref: dict[str, Any], key: str) -> str | None:
+            return next(
+                (p.get("value") for p in ref.get("properties", []) if p.get("key") == key), None
+            )
 
-        # Extract Ensembl references (transcript IDs for now, gene extraction is future enhancement)
-        ensembl_transcripts = [r["id"] for r in uniprot_refs if r["database"] == "Ensembl"]
+        def _by_db(db: str) -> list[dict[str, Any]]:
+            return [r for r in uniprot_refs if r.get("database") == db]
+
+        # Single-value references (registry form via normalize_xref, AGE-687)
+        hgnc = next((normalize_xref("hgnc", r["id"]) for r in _by_db("HGNC")), None)
+        entrez = next((r["id"] for r in _by_db("GeneID")), None)
+        string = next((r["id"] for r in _by_db("STRING")), None)
+        biogrid = next((r["id"] for r in _by_db("BioGRID")), None)
+
+        # Disease identifiers are single String keys in the registry: prefer the
+        # gene-type MIM entry, else the first; Orphanet takes the first id.
+        mim_refs = _by_db("MIM")
+        omim = next(
+            (r["id"] for r in mim_refs if _prop(r, "Type") == "gene"),
+            mim_refs[0]["id"] if mim_refs else None,
+        )
+        orphanet = next((normalize_xref("orphanet", r["id"]) for r in _by_db("Orphanet")), None)
+
+        pdb_ids = [r["id"] for r in _by_db("PDB")]
+
+        # RefSeq: the entry id is the protein (NP_); the registry key holds the
+        # nucleotide accession carried in NucleotideSequenceId.
+        refseq_ids: list[str] = []
+        for r in _by_db("RefSeq"):
+            nucleotide = _prop(r, "NucleotideSequenceId")
+            if nucleotide:
+                acc = normalize_xref("refseq", nucleotide)
+                if acc not in refseq_ids:
+                    refseq_ids.append(acc)
+
+        # Ensembl: transcript id is the entry id; gene id is the GeneId property.
+        ensembl_refs = _by_db("Ensembl")
+        ensembl_transcripts: list[str] = []
+        for r in ensembl_refs:
+            tid = normalize_xref("ensembl_transcript", r["id"])
+            if tid not in ensembl_transcripts:
+                ensembl_transcripts.append(tid)
+        ensembl_gene = next(
+            (normalize_xref("ensembl_gene", g) for r in ensembl_refs if (g := _prop(r, "GeneId"))),
+            None,
+        )
 
         # Extract KEGG reference
         kegg = next((r["id"] for r in uniprot_refs if r["database"] == "KEGG"), None)
@@ -146,6 +178,8 @@ class UniProtClient(LifeSciencesClient):
             refs_dict["hgnc"] = hgnc
         if entrez:
             refs_dict["entrez"] = entrez
+        if ensembl_gene:
+            refs_dict["ensembl_gene"] = ensembl_gene
         if ensembl_transcripts:
             # ensembl_transcript is list[str] in CrossReferences model
             refs_dict["ensembl_transcript"] = ensembl_transcripts
@@ -156,10 +190,10 @@ class UniProtClient(LifeSciencesClient):
             refs_dict["pdb"] = pdb_ids[:10]  # Limit to first 10 structures
         if kegg:
             refs_dict["kegg"] = kegg
-        if omim_ids:
-            refs_dict["omim"] = ",".join(omim_ids)
-        if orphanet_ids:
-            refs_dict["orphanet"] = ",".join(orphanet_ids)
+        if omim:
+            refs_dict["omim"] = omim
+        if orphanet:
+            refs_dict["orphanet"] = orphanet
         if string:
             refs_dict["string"] = string
         if biogrid:

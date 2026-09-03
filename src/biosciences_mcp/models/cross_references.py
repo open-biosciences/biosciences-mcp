@@ -59,7 +59,7 @@ def normalize_xref(key: str, value: str) -> str:
         return f"ORPHA:{_strip_prefixes(value, ('ORPHA:', 'ORPHA', 'Orphanet:'))}"
     if key == "pubmed":
         return f"PMID:{_strip_prefixes(value, ('PMID:',))}"
-    if key in ("ensembl_gene", "ensembl_transcript"):
+    if key in ("ensembl_gene", "ensembl_transcript", "refseq"):
         return value.split(".", 1)[0]
     return value
 

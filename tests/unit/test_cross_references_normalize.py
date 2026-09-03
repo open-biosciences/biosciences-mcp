@@ -38,6 +38,7 @@ pytestmark = [pytest.mark.unit]
         # ensembl ids: registry has no version suffix
         ("ensembl_gene", "ENSG00000141510.18", "ENSG00000141510"),
         ("ensembl_transcript", "ENST00000269305.9", "ENST00000269305"),
+        ("refseq", "NM_000546.6", "NM_000546"),
         # keys without a rewrite rule pass through
         ("entrez", "7157", "7157"),
         ("omim", "191170", "191170"),
