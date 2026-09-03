@@ -22,7 +22,7 @@ from typing import Any
 import httpx
 
 from biosciences_mcp.clients.base import LifeSciencesClient
-from biosciences_mcp.models.cross_references import CrossReferences
+from biosciences_mcp.models.cross_references import CrossReferences, normalize_xref
 from biosciences_mcp.models.envelopes import (
     ErrorCode,
     ErrorDetail,
@@ -420,17 +420,9 @@ class OpenTargetsClient(LifeSciencesClient):
         Returns:
             Normalized CURIE string.
         """
-        # CURIE normalization rules from research.md
-        if source == "hgnc" and not xref_id.startswith("HGNC:"):
-            return f"HGNC:{xref_id}"
-        if source == "uniprot_swissprot" and not xref_id.startswith("UniProtKB:"):
-            return f"UniProtKB:{xref_id}"
-        if source == "chembl" and not xref_id.startswith("CHEMBL:"):
-            return f"CHEMBL:{xref_id}"
-        if source == "drugbank" and not xref_id.startswith("DB:"):
-            return f"DB:{xref_id}"
-        # Other sources return as-is
-        return xref_id
+        # ADR-001 Appendix A registry form, via the shared normalizer (AGE-691)
+        key = OT_TO_REGISTRY_MAP.get(source, source)
+        return normalize_xref(key, xref_id)
 
     # ==================== Search Targets (T017-T020) ====================
 
