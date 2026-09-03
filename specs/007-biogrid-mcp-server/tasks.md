@@ -324,3 +324,15 @@ With multiple developers:
 - US4: Provide invalid input → Get helpful error with recovery hint
 
 **Suggested MVP scope**: Phase 1 + Phase 2 + Phase 3 (User Story 1) = 21 tasks
+
+---
+
+## Phase 8: Convergence
+
+**Purpose**: Close the gaps found by `/speckit-converge` (2026-09-03) between the current code and spec.md / plan.md / tasks.md. No Constitution MUST violations were found (the symbol-based strict lookup in Principle II is a justified deviation documented in plan.md Constitution Check and Complexity Tracking).
+
+- [ ] T076 [P] Implement the async context manager protocol on BioGridClient in src/biosciences_mcp/clients/biogrid.py (`__aenter__` returning self, `__aexit__` awaiting `self.close()`), matching src/biosciences_mcp/clients/hgnc.py; the base LifeSciencesClient is FROZEN and defines only `close()` per FR-003, T009 (missing)
+- [ ] T077 Return an ErrorEnvelope (code UPSTREAM_ERROR, recovery_hint directing the user to obtain a free key at https://webservice.thebiogrid.org/, invalid_input = the query/gene_symbol) from both the search_genes and get_interactions tools in src/biosciences_mcp/servers/biogrid.py when BIOGRID_API_KEY is unset, instead of letting the ValueError from BioGridClient.__init__ propagate through get_client(); leave the `_client` singleton unset on failure so a later-configured key still works per US4/AC1, FR-011, T051, contracts/search_genes.yaml UPSTREAM_ERROR trigger (partial)
+- [ ] T078 [P] Create unit test test_api_key_missing in tests/unit/test_biogrid_client.py (module `pytestmark = [pytest.mark.unit, pytest.mark.biogrid]`; monkeypatch BIOGRID_API_KEY deleted and reset `biosciences_mcp.servers.biogrid._client` to None) asserting both server tools return an ErrorEnvelope with code UPSTREAM_ERROR and a recovery_hint containing "webservice.thebiogrid.org" per US4/AC1, T048 (missing)
+- [ ] T079 [P] Create unit tests for BioGridSearchCandidate, GeneticInteraction, BioGridCrossReferences, and InteractionResult in tests/unit/test_biogrid_models.py (module `pytestmark = [pytest.mark.unit, pytest.mark.biogrid]`): GENE_SYMBOL_PATTERN validators accept "TP53"/"HLA-A" and reject "TP53!", the total_count validator rejects total_count != physical_count + genetic_count and != len(interactions), to_slim() emits only query_gene/interactions[symbol_b, experimental_system_type]/counts, and model_dump() omits cross_references.entrez when None per T058, T059, T060, FR-008, FR-013 (missing)
+- [ ] T080 [P] Create unit tests for BioGridClient in tests/unit/test_biogrid_client.py (same module as T078; mock httpx with unittest.mock MagicMock/AsyncMock/patch as in tests/unit/test_drugbank_client.py, no network): `_rate_limited_get` spaces calls by RATE_LIMIT (0.5s) and appends `accesskey`, retries 429/503 up to MAX_RETRIES honouring Retry-After then exponential backoff, search_genes returns AMBIGUOUS_QUERY for length < 2 and for symbols failing GENE_SYMBOL_PATTERN without calling the API, get_interactions uppercases and regex-validates gene_symbol, and `async with BioGridClient()` closes the underlying httpx client per T061, T062, T009, FR-003, FR-007 (missing)
