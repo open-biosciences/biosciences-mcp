@@ -321,6 +321,17 @@ class TestCrossReferenceRegistryForm:
         assert refs.ensembl_gene == "ENSG00000141510"
         assert refs.ensembl_transcript == ["ENST00000269305"]
 
+    def test_refseq_is_a_list_of_unversioned_nucleotide_accessions(self):
+        client = EntrezClient()
+        refs = client._build_cross_references(
+            {"RefSeq": ["NM_000546.6", "NP_000537.3", "NM_001126112.3", "NM_000546.6"]}
+        )
+        assert refs.refseq == ["NM_000546", "NM_001126112"]
+
+    def test_single_refseq_value_is_still_a_list(self):
+        client = EntrezClient()
+        assert client._build_cross_references({"RefSeq": "NM_000546.6"}).refseq == ["NM_000546"]
+
     def test_protein_only_ensembl_xref_does_not_land_in_ensembl_gene(self):
         client = EntrezClient()
         refs = client._build_cross_references({"Ensembl": "ENSP00000269305.4"})

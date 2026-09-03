@@ -69,6 +69,25 @@ class TestCrossReferenceRegistryForm:
         refs = UniProtClient()._map_cross_references(P04637_REFS)
         assert refs.refseq == ["NM_000546", "NM_001126112"]
 
+    def test_omim_prefers_gene_plus_phenotype_over_a_leading_phenotype_entry(self):
+        # Live UniProt shape for P04637: phenotype entries precede the gene entry,
+        # and the gene entry is typed "gene+phenotype", not "gene".
+        refs = UniProtClient()._map_cross_references(
+            [
+                {
+                    "database": "MIM",
+                    "id": "133239",
+                    "properties": [{"key": "Type", "value": "phenotype"}],
+                },
+                {
+                    "database": "MIM",
+                    "id": "191170",
+                    "properties": [{"key": "Type", "value": "gene+phenotype"}],
+                },
+            ]
+        )
+        assert refs.omim == "191170"
+
     def test_omim_falls_back_to_first_when_no_gene_type(self):
         refs = UniProtClient()._map_cross_references(
             [

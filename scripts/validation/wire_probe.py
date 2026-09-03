@@ -24,7 +24,11 @@ async def probe(names: list[str], dst: Path) -> None:
     async with Client(mcp) as client:
         schemas = {t.name: t.inputSchema for t in await client.list_tools()}
         for name in names:
-            server, tool, arg = name[:-5].split(".", 2)
+            parts = name[:-5].split(".", 2)
+            if len(parts) != 3:
+                print("skip (unexpected name):", name)
+                continue
+            server, tool, arg = parts
             gw_tool = f"{server}_{tool}"
             schema = schemas.get(gw_tool)
             if schema is None:

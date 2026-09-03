@@ -29,7 +29,7 @@ class IUPHARClient(LifeSciencesClient):
     Implements the Fuzzy-to-Fact protocol for pharmacological data:
     - Ligand search and retrieval (drugs, chemicals, peptides)
     - Target search and retrieval (receptors, enzymes, ion channels)
-    - Cross-reference mapping to 22-key Agentic Biolink schema
+    - Cross-reference mapping to ADR-001 Appendix A registry
 
     Rate limiting: 1 req/s (conservative for community resource).
     """
@@ -106,7 +106,7 @@ class IUPHARClient(LifeSciencesClient):
         return max(score, 0.1)
 
     def _map_ligand_cross_references(self, db_links: list[dict]) -> CrossReferences:
-        r"""Map GtoPdb ligand database links to 22-key Agentic Biolink schema.
+        r"""Map GtoPdb ligand database links to ADR-001 Appendix A registry.
 
         Mappings:
         - ChEMBL Ligand -> chembl (registry form CHEMBL\\d+)
@@ -132,7 +132,7 @@ class IUPHARClient(LifeSciencesClient):
         return CrossReferences(**refs_dict)
 
     def _map_target_cross_references(self, db_links: list[dict]) -> CrossReferences:
-        """Map GtoPdb target database links to 22-key Agentic Biolink schema.
+        """Map GtoPdb target database links to ADR-001 Appendix A registry.
 
         Filters to human species only (multi-species data present).
 

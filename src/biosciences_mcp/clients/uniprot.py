@@ -137,10 +137,11 @@ class UniProtClient(LifeSciencesClient):
         biogrid = next((r["id"] for r in _by_db("BioGRID")), None)
 
         # Disease identifiers are single String keys in the registry: prefer the
-        # gene-type MIM entry, else the first; Orphanet takes the first id.
+        # gene MIM entry (UniProt types it "gene" or "gene+phenotype"; phenotype
+        # entries often come first), else the first; Orphanet takes the first id.
         mim_refs = _by_db("MIM")
         omim = next(
-            (r["id"] for r in mim_refs if _prop(r, "Type") == "gene"),
+            (r["id"] for r in mim_refs if _prop(r, "Type") in ("gene", "gene+phenotype")),
             mim_refs[0]["id"] if mim_refs else None,
         )
         orphanet = next((normalize_xref("orphanet", r["id"]) for r in _by_db("Orphanet")), None)

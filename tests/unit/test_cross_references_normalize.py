@@ -33,6 +33,7 @@ pytestmark = [pytest.mark.unit]
         ("orphanet", "ORPHA121177", "ORPHA:121177"),
         ("orphanet", "121177", "ORPHA:121177"),
         ("orphanet", "ORPHA:121177", "ORPHA:121177"),
+        ("orphanet", "Orphanet:145", "ORPHA:145"),
         # pubmed: registry ^PMID:\d+$
         ("pubmed", "12345", "PMID:12345"),
         ("pubmed", "PMID:12345", "PMID:12345"),

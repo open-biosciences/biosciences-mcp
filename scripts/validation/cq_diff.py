@@ -10,10 +10,14 @@ from pathlib import Path
 
 
 def walk_entities(obj: object, path: str = "$") -> Iterator[tuple[str, dict]]:
-    """Yield (path, dict) for every dict carrying an 'id' or 'cross_references'."""
+    """Yield (key, dict) for every dict carrying an 'id' or 'cross_references'.
+
+    The key is the entity id when present (so reordering between runs does not
+    hide a change) and the JSON path otherwise.
+    """
     if isinstance(obj, dict):
         if "id" in obj or "cross_references" in obj:
-            yield path, obj
+            yield (f"id:{obj['id']}" if "id" in obj else path), obj
         for key, value in obj.items():
             yield from walk_entities(value, f"{path}.{key}")
     elif isinstance(obj, list):

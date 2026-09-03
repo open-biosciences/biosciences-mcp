@@ -98,7 +98,7 @@ class GeneSearchCandidate(OmitNoneModel):
 class EntrezCrossReferences(OmitNoneModel):
     """Cross-references to biological databases for Entrez genes.
 
-    Follows the 22-key Agentic Biolink registry per ADR-001 Section 4.
+    Follows the ADR-001 Appendix A cross-reference registry (values in registry form).
     Constitution Principle III: Omit keys entirely if no reference exists.
     """
 
@@ -123,7 +123,7 @@ class EntrezCrossReferences(OmitNoneModel):
     uniprot: list[str] | None = Field(
         None,
         description="UniProt accession(s)",
-        examples=["UniProtKB:P04637", ["UniProtKB:P04637", "UniProtKB:P04637-2"]],
+        examples=[["P04637"], ["P04637", "A0A386NC20"]],
     )
 
     entrez: str | None = Field(
@@ -132,7 +132,7 @@ class EntrezCrossReferences(OmitNoneModel):
         examples=["7157"],
     )
 
-    refseq: str | list[str] | None = Field(
+    refseq: list[str] | None = Field(
         None,
         description="RefSeq accession(s)",
         examples=["NM_000546.6", ["NM_000546.6", "NP_000537.3"]],
@@ -247,7 +247,7 @@ class EntrezGene(OmitNoneModel):
 
     cross_references: EntrezCrossReferences = Field(
         default_factory=EntrezCrossReferences,  # type: ignore[arg-type]
-        description="Cross-references to other biological databases (22-key registry)",
+        description="Cross-references to other biological databases (ADR-001 Appendix A registry)",
     )
 
     @field_validator("id")
@@ -290,8 +290,8 @@ class EntrezGene(OmitNoneModel):
                     "cross_references": {
                         "hgnc": "HGNC:11998",
                         "ensembl_gene": "ENSG00000141510",
-                        "uniprot": "UniProtKB:P04637",
-                        "refseq": "NM_000546.6",
+                        "uniprot": ["P04637"],
+                        "refseq": ["NM_000546"],
                         "omim": "191170",
                     },
                 }

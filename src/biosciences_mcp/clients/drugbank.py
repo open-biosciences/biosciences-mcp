@@ -344,7 +344,7 @@ class DrugBankClient(LifeSciencesClient):
     ) -> DrugCrossReferences:
         """Build cross-references from DrugBank response (T032).
 
-        Maps DrugBank external identifiers to 22-key Agentic Biolink schema.
+        Maps DrugBank external identifiers to ADR-001 Appendix A registry.
         Applies CURIE normalization per research.md R4.
 
         Args:

@@ -16,6 +16,7 @@ import asyncio
 import base64
 import json
 import os
+import re
 import time
 from typing import Any
 
@@ -383,12 +384,12 @@ class EntrezClient(LifeSciencesClient):
         """
         result: dict[str, Any] = {}
 
-        # HGNC - add prefix if needed per research.md R3
+        # HGNC - registry form HGNC:<digits>
         if "HGNC" in xrefs:
             hgnc_id = xrefs["HGNC"]
             if isinstance(hgnc_id, list):
                 hgnc_id = hgnc_id[0]
-            result["hgnc"] = f"HGNC:{hgnc_id}" if not str(hgnc_id).startswith("HGNC:") else hgnc_id
+            result["hgnc"] = normalize_xref("hgnc", str(hgnc_id))
 
         # Ensembl - NCBI lists gene, transcript and protein ids under one tag;
         # route by prefix into the registry keys (AGE-693)
@@ -424,16 +425,17 @@ class EntrezClient(LifeSciencesClient):
         if uniprot_ids:
             result["uniprot"] = uniprot_ids
 
-        # RefSeq - may have multiple entries
-        refseq_values = []
+        # RefSeq - registry key holds nucleotide accessions (NM_/NR_/XM_/XR_),
+        # unversioned, always a list; protein accessions (NP_/XP_) are dropped
+        refseq_values: list[str] = []
         for key, value in xrefs.items():
-            if key.startswith("RefSeq") or key == "RefSeq":
-                if isinstance(value, list):
-                    refseq_values.extend(value)
-                else:
-                    refseq_values.append(value)
+            if key.startswith("RefSeq"):
+                for raw_acc in value if isinstance(value, list) else [value]:
+                    acc = normalize_xref("refseq", str(raw_acc))
+                    if re.match(r"^[NX][MR]_\d+$", acc) and acc not in refseq_values:
+                        refseq_values.append(acc)
         if refseq_values:
-            result["refseq"] = refseq_values[0] if len(refseq_values) == 1 else refseq_values
+            result["refseq"] = refseq_values
 
         # STRING
         if "STRING" in xrefs:

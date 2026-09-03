@@ -30,7 +30,9 @@ def _strip_prefixes(value: str, prefixes: tuple[str, ...]) -> str:
     changed = True
     while changed:
         changed = False
-        for prefix in prefixes:
+        for prefix in sorted(
+            prefixes, key=len, reverse=True
+        ):  # longest first: "Orphanet:" before "ORPHA"
             if value.lower().startswith(prefix.lower()):
                 value = value[len(prefix) :]
                 changed = True
@@ -66,7 +68,7 @@ def normalize_xref(key: str, value: str) -> str:
 
 
 class CrossReferences(OmitNoneModel):
-    """External database identifiers per ADR-001 22-key registry.
+    """External database identifiers per the ADR-001 Appendix A registry.
 
     Keys are omitted if no value exists (never null or empty string).
     All values are validated against their respective regex patterns.
