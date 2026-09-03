@@ -79,7 +79,7 @@ class TestEntrezClientExponentialBackoff:
 
     def test_backoff_delay_calculation(self):
         """Test exponential backoff delay calculation exists."""
-        client = EntrezClient()
+        EntrezClient()
         # Client should have logic for calculating backoff delays
         # This is verified indirectly through integration tests
 
