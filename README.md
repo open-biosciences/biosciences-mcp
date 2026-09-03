@@ -171,7 +171,7 @@ Maintained by the **MCP Platform Engineer** agent (Agent 3). See [AGENTS.md](htt
 
 | Direction | Repository | Relationship |
 |-----------|------------|--------------|
-| Upstream | [biosciences-program](https://github.com/open-biosciences/biosciences-program) | Schemas and ADRs (ADR-001, ADR-004) |
+| Governance | [biosciences-program](https://github.com/open-biosciences/biosciences-program) | Agent team, migration tracking, ADR placement rule (`docs/adr/README.md`). The platform ADRs themselves live **in this repo** under `docs/adr/` |
 | Downstream | [biosciences-deepagents](https://github.com/open-biosciences/biosciences-deepagents) | LangGraph agents consume MCP tools |
 | Downstream | [biosciences-temporal](https://github.com/open-biosciences/biosciences-temporal) | Temporal activities call MCP tools |
 | Downstream | [biosciences-research](https://github.com/open-biosciences/biosciences-research) | Graph-builder workflows use MCP tools |
