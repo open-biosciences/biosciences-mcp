@@ -36,6 +36,7 @@ markers = [
     "unit: marks tests as unit tests (no network required)",
     "integration: marks tests as integration tests (require network)",
     "e2e: marks tests as end-to-end tests (require live server)",
+    "contract: wire-level ADR-001 contract tests (run through fastmcp.Client)",
     "hgnc: tests for HGNC gene nomenclature API",
     "uniprot: tests for UniProt protein database API",
     "chembl: tests for ChEMBL compound database (Python SDK)",
