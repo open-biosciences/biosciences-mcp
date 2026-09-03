@@ -354,8 +354,8 @@ class ChEMBLClient(LifeSciencesClient):
                 xrefs[registry_key].append(normalized_id)
 
         # Collapse String-cardinality keys to their first value
-        return CrossReferences(
-            **{k: v if k in MULTI_VALUE_KEYS else v[0] for k, v in xrefs.items()}
+        return CrossReferences.model_validate(
+            {k: v if k in MULTI_VALUE_KEYS else v[0] for k, v in xrefs.items()}
         )
 
     def _normalize_xref_id(self, registry_key: str, xref_id: str) -> str:

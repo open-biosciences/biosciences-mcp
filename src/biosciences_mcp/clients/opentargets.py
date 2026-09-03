@@ -408,7 +408,7 @@ class OpenTargetsClient(LifeSciencesClient):
                 else:
                     refs_dict[key] = normalized_id
 
-        return CrossReferences(**refs_dict)
+        return CrossReferences.model_validate(refs_dict)
 
     def _normalize_curie(self, source: str, xref_id: str) -> str:
         """Normalize cross-reference ID to CURIE format (research.md R4).
