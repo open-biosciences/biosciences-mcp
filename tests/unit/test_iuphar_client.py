@@ -115,15 +115,18 @@ def test_chembl_cross_reference_normalization():
     """T141: Test ChEMBL cross-reference normalization."""
     client = IUPHARClient()
 
-    # Test with "CHEMBL" prefix
+    # AGE-694: registry form is ^CHEMBL\d+$ whichever way GtoPdb spells it
     db_links_with_prefix = [{"database": "ChEMBL Ligand", "accession": "CHEMBL521"}]
     refs = client._map_ligand_cross_references(db_links_with_prefix)
-    assert refs.chembl == "521"  # Prefix stripped
+    assert refs.chembl == "CHEMBL521"
 
-    # Test without prefix (already normalized)
     db_links_no_prefix = [{"database": "ChEMBL Ligand", "accession": "521"}]
     refs = client._map_ligand_cross_references(db_links_no_prefix)
-    assert refs.chembl == "521"
+    assert refs.chembl == "CHEMBL521"
+
+    target_links = [{"database": "ChEMBL Target", "accession": "CHEMBL233", "species": "Human"}]
+    refs = client._map_target_cross_references(target_links)
+    assert refs.chembl == "CHEMBL233"
 
 
 def test_drugbank_id_format_validation():
@@ -141,7 +144,7 @@ def test_drugbank_id_format_validation():
 
     # Verify all mappings
     assert refs.drugbank == "DB01050"
-    assert refs.chembl == "521"
+    assert refs.chembl == "CHEMBL521"
     assert refs.pubchem_compound == "3672"
 
 

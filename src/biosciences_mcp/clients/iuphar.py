@@ -18,7 +18,7 @@ from typing import Any
 import httpx
 
 from biosciences_mcp.clients.base import LifeSciencesClient
-from biosciences_mcp.models.cross_references import CrossReferences
+from biosciences_mcp.models.cross_references import CrossReferences, normalize_xref
 from biosciences_mcp.models.envelopes import ErrorCode, ErrorDetail, ErrorEnvelope
 from biosciences_mcp.models.pharmacology import HTML_TAG_PATTERN
 
@@ -109,7 +109,7 @@ class IUPHARClient(LifeSciencesClient):
         r"""Map GtoPdb ligand database links to 22-key Agentic Biolink schema.
 
         Mappings:
-        - ChEMBL Ligand -> chembl (strip "CHEMBL" prefix if present)
+        - ChEMBL Ligand -> chembl (registry form CHEMBL\\d+)
         - DrugBank Ligand -> drugbank (format: DB\d{5})
         - PubChem CID -> pubchem_compound (numeric)
         """
@@ -123,8 +123,7 @@ class IUPHARClient(LifeSciencesClient):
                 continue
 
             if database == "ChEMBL Ligand":
-                # Strip "CHEMBL" prefix if present (e.g., "CHEMBL521" -> "521")
-                refs_dict["chembl"] = accession.replace("CHEMBL", "")
+                refs_dict["chembl"] = normalize_xref("chembl", accession)
             elif database == "DrugBank Ligand":
                 refs_dict["drugbank"] = accession
             elif database == "PubChem CID":
@@ -170,7 +169,7 @@ class IUPHARClient(LifeSciencesClient):
             elif database == "RefSeq Nucleotide":
                 refseq_ids.append(accession)
             elif database == "ChEMBL Target":
-                refs_dict["chembl"] = accession.replace("CHEMBL", "")
+                refs_dict["chembl"] = normalize_xref("chembl", accession)
             elif database == "OMIM":
                 refs_dict["omim"] = accession
             elif database == "Orphanet":

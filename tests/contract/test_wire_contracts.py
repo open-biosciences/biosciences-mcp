@@ -43,8 +43,6 @@ REGISTRY_DEVIATIONS: dict[str, str] = {
     "chembl.get_compound": "chembl is a list and carries a CHEMBL: prefix (registry: bare String)",
     "entrez.get_gene": "ensembl_gene holds a protein ID (ENSP...); uniprot values carry UniProtKB: prefix",
     "pubchem.get_compound": "pubchem_compound is a list (registry: String)",
-    "iuphar.get_ligand": "chembl is a bare number '521' (registry: ^CHEMBL\\d+$)",
-    "iuphar.get_target": "chembl is a bare number '233' (registry: ^CHEMBL\\d+$)",
     "wikipathways.get_pathway": (
         "hgnc holds gene symbols; entrez and ensembl_gene are lists (registry: String)"
     ),
