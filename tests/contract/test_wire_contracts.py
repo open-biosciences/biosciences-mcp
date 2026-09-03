@@ -42,7 +42,6 @@ REGISTRY_DEVIATIONS: dict[str, str] = {
     ),
     "chembl.get_compound": "chembl is a list and carries a CHEMBL: prefix (registry: bare String)",
     "opentargets.get_target": "chembl is 'CHEMBL:CHEMBL4096' and drugbank is 'DB:DB08363' (double/wrong prefixes)",
-    "ensembl.get_gene": "hgnc is 'HGNC:HGNC:11998' (double prefix)",
     "entrez.get_gene": "ensembl_gene holds a protein ID (ENSP...); uniprot values carry UniProtKB: prefix",
     "pubchem.get_compound": "pubchem_compound is a list (registry: String)",
     "iuphar.get_ligand": "chembl is a bare number '521' (registry: ^CHEMBL\\d+$)",
