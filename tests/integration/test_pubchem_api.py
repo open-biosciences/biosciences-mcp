@@ -9,6 +9,7 @@ import pytest
 
 from biosciences_mcp.clients.pubchem import PubChemClient
 from biosciences_mcp.models.envelopes import ErrorCode, ErrorEnvelope
+from tests.contract.registry import check_cross_references
 
 # Mark all tests in this module as integration tests
 pytestmark = [pytest.mark.integration, pytest.mark.pubchem]
@@ -213,7 +214,8 @@ class TestGetCompoundIntegration:
 
         # Verify cross-references (at minimum should have self-reference)
         assert "pubchem_compound" in result.cross_references
-        assert result.cross_references["pubchem_compound"] == ["2244"]
+        assert result.cross_references.pubchem_compound == "2244"
+        assert check_cross_references(result.cross_references.model_dump(exclude_none=True)) == []
 
         await client.close()
 

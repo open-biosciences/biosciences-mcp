@@ -15,6 +15,7 @@ from urllib.parse import quote
 import httpx
 
 from biosciences_mcp.clients.base import LifeSciencesClient
+from biosciences_mcp.models.cross_references import CrossReferences, normalize_xref
 from biosciences_mcp.models.envelopes import (
     ErrorCode,
     ErrorDetail,
@@ -619,76 +620,53 @@ class PubChemClient(LifeSciencesClient):
 
     def _extract_cross_references(
         self, cid: int, synonyms: list[str], xrefs: dict
-    ) -> dict[str, list[str]]:
+    ) -> CrossReferences:
         r"""Extract cross-references from synonyms and xrefs (T114-T122).
 
-        Args:
-            cid: Compound CID
-            synonyms: List of synonyms
-            xrefs: Dict with xref data from PubChem
+        Values are in ADR-001 Appendix A registry form (AGE-687); keys with no
+        value are omitted (Constitution Principle III).
 
-        Returns:
-            Dict mapping cross-reference keys to lists of IDs.
-            Only includes keys with non-empty values (omit-if-null pattern).
-
-        Cross-reference extraction:
-        - pubchem_compound: Self-reference (CID as string)
-        - chembl: From synonyms matching ^CHEMBL(\d+)$ -> CHEMBL:{number}
-        - drugbank: From synonyms matching ^DB\d{5}$
-        - uniprot: From xrefs where SourceName contains "UniProt" -> UniProtKB:{registry_id}
-        - pdb: From xrefs where SourceName contains "PDB"
+        - pubchem_compound: self-reference, the CID as a string
+        - chembl: first synonym matching ^CHEMBL\d+$, verbatim
+        - drugbank: first synonym matching ^DB\d{5}$
+        - uniprot: bare accessions from xrefs whose SourceName contains "UniProt"
+        - pdb: ids from xrefs whose SourceName contains "PDB"
         """
         import re
 
-        cross_refs: dict[str, list[str]] = {}
+        refs: dict[str, Any] = {"pubchem_compound": str(cid)}
 
-        # Self-reference (always included)
-        cross_refs["pubchem_compound"] = [str(cid)]
+        chembl = next((syn for syn in synonyms if re.fullmatch(r"CHEMBL\d+", syn)), None)
+        if chembl:
+            refs["chembl"] = normalize_xref("chembl", chembl)
+        drugbank = next((syn for syn in synonyms if re.fullmatch(r"DB\d{5}", syn)), None)
+        if drugbank:
+            refs["drugbank"] = normalize_xref("drugbank", drugbank)
 
-        # Extract ChEMBL IDs from synonyms
-        chembl_pattern = re.compile(r"^CHEMBL(\d+)$")
-        chembl_ids = []
-        for syn in synonyms:
-            match = chembl_pattern.match(syn)
-            if match:
-                chembl_ids.append(f"CHEMBL:{match.group(1)}")
-        if chembl_ids:
-            cross_refs["chembl"] = chembl_ids
-
-        # Extract DrugBank IDs from synonyms
-        drugbank_pattern = re.compile(r"^DB\d{5}$")
-        drugbank_ids = []
-        for syn in synonyms:
-            if drugbank_pattern.match(syn):
-                drugbank_ids.append(syn)
-        if drugbank_ids:
-            cross_refs["drugbank"] = drugbank_ids
-
-        # Extract cross-references from xrefs
         if xrefs:
-            # UniProt: from RegistryID where SourceName contains "UniProt"
-            uniprot_ids = []
-            pdb_ids = []
-
-            # xrefs structure: {CID: int, RegistryID: [...]}
+            uniprot_ids: list[str] = []
+            pdb_ids: list[str] = []
             registry_ids = xrefs.get("RegistryID", [])
             if isinstance(registry_ids, list):
                 for entry in registry_ids:
-                    if isinstance(entry, dict):
-                        source_name = entry.get("SourceName", "")
-                        registry_id = entry.get("RegistryID", "")
-
-                        if "UniProt" in source_name and registry_id:
-                            uniprot_ids.append(f"UniProtKB:{registry_id}")
-                        elif "PDB" in source_name and registry_id:
-                            pdb_ids.append(registry_id)
-
+                    if not isinstance(entry, dict):
+                        continue
+                    source_name = entry.get("SourceName", "")
+                    registry_id = entry.get("RegistryID", "")
+                    if not registry_id:
+                        continue
+                    if "UniProt" in source_name:
+                        acc = normalize_xref("uniprot", registry_id)
+                        if acc not in uniprot_ids:
+                            uniprot_ids.append(acc)
+                    elif "PDB" in source_name and registry_id not in pdb_ids:
+                        pdb_ids.append(registry_id)
             if uniprot_ids:
-                cross_refs["uniprot"] = uniprot_ids
+                refs["uniprot"] = uniprot_ids
             if pdb_ids:
-                cross_refs["pdb"] = pdb_ids
+                refs["pdb"] = pdb_ids
 
-        return cross_refs
+        return CrossReferences(**refs)
 
     async def get_compound(
         self, pubchem_id: str, slim: bool = False
@@ -708,7 +686,7 @@ class PubChemClient(LifeSciencesClient):
         Examples:
             >>> compound = await client.get_compound("PubChem:CID2244")
             >>> compound.name  # "Aspirin"
-            >>> compound.cross_references["chembl"]  # ["CHEMBL:25"]
+            >>> compound.cross_references.chembl  # "CHEMBL25"
         """
         # Validate CURIE and extract CID (T081)
         cid_result = self._validate_pubchem_curie(pubchem_id)

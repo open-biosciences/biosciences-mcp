@@ -879,3 +879,29 @@ class TestGetCompoundSynonyms:
             assert "CHEMBL25" in result
 
         await client.close()
+
+
+class TestCrossReferenceRegistryForm:
+    """AGE-687 (pubchem): values in ADR-001 Appendix A registry form."""
+
+    def test_extract_cross_references_returns_registry_form(self):
+        from biosciences_mcp.clients.pubchem import PubChemClient
+        from tests.contract.registry import check_cross_references
+
+        synonyms = ["Aspirin", "CHEMBL25", "DB00945", "CHEMBL1234", "50-78-2"]
+        xrefs = {
+            "RegistryID": [
+                {"SourceName": "UniProt", "RegistryID": "P23219"},
+                {"SourceName": "Protein Data Bank (PDB)", "RegistryID": "1PTY"},
+            ]
+        }
+        refs = PubChemClient()._extract_cross_references(2244, synonyms, xrefs)
+        dumped = refs.model_dump(exclude_none=True)
+        assert check_cross_references(dumped) == []
+        assert dumped == {
+            "pubchem_compound": "2244",
+            "chembl": "CHEMBL25",
+            "drugbank": "DB00945",
+            "uniprot": ["P23219"],
+            "pdb": ["1PTY"],
+        }

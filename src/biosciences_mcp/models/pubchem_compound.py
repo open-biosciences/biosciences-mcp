@@ -10,6 +10,7 @@ from typing import Any, ClassVar
 from pydantic import ConfigDict, Field, field_validator
 
 from biosciences_mcp.models.base import OmitNoneModel
+from biosciences_mcp.models.cross_references import CrossReferences
 
 # CURIE validation pattern (T018)
 PUBCHEM_CURIE_PATTERN = re.compile(r"^PubChem:CID\d+$")
@@ -139,9 +140,9 @@ class PubChemCompound(OmitNoneModel):
         description="Alternative names, trade names, and identifiers",
     )
 
-    cross_references: dict[str, list[str]] = Field(
-        default_factory=dict,
-        description="Cross-references to other databases (22-key registry)",
+    cross_references: CrossReferences = Field(
+        default_factory=CrossReferences,
+        description="Cross-references to other databases (ADR-001 Appendix A registry)",
     )
 
     @field_validator("id")
@@ -187,9 +188,9 @@ class PubChemCompound(OmitNoneModel):
                         "Bayer Aspirin",
                     ],
                     "cross_references": {
-                        "pubchem_compound": ["2244"],
-                        "chembl": ["CHEMBL:25"],
-                        "drugbank": ["DB00945"],
+                        "pubchem_compound": "2244",
+                        "chembl": "CHEMBL25",
+                        "drugbank": "DB00945",
                     },
                 }
             ]
