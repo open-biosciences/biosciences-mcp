@@ -4,15 +4,17 @@ Models follow the Agentic Biolink schema defined in ADR-001.
 """
 
 import re
-from typing import Annotated
+from typing import Annotated, ClassVar
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import ConfigDict, Field, field_validator, model_validator
+
+from biosciences_mcp.models.base import OmitNoneModel
 
 # DrugBank CURIE pattern: DrugBank:DBXXXXX (5-digit ID)
 DRUGBANK_CURIE_PATTERN = re.compile(r"^DrugBank:DB\d{5}$")
 
 
-class DrugCrossReferences(BaseModel):
+class DrugCrossReferences(OmitNoneModel):
     """External database identifiers for drugs per ADR-001 22-key registry.
 
     Keys are omitted if no value exists (never null or empty string).
@@ -63,13 +65,8 @@ class DrugCrossReferences(BaseModel):
                 setattr(self, field_name, None)
         return self
 
-    def model_dump(self, **kwargs) -> dict:
-        """Override to exclude None values (ADR-001: omit keys with no value)."""
-        kwargs.setdefault("exclude_none", True)
-        return super().model_dump(**kwargs)
 
-
-class DrugSearchCandidate(BaseModel):
+class DrugSearchCandidate(OmitNoneModel):
     """Lightweight drug search result for fuzzy discovery.
 
     Token Budget: ~20-30 tokens in slim mode, ~40-50 tokens in full mode
@@ -110,7 +107,7 @@ class DrugSearchCandidate(BaseModel):
             raise ValueError(msg)
         return v
 
-    model_config = {
+    model_config: ClassVar[ConfigDict] = {
         "json_schema_extra": {
             "examples": [
                 {
@@ -129,7 +126,7 @@ class DrugSearchCandidate(BaseModel):
     }
 
 
-class Drug(BaseModel):
+class Drug(OmitNoneModel):
     """Complete DrugBank drug record with Agentic Biolink cross-references.
 
     Token Budget: ~115-300 tokens in full mode, ~20 tokens in slim mode
@@ -219,7 +216,7 @@ class Drug(BaseModel):
             result["categories"] = self.categories
         return result
 
-    model_config = {
+    model_config: ClassVar[ConfigDict] = {
         "json_schema_extra": {
             "examples": [
                 {

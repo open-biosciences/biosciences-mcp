@@ -12,7 +12,9 @@ Status: NEW - Tier 1 implementation.
 import re
 from typing import Annotated
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import Field, field_validator
+
+from biosciences_mcp.models.base import OmitNoneModel
 
 # STRING protein ID pattern: <taxid>.ENSP<numbers>
 # Example: 9606.ENSP00000269305
@@ -22,7 +24,7 @@ STRING_PROTEIN_ID_PATTERN = re.compile(r"^\d+\.ENSP\d+$")
 STRING_CURIE_PATTERN = re.compile(r"^STRING:\d+\.ENSP\d+$")
 
 
-class InteractionSearchCandidate(BaseModel):
+class InteractionSearchCandidate(OmitNoneModel):
     """Search result candidate from STRING protein search.
 
     Returned by search_proteins fuzzy search phase.
@@ -79,7 +81,7 @@ class InteractionSearchCandidate(BaseModel):
         return v
 
 
-class EvidenceScores(BaseModel):
+class EvidenceScores(OmitNoneModel):
     """Evidence channel scores for a protein-protein interaction.
 
     STRING provides multiple evidence types, each scored 0-1.
@@ -151,7 +153,7 @@ class EvidenceScores(BaseModel):
     ]
 
 
-class Interaction(BaseModel):
+class Interaction(OmitNoneModel):
     """Single protein-protein interaction from STRING.
 
     Represents an edge in the protein interaction network
@@ -209,7 +211,7 @@ class Interaction(BaseModel):
     ]
 
 
-class InteractionCrossReferences(BaseModel):
+class InteractionCrossReferences(OmitNoneModel):
     """Cross-database references for a STRING protein.
 
     Per ADR-001: omit keys with no value (never null/empty).
@@ -242,7 +244,7 @@ class InteractionCrossReferences(BaseModel):
     ]
 
 
-class InteractionNetwork(BaseModel):
+class InteractionNetwork(OmitNoneModel):
     """Full interaction network for a protein.
 
     Represents the node (query protein) and its edges (interactions).

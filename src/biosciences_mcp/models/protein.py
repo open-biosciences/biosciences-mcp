@@ -6,8 +6,9 @@ including complete protein records and lightweight search candidates.
 
 import re
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import Field, field_validator
 
+from biosciences_mcp.models.base import OmitNoneModel
 from biosciences_mcp.models.cross_references import CrossReferences
 
 # UniProt CURIE validation pattern (from R6 research)
@@ -16,7 +17,7 @@ from biosciences_mcp.models.cross_references import CrossReferences
 UNIPROT_CURIE_PATTERN = re.compile(r"^UniProtKB:[A-Z][A-Z0-9]{5,9}$")
 
 
-class ProteinSearchCandidate(BaseModel):
+class ProteinSearchCandidate(OmitNoneModel):
     """Lightweight protein match for fuzzy search results.
 
     Represents a candidate protein from search results with minimal fields
@@ -41,7 +42,7 @@ class ProteinSearchCandidate(BaseModel):
         return v
 
 
-class Protein(BaseModel):
+class Protein(OmitNoneModel):
     """Complete protein record from UniProt with Agentic Biolink cross-references.
 
     Represents a full protein entity with all available metadata, including

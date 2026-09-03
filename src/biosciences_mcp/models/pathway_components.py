@@ -13,10 +13,12 @@ Usage:
     biological entities participating in a pathway.
 """
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import ConfigDict, Field
+
+from biosciences_mcp.models.base import OmitNoneModel
 
 
-class DataNode(BaseModel):
+class DataNode(OmitNoneModel):
     """Pathway component entity (gene, protein, metabolite, complex).
 
     Represents a biological entity participating in a pathway with
@@ -73,7 +75,7 @@ class DataNode(BaseModel):
     )
 
 
-class Interaction(BaseModel):
+class Interaction(OmitNoneModel):
     """Pathway relationship entity connecting two DataNodes.
 
     Represents interactions between biological entities (activation, inhibition,
@@ -107,7 +109,7 @@ class Interaction(BaseModel):
     )
 
 
-class PathwayComponents(BaseModel):
+class PathwayComponents(OmitNoneModel):
     """Structured pathway composition data.
 
     Returned by get_pathway_components tool with genes, proteins, metabolites,

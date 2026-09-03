@@ -8,7 +8,9 @@ Refactored from models/gene.py to decouple Protocol Types from Domain Types.
 
 import re
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import Field, model_validator
+
+from biosciences_mcp.models.base import OmitNoneModel
 
 # Cross-reference regex patterns from ADR-001 Appendix A
 CROSS_REF_PATTERNS = {
@@ -23,7 +25,7 @@ CROSS_REF_PATTERNS = {
 }
 
 
-class CrossReferences(BaseModel):
+class CrossReferences(OmitNoneModel):
     """External database identifiers per ADR-001 22-key registry.
 
     Keys are omitted if no value exists (never null or empty string).
@@ -146,8 +148,3 @@ class CrossReferences(BaseModel):
             if value == "" or value == []:
                 setattr(self, field_name, None)
         return self
-
-    def model_dump(self, **kwargs) -> dict:
-        """Override to exclude None values (ADR-001: omit keys with no value)."""
-        kwargs.setdefault("exclude_none", True)
-        return super().model_dump(**kwargs)

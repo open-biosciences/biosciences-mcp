@@ -10,10 +10,12 @@ Models:
     - PathwaySearchCandidate: Lightweight search result for fuzzy discovery (search_pathways tool)
 """
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import ConfigDict, Field
+
+from biosciences_mcp.models.base import OmitNoneModel
 
 
-class RevisionMetadata(BaseModel):
+class RevisionMetadata(OmitNoneModel):
     """Pathway revision and curation information.
 
     Tracks pathway version, modification history, and curator information.
@@ -24,7 +26,7 @@ class RevisionMetadata(BaseModel):
     curators: list[str] = Field(default_factory=list, description="List of pathway curators")
 
 
-class ComponentCounts(BaseModel):
+class ComponentCounts(OmitNoneModel):
     """Counts of pathway components.
 
     Provides aggregate statistics for pathway composition without requiring
@@ -37,7 +39,7 @@ class ComponentCounts(BaseModel):
     interaction_count: int = Field(0, description="Number of interactions")
 
 
-class Pathway(BaseModel):
+class Pathway(OmitNoneModel):
     """Complete pathway entity from WikiPathways following Agentic Biolink schema.
 
     Returned by get_pathway strict lookup tool after resolving pathway ID
@@ -102,7 +104,7 @@ class Pathway(BaseModel):
     )
 
 
-class PathwaySearchCandidate(BaseModel):
+class PathwaySearchCandidate(OmitNoneModel):
     """Lightweight pathway search result for fuzzy discovery.
 
     Returned by search_pathways and get_pathways_for_gene fuzzy tools.

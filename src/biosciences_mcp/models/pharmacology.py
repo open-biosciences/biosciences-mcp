@@ -12,10 +12,11 @@ other life sciences databases (ChEMBL, DrugBank, UniProt, HGNC, Ensembl, etc.).
 """
 
 import re
-from typing import Annotated, Any
+from typing import Annotated
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import Field, field_validator
 
+from biosciences_mcp.models.base import OmitNoneModel
 from biosciences_mcp.models.cross_references import CrossReferences
 
 # IUPHAR CURIE pattern: "IUPHAR:12345"
@@ -30,7 +31,7 @@ HTML_TAG_PATTERN = re.compile(r"<[^>]+>")
 # =============================================================================
 
 
-class LigandSearchCandidate(BaseModel):
+class LigandSearchCandidate(OmitNoneModel):
     """Lightweight ligand match for fuzzy search results.
 
     Used in slim mode to reduce token usage (~20 tokens per entity).
@@ -58,7 +59,7 @@ class LigandSearchCandidate(BaseModel):
         return v
 
 
-class Ligand(BaseModel):
+class Ligand(OmitNoneModel):
     """Complete ligand record from GtoPdb with Agentic Biolink cross-references.
 
     Represents pharmacological compounds including drugs, metabolites, peptides,
@@ -114,14 +115,6 @@ class Ligand(BaseModel):
             raise ValueError(msg)
         return v
 
-    def model_dump(self, **kwargs: Any) -> dict[str, Any]:
-        """Serialize to dict with exclude_none for omit-if-null pattern.
-
-        Implements Constitution Principle III (Schema Determinism).
-        """
-        kwargs.setdefault("exclude_none", True)
-        return super().model_dump(**kwargs)
-
     def to_search_candidate(self, score: float = 1.0) -> LigandSearchCandidate:
         """Convert to LigandSearchCandidate for search results."""
         return LigandSearchCandidate(
@@ -138,7 +131,7 @@ class Ligand(BaseModel):
 # =============================================================================
 
 
-class TargetSearchCandidate(BaseModel):
+class TargetSearchCandidate(OmitNoneModel):
     """Lightweight target match for fuzzy search results.
 
     Used in slim mode to reduce token usage (~20 tokens per entity).
@@ -166,7 +159,7 @@ class TargetSearchCandidate(BaseModel):
         return v
 
 
-class Target(BaseModel):
+class Target(OmitNoneModel):
     """Complete target record from GtoPdb with Agentic Biolink cross-references.
 
     Represents pharmacological targets including GPCRs, ion channels, enzymes,
@@ -217,14 +210,6 @@ class Target(BaseModel):
         This validator removes all HTML tags for clean agent consumption.
         """
         return HTML_TAG_PATTERN.sub("", v)
-
-    def model_dump(self, **kwargs: Any) -> dict[str, Any]:
-        """Serialize to dict with exclude_none for omit-if-null pattern.
-
-        Implements Constitution Principle III (Schema Determinism).
-        """
-        kwargs.setdefault("exclude_none", True)
-        return super().model_dump(**kwargs)
 
     def to_search_candidate(self, score: float = 1.0) -> TargetSearchCandidate:
         """Convert to TargetSearchCandidate for search results."""

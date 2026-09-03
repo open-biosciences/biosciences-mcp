@@ -10,9 +10,11 @@ Constitution Principle III (Schema Determinism).
 """
 
 import re
+from typing import ClassVar
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import ConfigDict, Field, field_validator
 
+from biosciences_mcp.models.base import OmitNoneModel
 from biosciences_mcp.models.cross_references import CrossReferences
 
 # Regex patterns for ID validation (from research.md R3)
@@ -21,7 +23,7 @@ ENSEMBL_GENE_ID_PATTERN = re.compile(r"^ENSG\d{11}$")
 DISEASE_ID_PATTERN = re.compile(r"^(EFO|MONDO|Orphanet|HP|DOID|OTAR)_\d+$")
 
 
-class TargetSearchCandidate(BaseModel):
+class TargetSearchCandidate(OmitNoneModel):
     """Lightweight target search result for fuzzy discovery.
 
     Token Budget: ~20-30 tokens in slim mode, ~40-50 tokens in full mode
@@ -59,7 +61,7 @@ class TargetSearchCandidate(BaseModel):
             raise ValueError(f"Invalid Ensembl gene ID format: {v}. Must match ENSG[11 digits]")
         return v
 
-    model_config = {
+    model_config: ClassVar[ConfigDict] = {
         "json_schema_extra": {
             "examples": [
                 {
@@ -73,7 +75,7 @@ class TargetSearchCandidate(BaseModel):
     }
 
 
-class Target(BaseModel):
+class Target(OmitNoneModel):
     """Complete Open Targets target record with Agentic Biolink cross-references.
 
     Token Budget: ~115-300 tokens in full mode, ~20 tokens in slim mode
@@ -137,7 +139,7 @@ class Target(BaseModel):
             "biotype": self.biotype,
         }
 
-    model_config = {
+    model_config: ClassVar[ConfigDict] = {
         "json_schema_extra": {
             "examples": [
                 {
@@ -161,7 +163,7 @@ class Target(BaseModel):
     }
 
 
-class Association(BaseModel):
+class Association(OmitNoneModel):
     """Target-disease association with aggregated evidence.
 
     Token Budget: ~60-80 tokens per association (no slim mode)
@@ -220,7 +222,7 @@ class Association(BaseModel):
             )
         return v
 
-    model_config = {
+    model_config: ClassVar[ConfigDict] = {
         "json_schema_extra": {
             "examples": [
                 {

@@ -7,10 +7,12 @@ Agentic Biolink schema with flattened JSON structure and omit-if-null pattern.
 import re
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import ConfigDict, Field, field_validator
+
+from biosciences_mcp.models.base import OmitNoneModel
 
 
-class TrialSearchCandidate(BaseModel):
+class TrialSearchCandidate(OmitNoneModel):
     """Lightweight trial search result for fuzzy discovery.
 
     Token Budget: ~100-200 tokens per candidate
@@ -37,7 +39,7 @@ class TrialSearchCandidate(BaseModel):
         return v
 
 
-class TrialProtocol(BaseModel):
+class TrialProtocol(OmitNoneModel):
     """Protocol design details."""
 
     study_type: str = Field(
@@ -57,7 +59,7 @@ class TrialProtocol(BaseModel):
     )
 
 
-class EligibilityCriteria(BaseModel):
+class EligibilityCriteria(OmitNoneModel):
     """Patient eligibility requirements."""
 
     criteria_text: str | None = Field(
@@ -71,7 +73,7 @@ class EligibilityCriteria(BaseModel):
     )
 
 
-class Outcome(BaseModel):
+class Outcome(OmitNoneModel):
     """Trial outcome measure."""
 
     measure: str = Field(description="Outcome measure description")
@@ -81,14 +83,14 @@ class Outcome(BaseModel):
     )
 
 
-class Sponsor(BaseModel):
+class Sponsor(OmitNoneModel):
     """Trial sponsor or collaborator."""
 
     name: str = Field(description="Organization name")
     role: str = Field(description="Role (LEAD_SPONSOR, COLLABORATOR)")
 
 
-class Trial(BaseModel):
+class Trial(OmitNoneModel):
     """Complete clinical trial entity with full protocol details.
 
     Token Budget: ~5K-10K tokens (deep nested structure from API)

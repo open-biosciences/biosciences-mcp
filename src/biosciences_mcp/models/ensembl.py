@@ -13,7 +13,9 @@ Entities:
 import re
 from typing import Annotated
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import Field, field_validator, model_validator
+
+from biosciences_mcp.models.base import OmitNoneModel
 
 # Ensembl ID patterns per research.md R3
 ENSEMBL_GENE_PATTERN = re.compile(r"^ENSG\d{11}$")
@@ -32,7 +34,7 @@ STRING_PATTERN = re.compile(r"^\d+\.[A-Za-z0-9]+$")
 BIOGRID_PATTERN = re.compile(r"^\d+$")
 
 
-class EnsemblCrossReferences(BaseModel):
+class EnsemblCrossReferences(OmitNoneModel):
     """External database identifiers per ADR-001 22-key registry.
 
     Keys are omitted if no value exists (never null or empty string).
@@ -108,13 +110,8 @@ class EnsemblCrossReferences(BaseModel):
                 setattr(self, field_name, None)
         return self
 
-    def model_dump(self, **kwargs) -> dict:
-        """Override to exclude None values (ADR-001: omit keys with no value)."""
-        kwargs.setdefault("exclude_none", True)
-        return super().model_dump(**kwargs)
 
-
-class GeneSearchCandidate(BaseModel):
+class GeneSearchCandidate(OmitNoneModel):
     """Lightweight gene representation for fuzzy search results.
 
     Used in search_genes to return ranked candidates with minimal tokens (~25 tokens).
@@ -146,7 +143,7 @@ class GeneSearchCandidate(BaseModel):
         return round(v, 2)
 
 
-class EnsemblGene(BaseModel):
+class EnsemblGene(OmitNoneModel):
     """Complete gene record from Ensembl with Agentic Biolink cross-references.
 
     This is the full record returned by get_gene (~150-350 tokens depending on xrefs).
@@ -209,7 +206,7 @@ class EnsemblGene(BaseModel):
         )
 
 
-class EnsemblTranscript(BaseModel):
+class EnsemblTranscript(OmitNoneModel):
     """Transcript record from Ensembl with cross-references.
 
     Returned by get_transcript (~100-200 tokens depending on xrefs).

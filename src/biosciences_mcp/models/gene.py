@@ -6,15 +6,16 @@ Models follow the Agentic Biolink schema defined in ADR-001.
 import re
 from typing import Annotated
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import Field, field_validator
 
+from biosciences_mcp.models.base import OmitNoneModel
 from biosciences_mcp.models.cross_references import CrossReferences
 
 # HGNC CURIE pattern: HGNC:NNNNN
 HGNC_CURIE_PATTERN = re.compile(r"^HGNC:\d+$")
 
 
-class SearchCandidate(BaseModel):
+class SearchCandidate(OmitNoneModel):
     """Lightweight gene representation for fuzzy search results.
 
     Used in slim mode to reduce token usage (~20 tokens per entity).
@@ -35,7 +36,7 @@ class SearchCandidate(BaseModel):
         return v
 
 
-class Gene(BaseModel):
+class Gene(OmitNoneModel):
     """Complete gene record from HGNC with Agentic Biolink cross-references.
 
     This is the full record returned by get_gene (~115-300 tokens depending on cross-refs).
