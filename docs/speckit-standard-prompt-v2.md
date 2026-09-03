@@ -11,8 +11,8 @@ This prompt template serves as the **enforcement mechanism** for the Life Scienc
 | **[ADR-003](../docs/adr/accepted/adr-003-v1.0.md)** | **SpecKit SDLC** (file header still reads Draft) | 🟢 **Foundational** | The `/specify` → `/plan` → `/implement` workflow itself. |
 | **[ADR-004](../docs/adr/accepted/adr-004-v1.0.md)** | **Lifecycle Management** | 🔴 **Explicit Constraint** | Module-level singleton pattern; `@mcp.on_event` is **FORBIDDEN**. |
 | **[ADR-005](../docs/adr/accepted/adr-005-v1.0.md)** | **Git Worktrees** | 🟡 **Pre-requisite** | Step 0: Use worktrees for parallelizing 3+ servers. |
-| **[ADR-007](../docs/adr/accepted/adr-007-v1.0.md)** | **Gateway Rate Resilience** | 🔴 **Explicit Constraint** | Rate limiting and retry live once in `LifeSciencesClient`; per-client copies are the anti-pattern (§1–2). |
 | **[ADR-006](../docs/adr/accepted/adr-006-v1.0.md)** | **Single Writer Package** | 🔴 **Explicit Constraint** | Split `client.py` into `clients/` package to enable ADR-005. |
+| **[ADR-007](../docs/adr/accepted/adr-007-v1.0.md)** | **Gateway Rate Resilience** | 🔴 **Explicit Constraint** | Rate limiting and retry live once in `LifeSciencesClient`; per-client copies are the anti-pattern (§1–2). |
 
 > [!IMPORTANT]
 > **Constraint Injection**
