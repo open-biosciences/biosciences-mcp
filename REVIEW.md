@@ -1,9 +1,18 @@
 # Review instructions
 
 These instructions tune automated review of pull requests in this
-repository. They apply to Claude Code Review and any reviewer that reads
-this file. The full standard, including the ADR decision matrix and the
-finding format, lives in `.claude/skills/pr-review-standard/SKILL.md`.
+repository. Claude Code Review (the managed product) reads this file; the
+`code-review` plugin that `.github/workflows/claude-code-review.yml` runs
+reads only `CLAUDE.md`. The full standard, including the ADR decision matrix
+and the finding format, lives in `.claude/skills/pr-review-standard/SKILL.md`.
+Severity maps as follows: Important here is Blocking there; Nit is Nit; the
+standard's Non-blocking level has no counterpart here, so report it as a Nit
+with the word "non-blocking" in the first line.
+
+Every automated comment, whether from Code Review, the workflow, or the
+`/pr-review` team, is advisory. None of them approves, requests changes, or
+merges; the `/pr-review` orchestrator posts only top-level comments and
+`COMMENT` reviews, and a guard hook denies the rest.
 
 ## What Important means here
 

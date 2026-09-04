@@ -1,14 +1,14 @@
 ---
 name: correctness-reviewer
 description: Reviews a biosciences-mcp pull request for real bugs, failure behaviour, async and concurrency mistakes, ADR-007 retry semantics, ADR-004 lifecycle, secrets, and test evidence proportionate to risk, reporting only findings verified at 80 percent confidence or above. Use as part of /pr-review or when asked to find bugs in a change.
-tools: Read, Grep, Glob, Bash
+tools: Read, Write, Grep, Glob, Bash
 model: inherit
 effort: high
 skills:
   - pr-review-standard
 hooks:
   PreToolUse:
-    - matcher: "Bash"
+    - matcher: "Bash|Write|Edit"
       hooks:
         - type: command
           command: "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/pr-review-guard.py"
@@ -28,7 +28,8 @@ the file you write your full report to.
 
 Read head versions from `PR_TREE`, base versions with `git show BASE_SHA:path`,
 and the change with `git diff BASE_SHA..HEAD_SHA -- path`. Run commands from
-inside `PR_TREE` with `uv run`. Do not run `git checkout` or `gh pr checkout`.
+inside `PR_TREE` with `uv run`. A guard hook allows only read-only git and gh
+verbs and denies anything that mutates git or GitHub. Do not work around it.
 
 ## Procedure
 
@@ -97,10 +98,12 @@ same evidence bar, and keep it out of the recommendation.
 
 ## Output
 
-Write the complete report to `REPORT_PATH` (create its directory if
-needed). Your final message to the orchestrator is two lines only: the path,
-and the `Recommendation:` line. Long messages are truncated in transit; the
-file is the record.
+Write the complete report to `REPORT_PATH` with the Write tool. That path
+is under the session scratchpad, outside `PR_TREE`; the guard denies writes
+anywhere else, so never write into `PR_TREE` or the repository. Your final
+message to the orchestrator is two lines only: the path, and the
+`Recommendation:` line. Long messages are truncated in transit; the file is
+the record.
 
 Follow section 6 of the standard: one block per finding with `path:line` at
 `HEAD_SHA` and a confidence score, then `## Examined`, `## Not examined`,

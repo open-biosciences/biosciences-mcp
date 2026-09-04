@@ -39,12 +39,12 @@ evidence.
 
 Do not cite these constitution statements as authority; cite the ADR instead.
 
-| Constitution says | Current authority | Consequence for review |
+| Governing document says | Current authority | Consequence for review |
 |---|---|---|
 | Cites ADR-001 **v1.2** | `docs/adr/accepted/adr-001-v1.4.md` is the accepted text | Cite v1.4 section numbers |
 | Cross-reference registry has **22** keys | ADR-001 v1.4 Appendix A and `tests/contract/registry.py` hold **23** | Use the registry file as the count |
 | Fixed **10 req/s** client-side rate limit | ADR-007 v1.0 makes the rate posture discoverable or measured, with full-jitter backoff and `Retry-After` precedence | Do not demand a 10 req/s constant |
-| ADR-006 says each client owns its own rate limiting | ADR-007 requires one implementation in the base client | Duplicated per-client retry logic is a non-blocking finding pointing at ADR-007, not a requirement |
+| ADR-006 says each client owns its own rate limiting | ADR-007 §2(f) requires one implementation in the base client | The existing per-client copies are Pre-existing until the consolidation (AGE-698) lands; new or modified retry logic outside `clients/base.py` is judged against §2(f). This transitional posture belongs in `docs/adr/README.md` once that file exists; AGE-698 is its expiry |
 | ADR-003 sits under `accepted/` but its header says `Status: Draft` | Treat the SpecKit workflow as established practice (Constitution Principle V), not as an ADR-backed MUST | Missing spec artefacts are non-blocking unless the PR itself claims SpecKit compliance |
 | Constitution Principle V and ADR-005 examples name dotted `/speckit.*` commands | Spec Kit v1.0.4 (PR #9) installs them as skills named `/speckit-*` | Do not flag either spelling; a constitution PATCH is owed after PR #9 merges |
 | Constitution says "All PRs MUST pass `/analyze` validation" | Unenforced in practice; `/speckit-converge` (PR #9) is the nearest gate and it grades against the stale constitution | Treat convergence CRITICAL items that cite the constitution as needing re-grading against the precedence above before they become work items |
@@ -62,9 +62,9 @@ ADR-007 row; a change to backoff arithmetic in any file does.
 |---|---|---|---|
 | Modern API client (anything except ChEMBL) | ADR-001 §2; Constitution I | Async `httpx`, pooled client via `LifeSciencesClient`, no blocking I/O in async paths | Read the diff; grep for `requests.`, `time.sleep`, sync SDK calls |
 | ChEMBL client | ADR-001 §2 | SDK calls wrapped in `run_in_executor`; batch tool present and bounded | Read the diff |
-| Search / lookup tools | ADR-001 §3 | Fuzzy tool returns ranked candidates with CURIEs; strict tool rejects raw strings with `UNRESOLVED_ENTITY` and a `recovery_hint` that names the resolve tool | `uv run pytest -m "unit and <server>"`; wire tier if network is available |
-| Entity and list responses | ADR-001 §§4, 7, 8 | Flat records, registered `cross_references` keys, `PaginationEnvelope` on every list tool, `ErrorEnvelope` on every error, `slim` honoured, `page_size` default 50 | `uv run pytest -m "contract and unit"`; read `tests/contract/test_wire_contracts.py` |
-| Pydantic entity models | ADR-001 §4 and `models/base.py` | Model inherits `OmitNoneModel`; no `model_dump` override, no `exclude_none` config; envelopes stay on `BaseModel` | `uv run pytest -m "contract and unit"` |
+| Search / lookup tools | ADR-001 §3 and §8B; Constitution II for the hint naming the resolve tool | Fuzzy tool returns ranked candidates with CURIEs; strict tool rejects raw strings with `UNRESOLVED_ENTITY` and a `recovery_hint` that names the resolve tool | `uv run pytest -m "unit and <server>"`; wire tier if network is available |
+| Entity and list responses | ADR-001 §§5, 7, 8 and Appendix A | Flat records, registered `cross_references` keys, `PaginationEnvelope` on every list tool, `ErrorEnvelope` on every error, `slim` honoured, `page_size` default 50 | `uv run pytest -m "contract and unit"`; read `tests/contract/test_wire_contracts.py` |
+| Pydantic entity models | ADR-001 Appendix A null policy (cited locally as "§4") and `models/base.py` | Model inherits `OmitNoneModel`; no `model_dump` override, no `exclude_none` config; envelopes stay on `BaseModel` | `uv run pytest -m "contract and unit"` |
 | Shared or domain types | ADR-001 §9 | Shared protocol types (`cross_references.py`, `envelopes.py`) import no domain model | grep imports |
 | Cross-reference registry | ADR-001 Appendix A; `tests/contract/registry.py` | Registry table and ADR amended in the same commit; deviation-table entries removed only with wire evidence | Read `registry.py` diff and deviation table diff |
 | Server lifecycle | ADR-004 | Module-level singleton client; no `@mcp.on_event` | grep `on_event` |

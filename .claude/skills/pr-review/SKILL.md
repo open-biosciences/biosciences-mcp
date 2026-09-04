@@ -3,6 +3,12 @@ name: pr-review
 description: Review a biosciences-mcp pull request with the three-reviewer team (ADR compliance, wire contract, correctness), verify and merge their findings into one evidence-backed report, and optionally post it to the PR. Use when asked to review a PR, a branch, or the current changes against the ADRs.
 argument-hint: [pr-number | branch | base...head] [--comment]
 allowed-tools: Read Grep Glob Agent Bash(gh pr view:*) Bash(gh pr diff:*) Bash(gh pr comment:*) Bash(gh api:*) Bash(git fetch:*) Bash(git diff:*) Bash(git show:*) Bash(git merge-base:*) Bash(git rev-parse:*) Bash(git worktree:*) Bash(git log:*) Bash(uv sync:*) Bash(mkdir:*)
+hooks:
+  PreToolUse:
+    - matcher: "Bash"
+      hooks:
+        - type: command
+          command: "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/pr-review-guard.py --role orchestrator"
 ---
 
 # /pr-review
@@ -15,7 +21,13 @@ reviewers' contexts hold the diff so yours stays small. Load the
 finding format before you start.
 
 Never approve, request changes, or merge on GitHub. The team informs a human
-decision; it does not make it.
+decision; it does not make it. The `hooks` entry above registers the guard in
+orchestrator mode, which denies `gh pr review`, `gh pr merge`, and any
+`gh api` call that approves, requests changes, merges, or otherwise mutates;
+it leaves git alone. Skill hooks persist for the rest of the session, so
+those GitHub actions stay blocked for Claude until the session ends. Hooks
+declared in project frontmatter run only after the workspace is trusted and
+are skipped in `-p` sessions; a headless run relies on the prompts alone.
 
 ## 1. Resolve the target
 
@@ -54,11 +66,14 @@ tree:
 
 ```
 git worktree add --detach <scratchpad>/pr-review/<target> <HEAD_SHA>
-cd <scratchpad>/pr-review/<target> && uv sync --extra dev -q
+uv sync --extra dev -q --project <scratchpad>/pr-review/<target>
+mkdir -p <scratchpad>/pr-review/<target>-reports
 ```
 
-If `git worktree add` is refused, fall back to `git show HEAD_SHA:path` for
-head files and tell the reviewers that tests cannot run on the head.
+Reports go in the sibling `<target>-reports` directory, never inside the
+worktree, because the worktree is deleted at the end. If `git worktree add`
+is refused, fall back to `git show HEAD_SHA:path` for head files and tell the
+reviewers that tests cannot run on the head.
 
 ## 3. Classify the change
 
@@ -87,7 +102,7 @@ Title: <title>
 BASE_SHA: <sha>
 HEAD_SHA: <sha>
 PR_TREE: <path>   (dependencies synced; run uv commands from here)
-REPORT_PATH: <scratchpad>/pr-review/<target>/reports/<reviewer-name>.md
+REPORT_PATH: <scratchpad>/pr-review/<target>-reports/<reviewer-name>.md
 Changed files (<count>):
 <one path per line, with +/- counts>
 PR body:
@@ -109,9 +124,9 @@ and messages longer than a few paragraphs are truncated in transit.
 
 1. **De-duplicate.** Two findings at the same `path:line` with the same
    claim become one, keeping the higher severity and citing both reviewers.
-2. **Verify every Blocking finding yourself.** Open the cited line with
-   `git show HEAD_SHA:path | sed -n 'L,Lp'` and confirm the quoted
-   observation matches. If it does not, downgrade or drop it and say so.
+2. **Verify every Blocking finding yourself.** Open the cited line with the
+   Read tool on `<PR_TREE>/path` (use `offset` and `limit`) and confirm the
+   quoted observation matches. If it does not, downgrade or drop it and say so.
    If a Blocking finding rests on a command result, confirm the reviewer
    reported the command's summary line.
 3. **Apply the evidence bar.** Drop any Blocking or Non-blocking finding
@@ -159,8 +174,11 @@ Not examined: <merged list with reasons>
 Commands run: <command and summary line, one per line>
 ```
 
-Print the report in the conversation. Then remove the scratch worktree:
-`git worktree remove --force "$PR_TREE"`.
+Print the report in the conversation. Then remove the scratch worktree you
+created in step 2, with its literal path:
+`git worktree remove --force <scratchpad>/pr-review/<target>`. Remove only
+that worktree; other sessions may hold worktrees of the same branch, and
+they are not yours to clean up. The reports directory stays.
 
 ## 7. Post to the PR (only with `--comment`)
 

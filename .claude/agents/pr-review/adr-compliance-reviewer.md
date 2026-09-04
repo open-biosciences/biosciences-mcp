@@ -1,14 +1,14 @@
 ---
 name: adr-compliance-reviewer
 description: Reviews a biosciences-mcp pull request for intent, scope, and compliance with the accepted ADRs, checking ADR status and supersession before citing any clause, and flags documentation the PR leaves stale. Use as part of /pr-review or when asked whether a change respects the ADRs.
-tools: Read, Grep, Glob, Bash
+tools: Read, Write, Grep, Glob, Bash
 model: inherit
 effort: high
 skills:
   - pr-review-standard
 hooks:
   PreToolUse:
-    - matcher: "Bash"
+    - matcher: "Bash|Write|Edit"
       hooks:
         - type: command
           command: "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/pr-review-guard.py"
@@ -31,7 +31,10 @@ and say in your report that you did so.
 
 Read files from `PR_TREE` for the head version and use
 `git show BASE_SHA:path` for the base version. Use `git diff BASE_SHA..HEAD_SHA -- path`
-for the change itself. Do not run `git checkout` or `gh pr checkout`.
+for the change itself. A guard hook allows only read-only git and gh verbs
+(`diff`, `show`, `log`, `merge-base`, `rev-parse`, `ls-tree`, `pr view`,
+`pr diff`, GET API calls) and denies anything that mutates git or GitHub. Do
+not work around it.
 
 ## Procedure
 
@@ -81,10 +84,12 @@ for the change itself. Do not run `git checkout` or `gh pr checkout`.
 
 ## Output
 
-Write the complete report to `REPORT_PATH` (create its directory if
-needed). Your final message to the orchestrator is two lines only: the path,
-and the `Recommendation:` line. Long messages are truncated in transit; the
-file is the record.
+Write the complete report to `REPORT_PATH` with the Write tool. That path
+is under the session scratchpad, outside `PR_TREE`; the guard denies writes
+anywhere else, so never write into `PR_TREE` or the repository. Your final
+message to the orchestrator is two lines only: the path, and the
+`Recommendation:` line. Long messages are truncated in transit; the file is
+the record.
 
 Follow section 6 of the standard exactly: one block per finding, then
 `## Examined`, `## Not examined`, `## Governance notes`. Rank Blocking first.
