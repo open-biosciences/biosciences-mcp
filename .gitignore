@@ -208,3 +208,6 @@ __marimo__/
 
 # Git worktrees (skill convention)
 .worktrees/
+
+# Claude Code worktree sessions (docs: worktrees#start-claude-in-a-worktree)
+.claude/worktrees/
