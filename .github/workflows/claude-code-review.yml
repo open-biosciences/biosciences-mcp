@@ -21,8 +21,10 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: read
-      issues: read
+      # write so --comment can post; with read-only scopes the job goes green
+      # and posts nothing (anthropics/claude-code-action#1562)
+      pull-requests: write
+      issues: write
       id-token: write
 
     steps:
@@ -38,7 +40,12 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
           plugins: 'code-review@claude-code-plugins'
-          prompt: '/code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}'
+          # --comment asks the review to post findings on the PR; without it the review only
+          # reaches the run log. The action refuses a workflow file that differs from main,
+          # so this only takes effect after merge: confirm with one live run.
+          prompt: '/code-review:code-review --comment ${{ github.repository }}/pull/${{ github.event.pull_request.number }}'
+          # The inline-comment MCP server starts only when --allowedTools names it.
+          claude_args: '--allowedTools "mcp__github_inline_comment__create_inline_comment"'
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://code.claude.com/docs/en/cli-reference for available options
 
