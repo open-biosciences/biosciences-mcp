@@ -8,10 +8,11 @@ This prompt template serves as the **enforcement mechanism** for the Life Scienc
 | :--- | :--- | :--- | :--- |
 | **[ADR-001](../docs/adr/accepted/adr-001-v1.4.md)** | **Agentic-First Architecture** | 🔴 **Explicit Constraint** | Async-First, Fuzzy-to-Fact, Canonical Envelopes. |
 | **[ADR-002](../docs/adr/accepted/adr-002-v1.0.md)** | **Platform Skills** | 🟢 **Foundational** | Skills like `scaffold-fastmcp` MUST be used over manual coding. |
-| **[ADR-003](../docs/adr/accepted/adr-003-v1.0.md)** | **SpecKit SDLC** | 🟢 **Foundational** | The `/specify` → `/plan` → `/implement` workflow itself. |
+| **[ADR-003](../docs/adr/accepted/adr-003-v1.0.md)** | **SpecKit SDLC** (file header still reads Draft) | 🟢 **Foundational** | The `/specify` → `/plan` → `/implement` workflow itself. |
 | **[ADR-004](../docs/adr/accepted/adr-004-v1.0.md)** | **Lifecycle Management** | 🔴 **Explicit Constraint** | Module-level singleton pattern; `@mcp.on_event` is **FORBIDDEN**. |
 | **[ADR-005](../docs/adr/accepted/adr-005-v1.0.md)** | **Git Worktrees** | 🟡 **Pre-requisite** | Step 0: Use worktrees for parallelizing 3+ servers. |
 | **[ADR-006](../docs/adr/accepted/adr-006-v1.0.md)** | **Single Writer Package** | 🔴 **Explicit Constraint** | Split `client.py` into `clients/` package to enable ADR-005. |
+| **[ADR-007](../docs/adr/accepted/adr-007-v1.0.md)** | **Gateway Rate Resilience** | 🔴 **Explicit Constraint** | Rate limiting and retry live once in `LifeSciencesClient`; per-client copies are the anti-pattern (§1–2). |
 
 > [!IMPORTANT]
 > **Constraint Injection**
@@ -162,6 +163,8 @@ Use the template above, substituting:
 /speckit.analyze    # Optional - cross-artifact consistency check
 /speckit.implement  # Execute bounded implementation
 ```
+
+> **Process record (AGE-699).** Every Spec Kit command run for a feature, under whichever name the installed version provides, appends one row to `docs/speckit-process-record.md` — feature, command, artifact produced, date, commit — in the PR that carries the artifact. The standard prompt records the intended sequence; the process record records what ran. A feature whose artifacts exist without rows in the record is unrecorded: the record, not the artifacts, is the evidence that a step ran.
 
 > ⚠️ **PROMPT SIZE LIMIT (v1.4.0)**: When using `claude -p` for non-interactive execution, the `-p` flag has a ~20KB prompt limit. If your `tasks.md` exceeds ~20KB (typically >150 tasks), you must use **interactive mode**:
 > ```bash
