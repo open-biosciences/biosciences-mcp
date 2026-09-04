@@ -26,7 +26,24 @@ def walk_entities(obj: object, path: str = "$") -> Iterator[tuple[str, dict]]:
 
 
 def shape(result: dict) -> tuple:
-    return (result.get("success"), result.get("total_count"), len(result.get("items", [])))
+    """Classify a wire payload and summarise the fields that must not drift.
+
+    Error envelope: ("error", code). Pagination envelope (ADR-001 §8):
+    ("list", item count, pagination.total_count, pagination.page_size,
+    has-next-cursor). Anything else is a single entity: ("entity", id).
+    """
+    if result.get("success") is False:
+        return ("error", (result.get("error") or {}).get("code"))
+    if "items" in result:
+        page = result.get("pagination") or {}
+        return (
+            "list",
+            len(result.get("items", [])),
+            page.get("total_count"),
+            page.get("page_size"),
+            page.get("cursor") is not None,
+        )
+    return ("entity", result.get("id"))
 
 
 def main() -> None:
