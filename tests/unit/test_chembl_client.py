@@ -7,6 +7,7 @@ import pytest
 
 from biosciences_mcp.clients.chembl import ChEMBLClient
 from biosciences_mcp.models.envelopes import ErrorCode, ErrorEnvelope
+from tests.contract.registry import check_cross_references
 
 pytestmark = [pytest.mark.unit, pytest.mark.chembl]
 
@@ -159,40 +160,43 @@ class TestChEMBLClientSearchValidation:
 
 
 class TestChEMBLClientCrossReferenceNormalization:
-    """Tests for cross-reference normalization."""
+    """AGE-687 (chembl): cross_references values in ADR-001 Appendix A registry form."""
 
-    def test_normalize_uniprot_adds_prefix(self):
-        """Test: UniProt ID gets UniProtKB: prefix."""
-        client = ChEMBLClient()
-        result = client._normalize_xref_id("uniprot", "P23219")
-        assert result == "UniProtKB:P23219"
+    @pytest.mark.parametrize(
+        "key,raw,expected",
+        [
+            ("uniprot", "P23219", "P23219"),
+            ("uniprot", "UniProtKB:P23219", "P23219"),
+            ("drugbank", "00945", "DB00945"),
+            ("drugbank", "DB00945", "DB00945"),
+            ("drugbank", "DB:00945", "DB00945"),
+            ("pdb", "1pty", "1PTY"),
+            ("unknown", "some_id", "some_id"),
+        ],
+    )
+    def test_normalize_xref_id_returns_registry_form(self, key, raw, expected):
+        assert ChEMBLClient()._normalize_xref_id(key, raw) == expected
 
-    def test_normalize_uniprot_preserves_prefix(self):
-        """Test: UniProt ID with prefix is unchanged."""
-        client = ChEMBLClient()
-        result = client._normalize_xref_id("uniprot", "UniProtKB:P23219")
-        assert result == "UniProtKB:P23219"
-
-    def test_normalize_drugbank_formats_correctly(self):
-        """Test: DrugBank ID formats to DB:NNNNN."""
-        client = ChEMBLClient()
-        result = client._normalize_xref_id("drugbank", "00945")
-        assert result == "DB:00945"
-
-    def test_normalize_drugbank_handles_db_prefix(self):
-        """Test: DrugBank ID with DB prefix formats correctly."""
-        client = ChEMBLClient()
-        result = client._normalize_xref_id("drugbank", "DB00945")
-        assert result == "DB:00945"
-
-    def test_normalize_pdb_uppercase(self):
-        """Test: PDB ID is uppercased."""
-        client = ChEMBLClient()
-        result = client._normalize_xref_id("pdb", "1pty")
-        assert result == "1PTY"
-
-    def test_normalize_unknown_key_unchanged(self):
-        """Test: Unknown key returns ID unchanged."""
-        client = ChEMBLClient()
-        result = client._normalize_xref_id("unknown", "some_id")
-        assert result == "some_id"
+    def test_build_cross_references_returns_registry_form(self):
+        sdk_result = {
+            "molecule_chembl_id": "CHEMBL25",
+            "cross_references": [
+                {"xref_name": "UniProt", "xref_id": "P23219"},
+                {"xref_name": "UniProt", "xref_id": "P35354"},
+                {"xref_name": "PDBe", "xref_id": "1pty"},
+                {"xref_name": "PubChem", "xref_id": "2244"},
+                {"xref_name": "PubChem", "xref_id": "2245"},
+                {"xref_name": "DrugBank", "xref_id": "DB00945"},
+                {"xref_name": "Wikipedia", "xref_id": "Aspirin"},
+            ],
+        }
+        refs = ChEMBLClient()._build_cross_references(sdk_result)
+        dumped = refs.model_dump(exclude_none=True)
+        assert check_cross_references(dumped) == []
+        assert dumped == {
+            "chembl": "CHEMBL25",
+            "uniprot": ["P23219", "P35354"],
+            "pdb": ["1PTY"],
+            "pubchem_compound": "2244",
+            "drugbank": "DB00945",
+        }

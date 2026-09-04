@@ -22,6 +22,7 @@ from biosciences_mcp.models import (
     TrialLocation,
     TrialSearchCandidate,
 )
+from biosciences_mcp.models.cross_references import normalize_xref
 from biosciences_mcp.models.envelopes import ErrorCode
 
 
@@ -451,7 +452,8 @@ class ClinicalTrialsClient(LifeSciencesClient):
                 if pmid:
                     pubmed_ids.append(pmid)
             if pubmed_ids:
-                cross_refs["pubmed"] = ",".join(pubmed_ids)
+                # Registry form: List[String] of PMID:<id> (AGE-687)
+                cross_refs["pubmed"] = [normalize_xref("pubmed", str(p)) for p in pubmed_ids]
 
             # ClinicalTrials.gov registry link
             cross_refs["clinicaltrials_gov"] = f"https://clinicaltrials.gov/study/{nct_number}"

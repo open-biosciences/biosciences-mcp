@@ -293,7 +293,7 @@ class TestTrial:
             protocol=TrialProtocol(study_type="INTERVENTIONAL"),
             status="RECRUITING",
             cross_references={
-                "pubmed": "20674830,21234567",
+                "pubmed": ["PMID:20674830", "PMID:21234567"],
                 "clinicaltrials_gov": "https://clinicaltrials.gov/study/NCT00461032",
             },
         )

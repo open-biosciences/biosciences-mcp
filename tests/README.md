@@ -512,10 +512,10 @@ def check_api_available():
 *ClinicalTrials.gov integration tests blocked by Cloudflare; use manual curl testing.
 
 Contract tier (all servers, not per-server): **106** serialisation cases (unit) and
-**69** wire cases (integration), of which 12 are recorded deviations (xfail) and 5
+**69** wire cases (integration), of which 2 are recorded deviations (xfail, deferred to ADR-001 v1.5) and 5
 skip without `DRUGBANK_API_KEY`.
 
-Marker totals on 2026-09-02: `unit` 510 (404 + 106 contract), `integration` 363
+Marker totals on 2026-09-03: `unit` 557 (453 + 104 contract), `integration` 363
 (294 + 69 contract), `e2e` 4.
 
 ---

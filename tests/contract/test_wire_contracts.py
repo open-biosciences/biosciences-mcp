@@ -35,34 +35,20 @@ ENVELOPE_KEYS = frozenset({"pagination", "error"})
 # keys). They are recorded here so the harness stays green while the decision
 # is pending, and so a fix is forced to delete its entry.
 REGISTRY_DEVIATIONS: dict[str, str] = {
-    "uniprot.get_protein": (
-        "omim and orphanet are comma-joined strings; orphanet lacks ORPHA: prefix; "
-        "ensembl_transcript carries version suffixes; refseq NP_ accessions are outside "
-        "the ^[NX][MR]_ regex"
-    ),
-    "chembl.get_compound": "chembl is a list and carries a CHEMBL: prefix (registry: bare String)",
-    "opentargets.get_target": "chembl is 'CHEMBL:CHEMBL4096' and drugbank is 'DB:DB08363' (double/wrong prefixes)",
-    "ensembl.get_gene": "hgnc is 'HGNC:HGNC:11998' (double prefix)",
-    "entrez.get_gene": "ensembl_gene holds a protein ID (ENSP...); uniprot values carry UniProtKB: prefix",
-    "pubchem.get_compound": "pubchem_compound is a list (registry: String)",
-    "iuphar.get_ligand": "chembl is a bare number '521' (registry: ^CHEMBL\\d+$)",
-    "iuphar.get_target": "chembl is a bare number '233' (registry: ^CHEMBL\\d+$)",
     "wikipathways.get_pathway": (
-        "hgnc holds gene symbols; entrez and ensembl_gene are lists (registry: String)"
+        "deferred to ADR-001 v1.5 (AGE-700): pathway membership lists under entrez/ensembl_gene "
+        "and symbols under hgnc need a registry decision, not a client fix"
     ),
     "clinicaltrials.get_trial": (
-        "clinicaltrials_gov, mesh_conditions, mesh_interventions are not registry keys; "
-        "pubmed is an unprefixed string"
+        "deferred to ADR-001 v1.5 (AGE-700): clinicaltrials_gov, mesh_conditions, "
+        "mesh_interventions are not registry keys (pubmed is fixed)"
     ),
 }
 
 # Strict tools whose raw-string rejection is done by FastMCP parameter
 # validation, which returns a plain-text pydantic error instead of the
 # ErrorEnvelope that ADR-001 §3 requires.
-RAW_STRING_DEVIATIONS: dict[str, str] = {
-    "iuphar.get_ligand": "pattern= on the tool parameter short-circuits to a pydantic validation string",
-    "iuphar.get_target": "pattern= on the tool parameter short-circuits to a pydantic validation string",
-}
+RAW_STRING_DEVIATIONS: dict[str, str] = {}
 
 
 def _xfail_if_known(case_id: str, table: dict[str, str]) -> None:

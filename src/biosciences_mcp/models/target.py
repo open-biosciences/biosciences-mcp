@@ -151,11 +151,11 @@ class Target(OmitNoneModel):
                     "associated_diseases_count": 245,
                     "cross_references": {
                         "hgnc": "HGNC:11998",
-                        "uniprot": "UniProtKB:P04637",
+                        "uniprot": ["P04637"],
                         "ensembl_gene": "ENSG00000141510",
                         "entrez": "7157",
                         "omim": "191170",
-                        "chembl": "CHEMBL:1993",
+                        "chembl": "CHEMBL1993",
                     },
                 }
             ]

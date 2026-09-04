@@ -131,9 +131,9 @@ class TestPubChemCompound:
             inchikey="BSYNRYMUTXBXSQ-UHFFFAOYSA-N",
             synonyms=["acetylsalicylic acid", "ASA", "Ecotrin"],
             cross_references={
-                "pubchem_compound": ["2244"],
-                "chembl": ["CHEMBL:25"],
-                "drugbank": ["DB00945"],
+                "pubchem_compound": "2244",
+                "chembl": "CHEMBL25",
+                "drugbank": "DB00945",
             },
         )
 
@@ -147,7 +147,7 @@ class TestPubChemCompound:
         assert compound.inchi.startswith("InChI=1S/C9H8O4")
         assert compound.inchikey == "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
         assert len(compound.synonyms) == 3
-        assert "chembl" in compound.cross_references
+        assert "chembl" in compound.model_dump()["cross_references"]
 
     def test_compound_model_minimal(self) -> None:
         """Test PubChemCompound with minimal required fields (T068)."""
@@ -161,7 +161,7 @@ class TestPubChemCompound:
         assert compound.molecular_formula is None
         assert compound.molecular_weight is None
         assert compound.synonyms == []
-        assert compound.cross_references == {}
+        assert compound.model_dump()["cross_references"] == {}
 
     def test_compound_curie_validation_valid(self) -> None:
         """Test CURIE validation accepts valid formats (T069)."""
@@ -200,7 +200,7 @@ class TestPubChemCompound:
             molecular_weight=180.16,
             canonical_smiles="CC(=O)OC1=CC=CC=C1C(=O)O",
             synonyms=["acetylsalicylic acid"],
-            cross_references={"chembl": ["CHEMBL:25"]},
+            cross_references={"chembl": "CHEMBL25"},
         )
 
         slim = compound.to_slim()
@@ -226,7 +226,7 @@ class TestPubChemCompound:
         )
 
         # Empty cross_references should be valid
-        assert compound.cross_references == {}
+        assert compound.model_dump()["cross_references"] == {}
 
         # Can serialize to dict without cross_references key having null values
         as_dict = compound.model_dump(exclude_none=True)

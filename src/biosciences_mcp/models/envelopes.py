@@ -10,6 +10,8 @@ from typing import Generic, TypeVar
 
 from pydantic import BaseModel, Field
 
+from biosciences_mcp.models.base import OmitNoneModel
+
 T = TypeVar("T")
 
 
@@ -24,8 +26,11 @@ class ErrorCode(StrEnum):
     INVALID_CROSS_REFERENCE = "INVALID_CROSS_REFERENCE"
 
 
-class ErrorDetail(BaseModel):
-    """Error detail object within ErrorEnvelope."""
+class ErrorDetail(OmitNoneModel):
+    """Error detail object within ErrorEnvelope.
+
+    invalid_input is omitted from the wire when absent (ADR-001 §4 omit-null).
+    """
 
     code: ErrorCode = Field(description="Error code from registry")
     message: str = Field(description="Human-readable error message")
