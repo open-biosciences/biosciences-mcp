@@ -1,6 +1,6 @@
 # `/pr-merge-order` — simulated landing order for open PRs
 
-Status: local tooling, not yet in a PR. See `docs/adr/critique/pr-review-tooling-decision-record-2026-09-03.md` for why it is kept separate from PR #11 and how it should be packaged.
+Status: draft PR #14 on `feature/pr-merge-order`; not ready to merge (see the checklist in the PR body). See `docs/adr/critique/pr-review-tooling-decision-record-2026-09-03.md` for why it is kept separate from PR #11 and how it should be packaged.
 
 ## 1. What it answers, and what it never does
 
