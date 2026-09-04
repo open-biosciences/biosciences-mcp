@@ -476,3 +476,27 @@ Each story adds value without breaking previous stories.
 - Rate limit: 15 req/s (Ensembl policy) per research.md R2
 - Cross-reference keys: 12 Ensembl-relevant from 22-key registry per data-model.md
 - Canonical envelopes: PaginationEnvelope, ErrorEnvelope per ADR-001 Section 8
+
+---
+
+## Phase 8: Convergence
+
+**Purpose**: Remaining work identified by `/speckit-converge` (2026-09-03) after comparing the current checkout against spec.md, plan.md, tasks.md, and the constitution. Paths below use the current `src/biosciences_mcp/` package (plan.md and earlier tasks still name `src/lifesciences_mcp/`; the package was renamed repo-wide).
+
+- [ ] T073 CRITICAL: Apply runtime regex validation to every cross-reference value in `EnsemblCrossReferences` in `src/biosciences_mcp/models/ensembl.py` per Constitution III / Required Pattern "Cross-reference regex validation" and plan.md Required Patterns Compliance (missing)
+  - The ADR-001 Appendix A patterns are declared at lines 25-34 (HGNC_PATTERN through BIOGRID_PATTERN) but no validator uses them; `EnsemblCrossReferences` (lines 37-111) only blanks empty strings/lists
+  - Add validators covering each scalar key and each element of the list keys (uniprot, refseq, pdb, ensembl_transcript); non-conforming upstream values MUST be omitted (never emitted, never raise) so live Ensembl xref noise cannot break get_gene/get_transcript
+  - Add unit tests in `tests/unit/test_ensembl_models.py` (accept valid, omit invalid, per key) and confirm the existing `_map_cross_references` tests in `tests/unit/test_ensembl_client.py` still pass
+- [ ] T074 Add mocked unit tests for rate limiting, exponential backoff, and HTTP error mapping in `tests/unit/test_ensembl_client.py` per T061 / FR-017, FR-018, FR-019, FR-014, FR-015 (partial)
+  - T061 is checked, but the file only asserts constants (`RATE_LIMIT_DELAY`, `MAX_RETRIES`, lines 34-42); nothing exercises `_rate_limited_get` (`src/biosciences_mcp/clients/ensembl.py` lines 101-155) or the status-code branches
+  - Cover: 429 then 200 with `Retry-After` honoured; 503 with 2**attempt fallback; MAX_RETRIES exhaustion; two sequential calls spaced >= RATE_LIMIT_DELAY (patch `asyncio.sleep`); mapping of 429->RATE_LIMITED, 5xx->UPSTREAM_ERROR, 400->ENTITY_NOT_FOUND, timeout/RequestError->UPSTREAM_ERROR for search_genes, get_gene, get_transcript
+- [ ] T075 Return an ErrorEnvelope with a valid-species hint when the species filter is invalid in `EnsemblClient.search_genes` (`src/biosciences_mcp/clients/ensembl.py` lines 292-299) per spec.md Edge Cases "species filter is invalid" (contradicts)
+  - Ensembl answers `/xrefs/symbol/{species}/{symbol}` with HTTP 400 `{"error":"Can not find internal name for species '...'"}` for an unknown species, while an unknown symbol on a valid species returns HTTP 200 `[]`; the current 400 branch (commented "Symbol not found") converts the species error into an empty PaginationEnvelope, masking the mistake
+  - Parse the 400 body and return an ErrorEnvelope (code from the FR-015 registry, e.g. UNRESOLVED_ENTITY) with `invalid_input=species` and a `recovery_hint` listing accepted values (`SPECIES_ALIASES` keys plus Ensembl production names such as homo_sapiens, mus_musculus)
+  - Add a mocked unit test in `tests/unit/test_ensembl_client.py` and an integration test `test_search_genes_invalid_species` in `tests/integration/test_ensembl_api.py`
+- [ ] T076 [P] Create performance test `tests/integration/test_ensembl_performance.py` validating SC-001 (<2s for 95% of search queries) per SC-001 / T069 (missing)
+  - Follow the existing pattern in `tests/integration/test_entrez_performance.py`; mark `integration` and `ensembl`; use the `check_ensembl_available` fixture from `tests/integration/conftest.py`
+- [ ] T077 [P] Map HTTP 404 from `/lookup/id/{id}` to ENTITY_NOT_FOUND in `get_gene` and `get_transcript` (`src/biosciences_mcp/clients/ensembl.py` lines 432-446 and 549-562) per contracts/get_gene.yaml and contracts/get_transcript.yaml ENTITY_NOT_FOUND trigger (partial)
+  - The contracts specify the trigger as "Ensembl API returns 404"; the client only treats 400 as not-found (research.md R5 documents 400 as Ensembl's actual behaviour) and lets 404 fall through to UPSTREAM_ERROR; handle both 400 and 404 as ENTITY_NOT_FOUND and add a mocked unit test for each
+- [ ] T078 [P] Implement the second AMBIGUOUS_QUERY trigger ("result count > 100 with query length < 3") in `EnsemblClient.search_genes` (`src/biosciences_mcp/clients/ensembl.py` after line 311) per contracts/search_genes.yaml errors.AMBIGUOUS_QUERY (partial)
+  - Only the minimum-length check (lines 246-253) exists; add the result-count guard before pagination using the contract's recovery_hint and add a mocked unit test

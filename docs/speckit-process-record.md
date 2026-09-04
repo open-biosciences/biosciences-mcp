@@ -45,6 +45,25 @@ Legend: date = artifact header date; `✓` = artifact present, produced by the d
 | 2026-09-02 | Wire-level contract tier | PR #4 (`d647776`, `88088e0`, `0a1098c`), AGE-686 | First executable check of ADR-001 §4/§8 on tool output; found 13 of 14 servers emitting nulls; 12 registry deviations recorded (AGE-687). |
 | 2026-09-02 / 03 | ADR-007 proposed and accepted | PR #5, PR #7, AGE-690 | Documentation only; no Spec Kit command involved. |
 
+## Spec Kit v1.0.4 runs (from 2026-09-03)
+
+| Date | Feature | Command | Artifact | Commit | Notes |
+|---|---|---|---|---|---|
+| 2026-09-03 | all | Spec Kit upgrade to v1.0.4 (`specify init --here --force --integration claude`) | `.claude/skills/speckit-*`, `.specify/` | `8c588bb` | AGE-702; constitution byte-identical; legacy `.claude/commands/speckit.*.md` removed |
+| 2026-09-03 | 001 hgnc | `/speckit-converge` (baseline, main-equivalent code) | `specs/001-hgnc-mcp-server/tasks.md` Convergence phase, 8 tasks appended | `f2eb447` | AGE-702 baseline; see PR #9 for the per-feature CRITICAL counts |
+| 2026-09-03 | 002 uniprot | `/speckit-converge` (baseline, main-equivalent code) | `specs/002-uniprot-mcp-server/tasks.md` Convergence phase, 14 tasks appended | `f2eb447` | AGE-702 baseline; see PR #9 for the per-feature CRITICAL counts |
+| 2026-09-03 | 003 chembl | `/speckit-converge` (baseline, main-equivalent code) | `specs/003-chembl-mcp-server/tasks.md` Convergence phase, 9 tasks appended | `f2eb447` | AGE-702 baseline; see PR #9 for the per-feature CRITICAL counts |
+| 2026-09-03 | 004 opentargets | `/speckit-converge` (baseline, main-equivalent code) | `specs/004-opentargets-mcp-server/tasks.md` Convergence phase, 16 tasks appended | `f2eb447` | AGE-702 baseline; see PR #9 for the per-feature CRITICAL counts |
+| 2026-09-03 | 005 drugbank | `/speckit-converge` (baseline, main-equivalent code) | `specs/005-drugbank-mcp-server/tasks.md` Convergence phase, 11 tasks appended | `f2eb447` | AGE-702 baseline; see PR #9 for the per-feature CRITICAL counts |
+| 2026-09-03 | 006 string | `/speckit-converge` (baseline, main-equivalent code) | `specs/006-string-mcp-server/tasks.md` Convergence phase, 11 tasks appended | `f2eb447` | AGE-702 baseline; see PR #9 for the per-feature CRITICAL counts |
+| 2026-09-03 | 007 biogrid | `/speckit-converge` (baseline, main-equivalent code) | `specs/007-biogrid-mcp-server/tasks.md` Convergence phase, 5 tasks appended | `f2eb447` | AGE-702 baseline; see PR #9 for the per-feature CRITICAL counts |
+| 2026-09-03 | 008 ensembl | `/speckit-converge` (baseline, main-equivalent code) | `specs/008-ensembl-mcp-server/tasks.md` Convergence phase, 6 tasks appended | `f2eb447` | AGE-702 baseline; see PR #9 for the per-feature CRITICAL counts |
+| 2026-09-03 | 009 entrez | `/speckit-converge` (baseline, main-equivalent code) | `specs/009-entrez-mcp-server/tasks.md` Convergence phase, 8 tasks appended | `f2eb447` | AGE-702 baseline; see PR #9 for the per-feature CRITICAL counts |
+| 2026-09-03 | 010 pubchem | `/speckit-converge` (baseline, main-equivalent code) | `specs/010-pubchem-mcp-server/tasks.md` Convergence phase, 8 tasks appended | `f2eb447` | AGE-702 baseline; see PR #9 for the per-feature CRITICAL counts |
+| 2026-09-03 | 011 iuphar | `/speckit-converge` (baseline, main-equivalent code) | `specs/011-iuphar-mcp-server/tasks.md` Convergence phase, 13 tasks appended | `f2eb447` | AGE-702 baseline; see PR #9 for the per-feature CRITICAL counts |
+| 2026-09-03 | 012 wikipathways | `/speckit-converge` (baseline, main-equivalent code) | `specs/012-wikipathways-mcp-server/tasks.md` Convergence phase, 12 tasks appended | `f2eb447` | AGE-702 baseline; see PR #9 for the per-feature CRITICAL counts |
+| 2026-09-03 | 013 clinicaltrials | `/speckit-converge` (baseline, main-equivalent code) | `specs/013-clinicaltrials-mcp-server/tasks.md` Convergence phase, 8 tasks appended | `f2eb447` | AGE-702 baseline; see PR #9 for the per-feature CRITICAL counts |
+
 ## Discrepancies worth knowing
 
 1. **"analyze" in Linear meant agent audits, not the command.** AGE-118 is titled as a `/speckit.analyze` run and marked Done, but its outputs are agent-written compliance reports. The only `/speckit.analyze` artifact in the repository is 001's `analysis.md` (2025-12-21); no other feature has one, and none was produced by AGE-118.

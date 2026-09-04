@@ -311,7 +311,7 @@ survive a per-test loop.
                             │
                             ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│  Step 2: /speckit.specify                                       │
+│  Step 2: /speckit-specify                                       │
 │  Defines: User Stories with test requirements                   │
 │           US1: Fuzzy Search → tests search validation           │
 │           US2: Strict Lookup → tests CURIE resolution           │
@@ -321,7 +321,7 @@ survive a per-test loop.
                             │
                             ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│  Step 3: /speckit.implement                                     │
+│  Step 3: /speckit-implement                                     │
 │  Writes: Tests alongside implementation                         │
 │          Each User Story gets dedicated test coverage           │
 └───────────────────────────┬─────────────────────────────────────┘

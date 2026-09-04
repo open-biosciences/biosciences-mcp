@@ -43,7 +43,7 @@ This prompt template serves as the **enforcement mechanism** for the Life Scienc
 ## The Template
 
 ```text
-/speckit.specify "Build the [API_NAME] MCP Server.
+/speckit-specify "Build the [API_NAME] MCP Server.
 
 Core Requirements:
 1. **Architecture:** Implement `[ClientName]Client` extending `LifeSciencesClient` using `httpx` and native `asyncio` (ADR-001 §2).
@@ -157,12 +157,15 @@ Use the template above, substituting:
 ### Step 3: Continue SpecKit Workflow
 
 ```bash
-/speckit.clarify    # Optional - surface underspecified areas
-/speckit.plan       # Create implementation plan
-/speckit.tasks      # Generate actionable tasks
-/speckit.analyze    # Optional - cross-artifact consistency check
-/speckit.implement  # Execute bounded implementation
+/speckit-clarify    # Optional - surface underspecified areas
+/speckit-plan       # Create implementation plan
+/speckit-tasks      # Generate actionable tasks
+/speckit-analyze    # Optional - cross-artifact consistency check (artifacts only)
+/speckit-implement  # Execute bounded implementation
+/speckit-converge   # After implementation: audit code against spec/plan/tasks/constitution; appends remaining work to tasks.md
 ```
+
+> **Command names (Spec Kit v1.0.4, 2026-09-03).** Commands are skills under `.claude/skills/speckit-*/` and are invoked with a hyphen (`/speckit-plan`), not the January 2026 dotted form. Select the feature explicitly with `SPECIFY_FEATURE_DIRECTORY=specs/NNN-<name>` (or `.specify/feature.json`, which is per-checkout and git-ignored); a branch name alone does not select it. `/speckit-converge` is the artifact-side gate that pairs with the contract tier: run it per feature after any change to that feature's code.
 
 > **Process record (AGE-699).** Every Spec Kit command run for a feature, under whichever name the installed version provides, appends one row to `docs/speckit-process-record.md` — feature, command, artifact produced, date, commit — in the PR that carries the artifact. The standard prompt records the intended sequence; the process record records what ran. A feature whose artifacts exist without rows in the record is unrecorded: the record, not the artifacts, is the evidence that a step ran.
 
@@ -174,7 +177,7 @@ Use the template above, substituting:
 > # If over ~20KB, use interactive mode:
 > cd .worktrees/ensembl
 > claude
-> # Then type: /speckit.implement specs/008-ensembl-mcp-server/tasks.md
+> # Then type: /speckit-implement specs/008-ensembl-mcp-server/tasks.md
 > ```
 > See [ADR-005 v1.1.0](../docs/adr/accepted/adr-005-v1.0.md) for details.
 
@@ -187,7 +190,7 @@ Use the template above, substituting:
 ### HGNC (Gene Nomenclature)
 
 ```text
-/speckit.specify "Build the HGNC MCP Server.
+/speckit-specify "Build the HGNC MCP Server.
 
 Core Requirements:
 1. **Architecture:** Implement `HGNCClient` extending `LifeSciencesClient` using `httpx` and native `asyncio` (ADR-001 §2).
@@ -204,7 +207,7 @@ Core Requirements:
 ### UniProt (Protein Data)
 
 ```text
-/speckit.specify "Build the UniProt MCP Server.
+/speckit-specify "Build the UniProt MCP Server.
 
 Core Requirements:
 1. **Architecture:** Implement `UniProtClient` extending `LifeSciencesClient` using `httpx` and native `asyncio` (ADR-001 §2).
@@ -221,7 +224,7 @@ Core Requirements:
 ### ChEMBL (Drug/Compound Data)
 
 ```text
-/speckit.specify "Build the ChEMBL MCP Server.
+/speckit-specify "Build the ChEMBL MCP Server.
 
 Core Requirements:
 1. **Architecture:** Implement `ChEMBLClient` extending `LifeSciencesClient`. NOTE: ChEMBL uses a synchronous SDK - wrap with `run_in_executor` per ADR-001 §2 exception.
@@ -239,7 +242,7 @@ Core Requirements:
 ### DrugBank (Drug Data)
 
 ```text
-/speckit.specify "Build the DrugBank MCP Server.
+/speckit-specify "Build the DrugBank MCP Server.
 
 Core Requirements:
 1. **Architecture:** Implement `DrugBankClient` extending `LifeSciencesClient` using `httpx` and native `asyncio` (ADR-001 §2).
@@ -256,7 +259,7 @@ Core Requirements:
 ### Open Targets (Target-Disease Associations)
 
 ```text
-/speckit.specify "Build the Open Targets MCP Server.
+/speckit-specify "Build the Open Targets MCP Server.
 
 Core Requirements:
 1. **Architecture:** Implement `OpenTargetsClient` extending `LifeSciencesClient` using `httpx` and native `asyncio` (ADR-001 §2). Use GraphQL API.
@@ -274,7 +277,7 @@ Core Requirements:
 ### STRING (Protein-Protein Interactions)
 
 ```text
-/speckit.specify "Build the STRING MCP Server.
+/speckit-specify "Build the STRING MCP Server.
 
 Core Requirements:
 1. **Architecture:** Implement `STRINGClient` extending `LifeSciencesClient` using `httpx` and native `asyncio` (ADR-001 §2). Base URL: https://string-db.org/api
@@ -292,7 +295,7 @@ Core Requirements:
 ### BioGRID (Genetic/Protein Interactions)
 
 ```text
-/speckit.specify "Build the BioGRID MCP Server.
+/speckit-specify "Build the BioGRID MCP Server.
 
 Core Requirements:
 1. **Architecture:** Implement `BioGridClient` extending `LifeSciencesClient` using `httpx` and native `asyncio` (ADR-001 §2). Base URL: https://webservice.thebiogrid.org. Requires BIOGRID_API_KEY (free registration).
@@ -309,7 +312,7 @@ Core Requirements:
 ### Ensembl (Genomic Annotations)
 
 ```text
-/speckit.specify "Build the Ensembl MCP Server.
+/speckit-specify "Build the Ensembl MCP Server.
 
 Core Requirements:
 1. **Architecture:** Implement `EnsemblClient` extending `LifeSciencesClient` using `httpx` and native `asyncio` (ADR-001 §2). Base URL: https://rest.ensembl.org
@@ -327,7 +330,7 @@ Core Requirements:
 ### NCBI Entrez (Gene Database)
 
 ```text
-/speckit.specify "Build the NCBI Entrez MCP Server.
+/speckit-specify "Build the NCBI Entrez MCP Server.
 
 Core Requirements:
 1. **Architecture:** Implement `EntrezClient` extending `LifeSciencesClient` using `httpx` and native `asyncio` (ADR-001 §2). Base URL: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/. API returns XML by default - include XML parsing.
@@ -345,7 +348,7 @@ Core Requirements:
 ### PubChem (Chemical Structures)
 
 ```text
-/speckit.specify "Build the PubChem MCP Server.
+/speckit-specify "Build the PubChem MCP Server.
 
 Core Requirements:
 1. **Architecture:** Implement `PubChemClient` extending `LifeSciencesClient` using `httpx` and native `asyncio` (ADR-001 §2). Base URL: https://pubchem.ncbi.nlm.nih.gov/rest/pug
@@ -362,7 +365,7 @@ Core Requirements:
 ### IUPHAR/GtoPdb (Pharmacology)
 
 ```text
-/speckit.specify "Build the IUPHAR/GtoPdb MCP Server.
+/speckit-specify "Build the IUPHAR/GtoPdb MCP Server.
 
 Core Requirements:
 1. **Architecture:** Implement `IUPHARClient` extending `LifeSciencesClient` using `httpx` and native `asyncio` (ADR-001 §2). Base URL: https://www.guidetopharmacology.org/services
@@ -381,7 +384,7 @@ Core Requirements:
 ### WikiPathways (Biological Pathways)
 
 ```text
-/speckit.specify "Build the WikiPathways MCP Server.
+/speckit-specify "Build the WikiPathways MCP Server.
 
 Core Requirements:
 1. **Architecture:** Implement `WikiPathwaysClient` extending `LifeSciencesClient` using `httpx` and native `asyncio` (ADR-001 §2). Base URL: https://www.wikipathways.org/api/. Open CC0 license - no restrictions.
@@ -400,7 +403,7 @@ Core Requirements:
 ### ClinicalTrials.gov (Clinical Trials Registry)
 
 ```text
-/speckit.specify "Build the ClinicalTrials.gov MCP Server.
+/speckit-specify "Build the ClinicalTrials.gov MCP Server.
 
 Core Requirements:
 1. **Architecture:** Implement `ClinicalTrialsClient` extending `LifeSciencesClient` using `httpx` and native `asyncio` (ADR-001 §2). Base URL: https://clinicaltrials.gov/api/v2/. Public API, no authentication required.

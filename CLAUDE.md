@@ -115,6 +115,16 @@ git switch -c feature/<id>-<description>
 git switch -c implement/<id>-<description>
 ```
 
+## Spec Kit
+
+Spec Kit v1.0.4 (upgraded 2026-09-03, AGE-702). Commands are skills under `.claude/skills/speckit-*/` and are invoked with a hyphen: `/speckit-specify`, `/speckit-plan`, `/speckit-tasks`, `/speckit-implement`, `/speckit-analyze`, `/speckit-checklist`, `/speckit-converge`. The January 2026 dotted commands are gone.
+
+- Select the feature explicitly: `SPECIFY_FEATURE_DIRECTORY=specs/NNN-<name>` in the environment, or `.specify/feature.json` (per-checkout, git-ignored). The branch name does not select it.
+- `/speckit-converge` audits the code against `spec.md`, `plan.md`, `tasks.md`, and the constitution and **appends** a `## Phase N: Convergence` section to `tasks.md`; it never edits code or specs. Run it per feature after changing that feature's code; it is the artifact-side gate that pairs with `pytest -m contract`.
+- `/speckit-analyze` reads artifacts only; it cannot see code drift.
+- Converge grades against the constitution as written (v1.1.0, which predates ADR-007 and the ADR-001 v1.4 registry). Constitution-derived CRITICAL items are re-graded against accepted-ADR precedence before they become work items: a task that asks for a per-client rate limiter is pointed at ADR-007 §2 (one implementation in the base client, AGE-698), not implemented as written.
+- The constitution (`.specify/memory/constitution.md`) was preserved byte-for-byte by the upgrade; five stock templates and six scripts were refreshed (no local customizations existed).
+
 ## Known Issues
 
 - **Serialisation (ADR-001 §4)**: every entity model MUST inherit `OmitNoneModel` from `models/base.py`. FastMCP never calls `model_dump()`, so `model_dump` overrides and `ConfigDict(exclude_none=True)` do not reach the wire; `tests/contract/` fails on either. `PaginationEnvelope` stays on `BaseModel` (§8 allows null `cursor`/`total_count`); `ErrorDetail` is `OmitNoneModel` so `invalid_input` is omitted when absent.
