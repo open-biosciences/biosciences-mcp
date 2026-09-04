@@ -22,7 +22,7 @@ FastMCP wrappers for life sciences APIs, enabling LLM agents to query biological
 | WikiPathways | v0.1.0 | 17 | ✅ Complete |
 | ClinicalTrials.gov | v0.1.0 | 13 | ✅ Complete |
 
-**Total: 12 active servers, 875+ tests (510 unit + 363 integration + 4 e2e; the `contract` marker selects the 175-case wire-level ADR-001 tier inside those)**
+**Total: 12 active servers, 920+ tests (557 unit + 363 integration + 4 e2e; the `contract` marker selects the 173-case wire-level ADR-001 tier inside those)**
 
 ## Architecture (ADR-001 v1.4)
 
@@ -78,7 +78,7 @@ uv sync                          # Install dependencies
 uv sync --extra dev              # Install with dev dependencies
 
 # Testing (marker-based)
-uv run pytest -m unit -v                              # Unit tests (510 tests, no network)
+uv run pytest -m unit -v                              # Unit tests (557 tests, no network)
 uv run pytest -m integration -v                       # Integration tests (363 tests)
 uv run pytest -m e2e -v                               # End-to-end tests (4 tests)
 uv run pytest -m "contract and unit" -v               # ADR-001 serialisation contract (106, no network)
@@ -117,7 +117,9 @@ git switch -c implement/<id>-<description>
 
 ## Known Issues
 
-- **Serialisation (ADR-001 §4)**: every entity model MUST inherit `OmitNoneModel` from `models/base.py`. FastMCP never calls `model_dump()`, so `model_dump` overrides and `ConfigDict(exclude_none=True)` do not reach the wire; `tests/contract/` fails on either. Envelopes stay on `BaseModel` (§8 allows null `cursor`/`total_count`).
+- **Serialisation (ADR-001 §4)**: every entity model MUST inherit `OmitNoneModel` from `models/base.py`. FastMCP never calls `model_dump()`, so `model_dump` overrides and `ConfigDict(exclude_none=True)` do not reach the wire; `tests/contract/` fails on either. `PaginationEnvelope` stays on `BaseModel` (§8 allows null `cursor`/`total_count`); `ErrorDetail` is `OmitNoneModel` so `invalid_input` is omitted when absent.
+- **Tool parameter constraints (ADR-001 §3)**: never put a CURIE `pattern=` on a `@mcp.tool` parameter. FastMCP validates arguments before the tool body runs and returns a pydantic string instead of the ErrorEnvelope (IUPHAR did this until AGE-695); validate in the client and return `UNRESOLVED_ENTITY`. `tests/contract/` fails on this.
+- **Cross-reference values (ADR-001 Appendix A)**: build every `cross_references` value through `normalize_xref(key, value)` in `models/cross_references.py`; never hand-prefix or strip identifiers in a client. The registry form is bare local ids except for prefixed keys (`hgnc`, `orphanet`, `ucsc`, `pubmed`, `mondo`, `efo`).
 - **ClinicalTrials.gov**: Cloudflare blocks Python httpx clients (403). Use curl for manual testing. Unit tests with mocks verify parameter logic.
 - **DrugBank**: Requires commercial API key. Implementation complete, integration tests skip without key.
 - **ChEMBL**: Frequently returns 500 errors. Use Open Targets `knownDrugs` GraphQL as fallback.

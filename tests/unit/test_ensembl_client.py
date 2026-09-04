@@ -373,3 +373,14 @@ class TestContextManager:
         """Close method can be called."""
         client = EnsemblClient()
         await client.close()  # Should not raise
+
+
+class TestCrossReferenceRegistryForm:
+    """AGE-692: Ensembl REST already returns HGNC xrefs as 'HGNC:11998'; the
+    client must not add a second prefix."""
+
+    def test_hgnc_prefixed_upstream_value_is_not_double_prefixed(self):
+        client = EnsemblClient()
+        xrefs = [{"dbname": "HGNC", "primary_id": "HGNC:11998"}]
+        result = client._map_cross_references(xrefs)
+        assert result.hgnc == "HGNC:11998"

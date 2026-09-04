@@ -187,7 +187,7 @@ class TestCompound:
             canonical_name="2-acetoxybenzoic acid",
             synonyms=["Acetylsalicylic acid", "ASA"],
             cross_references={
-                "uniprot": ["UniProtKB:P23219"],
+                "uniprot": ["P23219"],
                 "pdb": ["1PTY"],
             },
         )
@@ -200,7 +200,7 @@ class TestCompound:
         assert dump["inchi"] is not None
         assert dump["canonical_name"] == "2-acetoxybenzoic acid"
         assert dump["synonyms"] == ["Acetylsalicylic acid", "ASA"]
-        assert dump["cross_references"]["uniprot"] == ["UniProtKB:P23219"]
+        assert dump["cross_references"]["uniprot"] == ["P23219"]
 
     def test_slim_mode_excludes_verbose_fields(self) -> None:
         """Test slim mode excludes cross_references and synonyms."""
@@ -247,7 +247,7 @@ class TestCompound:
         """Test that synonyms and cross_references default to empty."""
         compound = Compound(id="CHEMBL:25")
         assert compound.synonyms == []
-        assert compound.cross_references == {}
+        assert compound.model_dump()["cross_references"] == {}
 
 
 class TestCrossReferenceMapping:
@@ -255,25 +255,24 @@ class TestCrossReferenceMapping:
 
     def test_uniprot_xref_transformation(self) -> None:
         """Test UniProt cross-reference adds UniProtKB prefix."""
-        # The transformation is done in ChEMBLClient._normalize_xref_id
-        # Here we just verify the expected output format
+        # Registry form (ADR-001 Appendix A): bare accessions
         compound = Compound(
             id="CHEMBL:25",
             cross_references={
-                "uniprot": ["UniProtKB:P23219"],
+                "uniprot": ["P23219"],
             },
         )
-        assert compound.cross_references["uniprot"][0].startswith("UniProtKB:")
+        assert compound.cross_references.uniprot == ["P23219"]
 
     def test_drugbank_xref_transformation(self) -> None:
-        """Test DrugBank cross-reference adds DB: prefix."""
+        r"""DrugBank cross-reference is a single DB\d{5} string (registry form)."""
         compound = Compound(
             id="CHEMBL:25",
             cross_references={
-                "drugbank": ["DB:00945"],
+                "drugbank": "DB00945",
             },
         )
-        assert compound.cross_references["drugbank"][0].startswith("DB:")
+        assert compound.cross_references.drugbank == "DB00945"
 
     def test_omit_if_null_pattern_enforcement(self) -> None:
         """Test that missing xrefs are omitted entirely (not null)."""
@@ -281,10 +280,10 @@ class TestCrossReferenceMapping:
         compound = Compound(
             id="CHEMBL:25",
             cross_references={
-                "uniprot": ["UniProtKB:P23219"],
+                "uniprot": ["P23219"],
             },
         )
-        xrefs = compound.cross_references
+        xrefs = compound.model_dump()["cross_references"]
         # Only uniprot key should exist
         assert "uniprot" in xrefs
         # Other keys should not exist (not null)

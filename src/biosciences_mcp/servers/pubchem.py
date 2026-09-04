@@ -140,9 +140,9 @@ async def get_compound(pubchem_id: str, slim: bool = False) -> dict[str, Any]:
         >>> compound["molecular_formula"]
         "C9H8O4"
         >>> compound["cross_references"]["chembl"]
-        ["CHEMBL:25"]
+        "CHEMBL25"
         >>> compound["cross_references"]["drugbank"]
-        ["DB00945"]
+        "DB00945"
 
         # Get slim compound data (minimal tokens)
         >>> compound = await get_compound(pubchem_id="PubChem:CID2244", slim=True)

@@ -13,6 +13,7 @@ from typing import Any, ClassVar
 from pydantic import ConfigDict, Field, field_validator
 
 from biosciences_mcp.models.base import OmitNoneModel
+from biosciences_mcp.models.cross_references import CrossReferences
 
 # CURIE validation pattern for ChEMBL IDs
 CHEMBL_CURIE_PATTERN = re.compile(r"^CHEMBL:[0-9]+$")
@@ -136,9 +137,9 @@ class Compound(OmitNoneModel):
         description="Alternative names and trade names",
     )
 
-    cross_references: dict[str, list[str]] = Field(
-        default_factory=dict,
-        description="Cross-references to other biological databases (22-key registry)",
+    cross_references: CrossReferences = Field(
+        default_factory=CrossReferences,
+        description="Cross-references to other biological databases (ADR-001 Appendix A registry)",
     )
 
     @field_validator("id")
@@ -174,10 +175,11 @@ class Compound(OmitNoneModel):
                     "indications": ["Pain", "Fever", "Inflammation"],
                     "synonyms": ["Acetylsalicylic acid", "ASA", "Ecotrin"],
                     "cross_references": {
-                        "uniprot": ["UniProtKB:P23219"],
+                        "chembl": "CHEMBL25",
+                        "uniprot": ["P23219"],
                         "pdb": ["1PTY"],
-                        "pubchem_compound": ["2244"],
-                        "drugbank": ["DB:00945"],
+                        "pubchem_compound": "2244",
+                        "drugbank": "DB00945",
                     },
                 }
             ]

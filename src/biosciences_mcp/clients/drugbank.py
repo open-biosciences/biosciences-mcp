@@ -20,6 +20,7 @@ from typing import Any
 import httpx
 
 from biosciences_mcp.clients.base import LifeSciencesClient
+from biosciences_mcp.models.cross_references import normalize_xref
 from biosciences_mcp.models.drug import (
     Drug,
     DrugCrossReferences,
@@ -343,7 +344,7 @@ class DrugBankClient(LifeSciencesClient):
     ) -> DrugCrossReferences:
         """Build cross-references from DrugBank response (T032).
 
-        Maps DrugBank external identifiers to 22-key Agentic Biolink schema.
+        Maps DrugBank external identifiers to ADR-001 Appendix A registry.
         Applies CURIE normalization per research.md R4.
 
         Args:
@@ -356,7 +357,7 @@ class DrugBankClient(LifeSciencesClient):
         refs: dict[str, Any] = {}
 
         # Self-reference
-        refs["drugbank"] = drugbank_id
+        refs["drugbank"] = normalize_xref("drugbank", drugbank_id)
 
         # ChEMBL mapping - normalize to CHEMBL:NNN format
         external_ids = data.get("external_identifiers", [])
@@ -365,15 +366,7 @@ class DrugBankClient(LifeSciencesClient):
             identifier = ext_id.get("identifier", "")
 
             if resource == "ChEMBL" and identifier:
-                # Normalize to CHEMBL:NNN format (handle both CHEMBL25 and CHEMBL:25)
-                if identifier.startswith("CHEMBL:"):
-                    chembl_id = identifier  # Already normalized
-                elif identifier.startswith("CHEMBL"):
-                    # Extract numeric part and format as CURIE
-                    chembl_id = f"CHEMBL:{identifier[6:]}"
-                else:
-                    chembl_id = f"CHEMBL:{identifier}"
-                refs["chembl"] = chembl_id
+                refs["chembl"] = normalize_xref("chembl", identifier)
 
             elif resource == "KEGG Drug" and identifier:
                 refs["kegg"] = identifier
@@ -393,7 +386,7 @@ class DrugBankClient(LifeSciencesClient):
                 if poly.get("source") == "Swiss-Prot":
                     uniprot_id = poly.get("id")
                     if uniprot_id:
-                        uniprot_ids.append(f"UniProtKB:{uniprot_id}")
+                        uniprot_ids.append(normalize_xref("uniprot", uniprot_id))
         if uniprot_ids:
             refs["uniprot"] = uniprot_ids
 

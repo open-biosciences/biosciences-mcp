@@ -22,7 +22,11 @@ from typing import Any
 import httpx
 
 from biosciences_mcp.clients.base import LifeSciencesClient
-from biosciences_mcp.models.cross_references import CrossReferences
+from biosciences_mcp.models.cross_references import (
+    MULTI_VALUE_KEYS,
+    CrossReferences,
+    normalize_xref,
+)
 from biosciences_mcp.models.envelopes import (
     ErrorCode,
     ErrorDetail,
@@ -374,7 +378,7 @@ class OpenTargetsClient(LifeSciencesClient):
     # ==================== Cross-Reference Mapping (T026) ====================
 
     def _build_cross_references(self, ot_cross_refs: list[dict[str, Any]]) -> CrossReferences:
-        """Map Open Targets crossReferences to 22-key registry (research.md R4).
+        """Map Open Targets crossReferences to the ADR-001 Appendix A registry.
 
         Applies CURIE normalization and omit-if-null pattern (Constitution III).
 
@@ -400,15 +404,15 @@ class OpenTargetsClient(LifeSciencesClient):
                 # Apply CURIE normalization based on source
                 normalized_id = self._normalize_curie(source, xref_id)
 
-                # Handle multi-value vs single-value references
-                if key in refs_dict:
-                    # Append to existing list if it's a list, otherwise skip
-                    if isinstance(refs_dict[key], list):
-                        refs_dict[key].append(normalized_id)
-                else:
+                # List-cardinality keys accumulate; String keys keep the first value
+                if key in MULTI_VALUE_KEYS:
+                    values = refs_dict.setdefault(key, [])
+                    if isinstance(values, list) and normalized_id not in values:
+                        values.append(normalized_id)
+                elif key not in refs_dict:
                     refs_dict[key] = normalized_id
 
-        return CrossReferences(**refs_dict)
+        return CrossReferences.model_validate(refs_dict)
 
     def _normalize_curie(self, source: str, xref_id: str) -> str:
         """Normalize cross-reference ID to CURIE format (research.md R4).
@@ -420,17 +424,9 @@ class OpenTargetsClient(LifeSciencesClient):
         Returns:
             Normalized CURIE string.
         """
-        # CURIE normalization rules from research.md
-        if source == "hgnc" and not xref_id.startswith("HGNC:"):
-            return f"HGNC:{xref_id}"
-        if source == "uniprot_swissprot" and not xref_id.startswith("UniProtKB:"):
-            return f"UniProtKB:{xref_id}"
-        if source == "chembl" and not xref_id.startswith("CHEMBL:"):
-            return f"CHEMBL:{xref_id}"
-        if source == "drugbank" and not xref_id.startswith("DB:"):
-            return f"DB:{xref_id}"
-        # Other sources return as-is
-        return xref_id
+        # ADR-001 Appendix A registry form, via the shared normalizer (AGE-691)
+        key = OT_TO_REGISTRY_MAP.get(source, source)
+        return normalize_xref(key, xref_id)
 
     # ==================== Search Targets (T017-T020) ====================
 

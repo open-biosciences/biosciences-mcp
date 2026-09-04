@@ -20,6 +20,7 @@ from typing import Any
 import httpx
 
 from biosciences_mcp.clients.base import LifeSciencesClient
+from biosciences_mcp.models.cross_references import normalize_xref
 from biosciences_mcp.models.ensembl import (
     ENSEMBL_GENE_PATTERN,
     ENSEMBL_TRANSCRIPT_PATTERN,
@@ -202,7 +203,7 @@ class EnsemblClient(LifeSciencesClient):
                 continue
 
             if dbname == "HGNC":
-                refs["hgnc"] = f"HGNC:{primary_id}"
+                refs["hgnc"] = normalize_xref("hgnc", primary_id)
             elif dbname in ("Uniprot/SWISSPROT", "Uniprot/SPTREMBL"):
                 refs.setdefault("uniprot", []).append(primary_id)
             elif dbname == "EntrezGene":

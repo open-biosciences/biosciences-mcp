@@ -14,6 +14,7 @@ import pytest
 
 from biosciences_mcp.clients import ChEMBLClient
 from biosciences_mcp.models.envelopes import ErrorEnvelope, PaginationEnvelope
+from tests.contract.registry import check_cross_references
 
 
 @pytest.mark.integration
@@ -274,30 +275,13 @@ class TestCrossReferencesIntegration:
         assert "chembl" in xrefs, "Should have chembl self-reference"
 
     async def test_curie_formats_match_registry_patterns(self, client: ChEMBLClient):
-        """Test: verify CURIE formats match 22-key registry patterns."""
+        """Test: cross_references values match the ADR-001 Appendix A registry."""
         result = await client.get_compound("CHEMBL:25", slim=False)
 
         assert not isinstance(result, ErrorEnvelope)
         xrefs = result.get("cross_references", {})
-
-        # Check format patterns for known keys
-        if "chembl" in xrefs:
-            for curie in xrefs["chembl"]:
-                assert curie.startswith("CHEMBL:"), (
-                    f"ChEMBL CURIE should start with CHEMBL: - got {curie}"
-                )
-
-        if "uniprot" in xrefs:
-            for curie in xrefs["uniprot"]:
-                assert curie.startswith("UniProtKB:"), (
-                    f"UniProt CURIE should start with UniProtKB: - got {curie}"
-                )
-
-        if "drugbank" in xrefs:
-            for curie in xrefs["drugbank"]:
-                assert curie.startswith("DB:"), (
-                    f"DrugBank CURIE should start with DB: - got {curie}"
-                )
+        assert xrefs.get("chembl") == "CHEMBL25"
+        assert check_cross_references(xrefs) == []
 
     async def test_compound_with_no_xrefs_has_empty_cross_references(self, client: ChEMBLClient):
         """Test: compound with limited data has minimal or empty cross_references."""
