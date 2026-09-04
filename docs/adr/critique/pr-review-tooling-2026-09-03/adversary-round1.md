@@ -4,13 +4,15 @@ Repo: `<workspace>/biosciences-mcp`. Analysis began at main @ 29e0cfa; **main ad
 
 Tool under review (both untracked): `.claude/workflows/pr-merge-order.js` (250 lines), `scripts/pr_merge_sim.py` (389 lines). `scripts/` has 0 tracked files today, so it is a new top-level directory.
 
+> **Correction (2026-09-04).** The `scripts/` sentence is wrong. It was true only at `29e0cfa`, where the analysis began; PR #10 (`ec59a1d`) — one of the three merges recorded two paragraphs above — added `scripts/validation/` with five tracked files during the analysis. At `f6ced95`, and at every commit since, `git ls-tree -r --name-only f6ced95 scripts/` returns `scripts/validation/{README.md,cq_diff.py,cq_replay.py,wire_diff.py,wire_probe.py}`. Only `.claude/workflows/` is a genuinely new top-level surface.
+
 All experiments ran in a throwaway harness under this scratchpad: `clone/` (clone of the repo), `origin.git/` (bare fake origin with `refs/pull/{8,9,10,11}/head` at the real PR head OIDs), `fakebin/gh` (stub `gh pr list`). Nothing in the real repo was modified except one aborted `git merge --no-commit` dry run on main (state verified clean afterwards). Hook = PR #11's `.claude/hooks/pr-review-guard.py` at f60e508.
 
 ---
 
 ## Ranked objections
 
-### 1. BLOCKING — The simulator contradicts PR #11's trust boundary, and the guard can't see it
+> **Correction (2026-09-04), applies to objection 1.** The heading "the guard can't see it" and the sentence "the hook allows the simulator wholesale" overstate the finding, as `adversary-round2.md` §1 records and the decision record's §8 carries. The guard **denies** the git primitives textually — the nine `DENY` lines in the evidence block below are the proof — and only the `python3` wrapper passes. The accurate claim is narrower and still holds at today's `main`: the hook matches the outer command verb, so interpreter indirection bypasses it.
 
 PR #11's whole premise is "reviewers are read-only by contract … this hook is the enforcement" (`pr-review-guard.py:4-7`); each reviewer's system prompt repeats "never edit, commit, check out, or push" (`agents/pr-review/*-reviewer.md:20-23`). The simulator is built from exactly the primitives that hook denies, yet the hook allows the simulator wholesale because it only pattern-matches the outer `git`/`gh` verb.
 

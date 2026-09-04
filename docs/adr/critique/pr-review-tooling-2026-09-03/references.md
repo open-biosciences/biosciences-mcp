@@ -3,6 +3,8 @@
 Collected 2026-09-03 for the PR #11 scope decision (add `.claude/workflows/pr-merge-order.js` + `scripts/pr_merge_sim.py`?).
 Sources: **official** = https://code.claude.com/docs/en/… (fetched live); **platform-docs** = `mcp__claude_ai_platform-docs` (Anthropic source, 1603 docs — all `platform.claude.com`, no Claude Code CLI pages); **context7** = `/websites/code_claude` and `/llmstxt/code_claude_llms_txt` (mirrors of the official site); **bundled skill** = the `/workflow-authoring` skill text loaded locally in this session (v2.1.248+).
 
+> **Quotation accuracy (corrected 2026-09-04).** Four entries below were originally compressed paraphrases presented as `>` blockquotes; `adversary-round2.md` §4 flagged them and they are now replaced with the verbatim text from the live pages, each marked *(verbatim, re-fetched 2026-09-04)*. The remainder were spot-checked as CONFIRMED by the adversary or are marked as unverified where they were not checked. Lift quotations from this file only where a verbatim marker or a round-2 CONFIRMED verdict backs them.
+
 ## Skills
 
 - **Extend Claude with skills → intro note (commands merged)** — https://code.claude.com/docs/en/skills (source: official). Slash commands and skills are one mechanism; `.claude/commands/` is legacy.
@@ -33,10 +35,12 @@ Sources: **official** = https://code.claude.com/docs/en/… (fetched live); **pl
   > "Both scopes scan recursively for subfolder organization like `agents/review/`." (so `.claude/agents/pr-review/*.md` is a documented layout)
 - **Tools restriction** — https://code.claude.com/docs/en/sub-agents (section "Tools"; source: official).
   > "`disallowedTools` applied first, then `tools` resolved against remaining pool." / "`tools: Agent(worker, researcher), Read, Bash` — allowlist of subagent types only `worker` and `researcher` can spawn."
-- **Hooks in subagent frontmatter** — https://code.claude.com/docs/en/sub-agents (section "Hooks in Subagent Frontmatter"; canonical format at https://code.claude.com/docs/en/hooks#hooks-in-skills-and-agents) (source: official; context7 agrees). Events: `PreToolUse`, `PostToolUse`, `Stop` (→ `SubagentStop`).
-  > "Project-level frontmatter hooks require accepting workspace trust dialog for folder containing agent file."
-- **Permission modes (subagents)** — https://code.claude.com/docs/en/sub-agents#permission-modes (source: official).
-  > "If parent uses `bypassPermissions` or `acceptEdits`, this takes precedence. If parent uses auto mode, subagent inherits it; frontmatter `permissionMode` ignored."
+- **Hooks in subagent frontmatter** — https://code.claude.com/docs/en/sub-agents (section "Hooks in Subagent Frontmatter"; canonical format at https://code.claude.com/docs/en/hooks#hooks-in-skills-and-agents) (source: official; context7 agrees). *(verbatim, re-fetched 2026-09-04)*
+  > "All [hook events](/docs/en/hooks#hook-events) are supported. The most common events for subagents are:" — followed by a table of `PreToolUse`, `PostToolUse`, and `Stop` ("converted to `SubagentStop` at runtime"). Note that *all* events are supported; these three are only the most common. (`sub-agents.md:724-730`)
+  > "To let a project-level subagent's frontmatter hooks run, accept the [workspace trust dialog](/docs/en/permissions#project-allow-rules-and-workspace-trust) for the folder that contains the agent file. Hooks from user-level subagents in `~/.claude/agents/` and from definitions you pass with `--agents` run without this step." (`sub-agents.md:720`)
+  > "Hooks from [settings files, managed policy settings, and plugins](/docs/en/hooks#hook-locations) all apply inside subagents, so a `PreToolUse` hook in `settings.json` also runs before every tool a subagent uses." (`sub-agents.md:710`)
+- **Permission modes (subagents)** — https://code.claude.com/docs/en/sub-agents#permission-modes (source: official). *(verbatim, re-fetched 2026-09-04)*
+  > "If the parent uses `bypassPermissions` or `acceptEdits`, this takes precedence and can't be overridden. If the parent uses [auto mode](/docs/en/permission-modes#eliminate-prompts-with-auto-mode), the subagent inherits auto mode and any `permissionMode` in its frontmatter is ignored: the classifier evaluates the subagent's tool calls with the same block and allow rules as the parent session." (`sub-agents.md:560`)
 
 ## Hooks
 
@@ -56,7 +60,7 @@ Sources: **official** = https://code.claude.com/docs/en/… (fetched live); **pl
 
 - **Plugin manifest schema** — https://code.claude.com/docs/en/plugins-reference (section "Plugin manifest schema"; source: official). Verbatim component-path fields: `skills`, `commands`, `agents`, `workflows`, `hooks`, `mcpServers`, `lspServers`, `outputStyles`.
   > "The manifest is optional. If omitted, Claude Code auto-discovers components in default locations and derives the plugin name from the directory name."
-  > "`workflows` | string\|array | Workflow script files (replaces default `workflows/`)"
+  > "| `workflows` | string\|array | Custom [workflow](/docs/en/workflows) script files or directories (replaces default `workflows/`) | `\"./custom/workflows/\"` |" *(verbatim, re-fetched 2026-09-04; `plugins-reference.md:544`)*
 - **File locations reference / directory layout** — https://code.claude.com/docs/en/plugins-reference (section "Plugin directory structure"; source: official). Defaults: `skills/`, `commands/`, `agents/`, `workflows/`, `hooks/hooks.json`, `.mcp.json`, plus `scripts/` and `bin/` at plugin root.
   > "All other directories (commands/, agents/, skills/, workflows/, output-styles/, themes/, monitors/, hooks/) must be at the plugin root, not inside `.claude-plugin/`."
 - **Plugin-shipped agents: unsupported fields** — https://code.claude.com/docs/en/plugins-reference (section "Agents"; source: official; context7 agrees). Matters if PR #11's reviewer agents ever move into `marketplace`.

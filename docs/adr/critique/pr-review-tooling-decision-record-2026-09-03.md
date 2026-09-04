@@ -2,14 +2,16 @@
 
 | | |
 |---|---|
-| Status | Proposed (team analysis complete; awaiting maintainer decision). See the update note below: PR #11 merged after the analysis. |
+| Status | Decision record (synthesis). **Not an ADR**; non-normative per `pr-review-standard` §1. Team analysis complete; awaiting maintainer decision. See the update notes below: PR #11 merged after the analysis, and §2/§3 are historical. |
 | Date | 2026-09-03 |
 | Repo state | `main` @ `f6ced95` (#10, #8, #9 merged during the analysis); PR #11 @ `f60e508` is the only open PR |
 | Subject | `.claude/workflows/pr-merge-order.js` + `scripts/pr_merge_sim.py` (both untracked) vs PR #11 "chore(review): add the /pr-review team, guard hook, REVIEW.md, and PR template" |
 | Evidence files | `pr-review-tooling-2026-09-03/references.md`, `adversary-round1.md`, `adversary-round2.md` (session scratchpad paths redacted) |
 | Method | Three-role team: docs-grounding researcher, scope designer, adversarial reviewer (two rounds). Every claim below carries a source tag: `[docs]` official Claude Code documentation, `[diff]` read from the PR or the tool source, `[harness]` reproduced in a throwaway clone, `[hook]` piped through PR #11's guard hook, `[sim]` produced by the simulator against this repo |
 
-> **Update, later on 2026-09-03.** PR #11 merged as `734b817` and PR #12 (`fix/cq-diff-envelope-shape`) as `b155b8a` after this analysis was written; the repository state in the header is the state the team examined. The decision stands with one consequence: step 1 ("keep it local until #11 lands") has expired, so the independent tool PR (step 2) is gated only on its own prerequisites in §5 and §7, and the guarded assessor add-on (step 3) is no longer blocked. Whether #11 landed with its four blockers fixed was not re-verified here.
+> **Update, later on 2026-09-03.** PR #11 merged as `734b817` and PR #12 (`fix/cq-diff-envelope-shape`) as `b155b8a` after this analysis was written; the repository state in the header is the state the team examined. The decision stands with one consequence: step 1 ("keep it local until #11 lands") has expired, so the independent tool PR (step 2) is gated only on its own prerequisites in §5 and §7, and the guarded assessor add-on (step 3) is no longer blocked.
+>
+> **Re-verified 2026-09-04.** #11 landed with all four blockers fixed, in `6130713` ("fix(review): address PR #11 review (guard hook, orchestrator scope, report path, workflow permissions)"), which is `734b817`'s second parent. At today's `main`: the guard is registered on the orchestrator too (`.claude/skills/pr-review/SKILL.md` frontmatter, `--role orchestrator`), `merge-base` is in the hook's `GIT_READ_ONLY` set, the `Write`/`Edit` restriction is scoped to the reviewer role with a scratchpad allowance, heredoc bodies are stripped before matching, and the self-test asserts that `git -C … push`, `gh api -F event=APPROVE`, and `gh pr merge` all deny. §2 and §3 below are therefore **historical**: they describe `f60e508`, not current `main`. What survives unchanged is the argument this record actually rests on — the hook matches the outer command verb, so `python3 -c "…subprocess.run(['git','push'])"` is still allowed at HEAD, and interpreter indirection remains the gap (§8).
 
 ## 1. Decision
 
@@ -23,9 +25,11 @@ The designer proposed D → B; the adversary agreed on D and argued C for everyt
 
 ## 2. Why not option A (fold into #11)
 
+> Every statement in this section describes **PR #11 as of `f60e508`**, the head the team examined. `6130713` closed the four blocker rows before `734b817` merged the branch; see the update note above for what that changes.
+
 - **Two trust models in one PR.** PR #11 says "read-only" in its body, its `CLAUDE.md` section, each reviewer prompt, and the hook docstring ("a prompt is advisory; this hook is the enforcement") `[diff]`. The simulator writes `refs/pr/<N>`, creates and removes detached worktrees, and makes scratch commits (the original version also ran `git worktree prune`; the hardened version does not). It never touches `origin`, but it is not read-only. A single PR body cannot carry both promises honestly, and the review standard #11 introduces says bundling unrelated changes is itself a finding (`pr-review-standard/SKILL.md` "Prefer small, self-contained PRs"; PR template "One coherent change per PR") `[diff]`.
 - **The guard cannot see the simulator.** Piped through `pr-review-guard.py` at `f60e508`: `python3 scripts/pr_merge_sim.py discover|sequence|cleanup` → allow; `git worktree add`, `git merge --squash`, `git reset --hard`, `git rebase --onto`, `git merge-base` → deny; `git fetch`, `git -c user.name=… commit`, `git update-ref -d` → allow `[hook]`. Shipping the two together would mean a package whose guard denies every primitive its own tool is built from, passable only through interpreter indirection, the exact bypass #11's own review comments list.
-- **Blocker coupling.** All four #11 blockers sit in the hook and report-path plumbing (heredoc report writes denied and no `Write` tool; `git merge-base` denied; mutating shapes such as `git -C x push`, `gh api -F event=APPROVE`, `gh issue comment` allowed; reports written inside the worktree that step 6 force-removes) `[diff][hook]`. Adding ~640 lines in two more languages and two new top-level surfaces (`scripts/`, `.claude/workflows/`) to a PR under request-changes raises the review burden from 827 to ~1,470 lines and gives reviewers a moving target.
+- **Blocker coupling.** All four #11 blockers sit in the hook and report-path plumbing (heredoc report writes denied and no `Write` tool; `git merge-base` denied; mutating shapes such as `git -C x push`, `gh api -F event=APPROVE`, `gh issue comment` allowed; reports written inside the worktree that step 6 force-removes) `[diff][hook]`. Adding ~640 lines in two more languages and a new top-level surface (`.claude/workflows/`) to a PR under request-changes raises the review burden from 827 to ~1,470 lines and gives reviewers a moving target. (`scripts/` is **not** new: PR #10 added `scripts/validation/` during the analysis, so the tool's `scripts/pr_merge_sim.py` joins an existing directory — see §5 on the naming that implies.)
 - **The motivating condition is gone for now.** `gh pr list --state open` returns only #11 `[sim]`.
 
 ## 3. Fit analysis
@@ -36,7 +40,7 @@ The designer proposed D → B; the adversary agreed on D and argued C for everyt
 | Primitive | Skill + three `Agent` calls, turn by turn | Workflow script: deterministic phases, N+5 to N+7 agents per run `[diff]` | Different feature; the docs position workflows, subagents, and skills as separate tools ([workflows › When to use a workflow](https://code.claude.com/docs/en/workflows#when-to-use-a-workflow)) |
 | Local side effects | None by contract | Refs, worktrees, scratch commits | Incompatible with one shared trust statement |
 | Outputs | Report files + optional PR comment | Structured JSON per phase, markdown returned as the workflow result; no files, no comments `[diff]` | Tool avoids #11 blocker 4 by construction |
-| Hook interaction | Hook in three agents' frontmatter only; orchestrator unguarded | Default workflow subagents: no hook fires. `agentType` could attach one, but whether frontmatter hooks and `skills:` apply through `agentType` is **unverified** (§7) | Neither package currently guards the thing it claims to guard |
+| Hook interaction | At `f60e508`: hook in three agents' frontmatter only, orchestrator unguarded. Fixed in `6130713` — the skill now registers the hook with `--role orchestrator` | Default workflow subagents: no hook fires. `agentType` could attach one, but whether frontmatter hooks and `skills:` apply through `agentType` is **unverified** (§7) | At the time of analysis, neither package guarded the thing it claims to guard. #11 has since closed its half; the tool's half is still open |
 | Runtime requirements | `gh`, `git`, `uv` | `gh` (authenticated), `git ≥ 2.24` for `merge --no-verify` `[harness]`, Python matching the repo floor (`>=3.11`), and the Workflow tool: paid plans, off by default on Pro, disableable per org, stripped from subagents, inert on `-p`/CI keyword routes ([workflows](https://code.claude.com/docs/en/workflows), [sub-agents](https://code.claude.com/docs/en/sub-agents)) | Tool has the harder requirement set |
 | Test surface | `claude plugin validate` (structure only) | None shipped yet; helper is unit-testable with a fixture repo | Tool needs tests #11 does not |
 
@@ -46,7 +50,7 @@ Verbatim for the PR body and `docs/pr-merge-order.md`:
 
 > `pr_merge_sim.py` mutates local repository state only: it fetches `refs/pull/<N>/head` into `refs/pr/<N>`, creates detached worktrees under `--root`, makes commits inside a scratch worktree, and on `cleanup` removes only the worktrees and refs recorded in `<root>/.pr-merge-sim-manifest.json`. It never pushes, never merges or comments on GitHub. It refuses a `--root` that is non-empty without its manifest, that is the repository root, or that is a direct child of it (feature worktrees live there per ADR-005, `docs/adr/accepted/adr-005-v1.0.md`).
 
-Why the default root matters: ADR-005 makes `.worktrees/<name>` the canonical home for feature worktrees and says nothing about removal `[diff]`. The original `cleanup` deleted every child of `--root`; in the harness it destroyed a foreign worktree with uncommitted work and a user data directory, and a one-level typo (`--root .worktrees`) deleted a feature worktree `[harness]`. That is fixed (§6), and the direct-child refusal exists so the typo cannot recur.
+Why the default root matters: ADR-005 makes `.worktrees/<name>` the canonical home for feature worktrees, and contemplates removal only through `git worktree remove <path>` on a named worktree (`docs/adr/accepted/adr-005-v1.0.md:184-187`, "worktrees are disposable after merge" at `:257`) — never a recursive delete of a parent directory. The original `cleanup` deleted every child of `--root`; in the harness it destroyed a foreign worktree with uncommitted work and a user data directory, and a one-level typo (`--root .worktrees`) deleted a feature worktree `[harness]`. That is fixed (§6), and the direct-child refusal exists so the typo cannot recur.
 
 ## 5. Packaging design for the independent PR
 
@@ -55,10 +59,16 @@ Why the default root matters: ADR-005 makes `.worktrees/<name>` the canonical ho
 ```
 .claude/workflows/pr-merge-order.js     # entry point; a saved project workflow runs as /pr-merge-order
 scripts/pr_merge_sim.py                 # helper: discover | sequence | cleanup
+                                        #   note: joins the existing scripts/validation/ neighbourhood
 tests/unit/test_pr_merge_sim.py         # fixture-repo tests, marker `unit`, git binary only
-docs/pr-merge-order.md                  # trust statement + runbook (written; see below)
+                                        #   PREREQUISITE — not yet written (§1 step 2)
+docs/pr-merge-order.md                  # trust statement + runbook
+                                        #   written; lives on feature/pr-merge-order (draft PR #14)
 docs/adr/critique/pr-review-tooling-decision-record-2026-09-03.md   # this record
+                                        #   shipped separately in PR #13, not in the tool PR
 ```
+
+This is the intended shape of the tool PR, not a description of files that exist together anywhere today.
 
 **Entry point: workflow only, no wrapper skill.** A script saved under `.claude/workflows/` is "shared with everyone who clones the repo" and "runs as `/<name>` in future sessions" ([workflows › Save the workflow for reuse](https://code.claude.com/docs/en/workflows#save-the-workflow-for-reuse); [claude-directory › File reference](https://code.claude.com/docs/en/claude-directory#file-reference)). A wrapper skill would add nothing that is documented to reach the workflow's agents: a skill's `allowed-tools` grant "clears when you send your next message" ([skills › Frontmatter reference](https://code.claude.com/docs/en/skills#frontmatter-reference)), while "the subagents the workflow spawns use your permission rules" ([workflows › Approve the plan before it runs](https://code.claude.com/docs/en/workflows#approve-the-plan-before-it-runs)). Whether a skill and a workflow sharing one name collide is undocumented (the skills precedence list never mentions workflows), so avoid the situation by construction.
 
