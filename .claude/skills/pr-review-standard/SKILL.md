@@ -49,8 +49,9 @@ Do not cite these constitution statements as authority; cite the ADR instead.
 | Constitution Principle V and ADR-005 examples name dotted `/speckit.*` commands | Spec Kit v1.0.4 (PR #9) installs them as skills named `/speckit-*` | Do not flag either spelling; a constitution PATCH is owed after PR #9 merges |
 | Constitution says "All PRs MUST pass `/analyze` validation" | Unenforced in practice; `/speckit-converge` (PR #9) is the nearest gate and it grades against the stale constitution | Treat convergence CRITICAL items that cite the constitution as needing re-grading against the precedence above before they become work items |
 
-The critique under `docs/adr/critique/` is explicitly non-normative. It is
-useful context for ADR-001 v1.5 discussions and nothing more.
+Everything under `docs/adr/critique/` is explicitly non-normative: ADR-001
+v1.5 input and tooling decision records alike. It is useful context and
+nothing more — a decision record there never becomes a merge requirement.
 
 ## 3. Decision matrix
 
