@@ -2,20 +2,20 @@
 
 **Purpose:** Provide research context for the Life Sciences MCP architecture—positioning the current work within both historical prior art and the emerging 2025-2026 LLM knowledge augmentation landscape.
 
-**Date:** 2026-01-10
+**Version:** 1.6.0 · **Date:** 2026-09-12 (v1.0.0–1.5.0: 2026-01-10 → 2026-01-24)
 
 **Audience:** Research agents, collaborators, and reviewers seeking to understand how this project fits within the broader field.
 
-> **⚠️ Superseded by v1.6.0 (2026-09-12) — see [`prior-art-api-patterns-v1.6.0.md`](prior-art-api-patterns-v1.6.0.md).**
+> **Supersedes v1.5.0.** The previous revision remains at `prior-art-api-patterns.md`, unmodified.
+> This revision retracts two novelty claims that were predated by published guidance, updates
+> three landscape claims that moved during 2026, and adds the two sections v1.5.0 lacked: an
+> analysis of the MCP protocol layer itself (§4.6) and a survey of comparable systems (§10).
+> The derivation — every change with its rationale and evidence tier — is preserved at
+> `prior-art-revisions/2026-09-12-v1.5.0-to-v1.6.0-patch.md`.
 >
-> This revision (v1.5.0) is retained unmodified as the historical record. Do not cite it in new
-> work: §6, §7.1 and §7.2 claim novelty for `slim=` token budgeting and error recovery hints,
-> both of which were predated by published guidance; §9's TRAPI alignment targets a version that
-> has since moved twice; and §4 describes BioThings Explorer as the live reference implementation.
-> v1.6.0 corrects each of these and adds the two sections this revision lacks — an analysis of the
-> MCP protocol layer (§4.6) and a survey of comparable systems (§10).
->
-> Derivation: [`prior-art-revisions/2026-09-12-v1.5.0-to-v1.6.0-patch.md`](prior-art-revisions/2026-09-12-v1.5.0-to-v1.6.0-patch.md)
+> **Cite this revision, not v1.5.0.** As written, v1.5.0 asserts industry-precedent grounding
+> for behaviour the MCP specification now mandates outright, and claims novelty for two
+> patterns that are standard practice.
 
 ---
 
@@ -155,7 +155,9 @@ The 2025 [Federated Knowledge Retrieval](https://www.biorxiv.org/content/10.1101
 
 > "BTE-RAG integrating 61 authoritative biomedical APIs... increased accuracy from 51% to 75.8% for GPT-4o mini and from 69.8% to 78.6% for GPT-4o."
 
-This validates our MCP server approach—structured API access demonstrably improves LLM performance on biomedical tasks.
+This validates the structured-API-access approach: retrieval against typed, federated services demonstrably improves LLM performance on biomedical tasks.
+
+**Status note (2026-09-12).** Callaghan et al. 2023 remains the correct citation for the federation *pattern*. It should no longer be described as the live reference implementation: the BTE repository's last push was 2026-03-31 with 113 open issues and 15 stars, while sibling BioThings services (`NameResolutionAPI`, `mygene.info`, `biothings.api`) ship continuously. NCATS is separately consolidating a Koza/KGX "Tier 1" ingest graph in `translator-ingests`, so Translator is no longer unambiguous evidence that query-time federation is the field's direction. Cite the pattern; do not infer momentum.
 
 ---
 
@@ -203,6 +205,49 @@ This pattern is explicitly documented in BioThings Explorer (Callaghan et al., 2
 
 ---
 
+## 4.6 The MCP Protocol Layer
+
+MCP is not merely the transport this project happens to use. It makes its own claims about interface design, and those claims bear directly on the patterns above. v1.5.0 mentioned MCP eleven times without analysing it once — a gap at the centre of a document about interface patterns.
+
+### Server primitives and who controls them
+
+| Primitive | Controller | Specification status |
+|-----------|-----------|----------------------|
+| **Tools** | **Model** | Verbatim normative: *"Tools in MCP are designed to be model-controlled."* |
+| **Resources** | Application / host | Normative text is *"application-driven, with host applications determining how to incorporate context based on their needs."* "Application-**controlled**" appears only in a non-normative table — paraphrase it, do not quote it. |
+| **Prompts** | User | Surfaced as user-initiated commands; not model-invocable. |
+
+This is a command/query distinction at the protocol layer, and it maps onto the STRING verb taxonomy in §1: the Resolve verb is inherently model-controlled, since the model supplies the ambiguous string, while Retrieve over a stable reference corpus is the case Resources exist for.
+
+### Why this federation is 36 tools and 0 resources
+
+That shape was never decided; it is the default outcome of the SDK making `@mcp.tool()` the path of least resistance. A deliberate assessment (2026-09-12) finds the wholesale migration **correctly declined**, on four normative constraints:
+
+- `resources/read` takes only a `uri` — `slim=` has nowhere to live, and the fuzzy half of Fuzzy-to-Fact cannot be expressed as a resource at all.
+- `resources/read` supports caching but **not pagination**; `PaginationEnvelope` does not map.
+- Resources are application-driven, so a registry exposed *only* as a resource is invisible to the agent in most hosts.
+- Declaring the `resources` capability adds a listChanged/subscribe surface to maintain.
+
+One asymmetry is worth recording because it is easy to rediscover badly: **protocol-level caching applies to `server/discover`, `tools/list`, `prompts/list` and `resources/*` — never to `tools/call`.** A tool result cannot be client-cached however static the underlying record is. If the 23-key cross-reference registry, the CURIE-to-pattern table or the server inventory are ever exposed as resources, caching is the reason — not aesthetics.
+
+### What the specification makes normative
+
+Do not re-derive these as project conventions:
+
+- `inputSchema` **MUST** be valid JSON Schema. When a server declares `outputSchema` it **MUST** conform, and clients **SHOULD** validate. This is the only machine-checkable contract surface MCP provides.
+- Execution errors are returned as a normal result with `isError: true` and actionable text, distinct from JSON-RPC protocol errors. This is the mechanism §7.2's recovery hints depend on.
+- **Tool annotations are explicitly untrusted**: *"clients MUST consider tool annotations to be untrusted unless they come from trusted servers."* `readOnlyHint` and `destructiveHint` are UI hints, never a security or policy boundary — tiered autonomy cannot be implemented by tagging tools.
+
+### Protocol revision 2026-07-28
+
+Relevant to a read-mostly federation:
+
+- **Deprecated under SEP-2577:** Sampling, Roots, Logging, Dynamic Client Registration. Earliest removal is the first revision released on or after 2027-07-28. Migration paths are stated: Sampling → integrate directly with provider APIs; Roots → pass directories via tool parameters or server configuration. Any design treating Sampling or Roots as forward-looking is building on features being wound down.
+- **Multi Round-Trip Requests (MRTR):** `resultType: "input_required"` with an `inputRequests` schema and a signed `requestState` continuation token — a server-enforced human-in-the-loop gate. Normative, and correctly declined here: this federation holds no server-side secrets with which to run a signing-key lifecycle, and the mechanism has an open defect in at least one major host.
+- **Elicitation is not the specification's human-in-the-loop guarantee.** Its approval language is SHOULD-only and it is capability-gated, so a server cannot rely on it being available. The actual statement lives on the Tools page: there **SHOULD** always be a human in the loop able to deny tool invocations.
+
+---
+
 ## 5. 2025-2026 LLM + API Research
 
 ### Key Papers on Knowledge-Augmented LLMs
@@ -232,8 +277,9 @@ This pattern is explicitly documented in BioThings Explorer (Callaghan et al., 2
 | `PaginationEnvelope` | Standard REST cursor pagination | Industry standard |
 | `ErrorEnvelope` with recovery hints | TRAPI result metadata | Extended for agentic use |
 | `cross_references` | Biolink cross-references, BTE federation | Enables graph traversal |
-| `slim=True` | **Novel** - Token budgeting for LLMs | Our contribution |
-| Recovery hints | **Extended** - Agentic self-healing | Our contribution |
+| `slim=True` | Anthropic tool-design guidance (`response_format: concise\|detailed`), 2025-09-11 | Standard practice; ours is uniform and contract-tested |
+| Recovery hints | Anthropic tool-design guidance: "prompt-engineer your error responses" | Standard practice; ours is schema-enforced |
+| **Enforced strict phase** | **Novel** — raw string → `UNRESOLVED_ENTITY`, asserted at the wire | Our contribution (§7.3, §10) |
 
 ---
 
@@ -245,15 +291,21 @@ While grounded in prior art, this project makes several contributions that exten
 
 **Prior Art:** Traditional APIs return full records regardless of use case.
 
-**Our Innovation:** Every `search_*` and `get_*` tool accepts a `slim=True` parameter that returns minimal fields (~20 tokens/entity vs ~115-300 tokens). This is born from LLM context window constraints—a concern that didn't exist when STRING or TRAPI were designed.
+**Our Implementation:** Every `search_*` and `get_*` tool accepts a `slim=True` parameter returning minimal fields (~20 tokens/entity vs ~115-300 tokens).
+
+**This is not a novel contribution, and the earlier claim was wrong.** Anthropic's "Writing effective tools for agents" (2025-09-11 — four months before v1.5.0 asserted novelty) prescribes a `response_format: concise|detailed` enum alongside pagination, filtering and truncation. By 2026, `meringlab/string-mcp`, BioMCP, ToolUniverse and `smartapi-mcp` all budget tokens, and TRAPI 2.0 strips fields for the same reason.
+
+**What is genuinely ours:** the parameter is uniform across all 36 tools and covered by the wire contract tests, rather than applied per-tool at each author's discretion.
+
+**Known gap (2026-09-12):** `slim` mode drops fields *silently*. `meringlab/string-mcp` returns truncation metadata alongside truncated payloads (`notes`, `truncated`, `truncated_categories`, `omitted_categories`). That is a strictly better version of this pattern and is worth adopting.
 
 **Impact:** Enables batch operations (e.g., resolving 50 gene symbols) within a single LLM turn without context overflow.
 
 ### 7.2 Recovery Hints in Error Envelopes
 
-**Prior Art:** TRAPI and REST APIs return error codes with messages. Self-correction is left to the client.
+**Prior Art:** Anthropic's tool-design guidance (2025-09-11) already prescribes prompt-engineering error responses to communicate specific, actionable recovery steps. The MCP specification separately makes the transport mechanism normative: tool *execution* errors are returned as a normal result with `isError: true` and actionable text — not as a JSON-RPC protocol error — precisely so the model sees a fixable mistake rather than a broken connection.
 
-**Our Innovation:** Every `ErrorEnvelope` includes a `recovery_hint` field that tells an autonomous agent exactly how to recover:
+**Our Implementation:** `recovery_hint` is a **required, schema-typed field** on every `ErrorEnvelope` rather than free text, and its presence is asserted by the wire contract tests. The contribution is enforcement and typing, not the idea:
 
 ```json
 {
@@ -275,7 +327,11 @@ While grounded in prior art, this project makes several contributions that exten
 - Phase 1 (Fuzzy): Ambiguous input → Ranked candidates with CURIEs
 - Phase 2 (Strict): CURIE → Authoritative record
 
-**Impact:** Makes the pattern teachable, testable, and enforceable across all 13 servers.
+**Impact:** Makes the pattern teachable, testable, and enforceable across all 13 implemented servers (12 mounted on the gateway; DrugBank is excluded pending a commercial key).
+
+**What actually distinguishes this (2026-09-12).** Two-phase resolve-then-retrieve is now common. `genomoncology/biomcp` implements search→get with identifier abstraction and progressive disclosure; `meringlab/string-mcp` — the vendor's own server — leads with `string_resolve_proteins`. The differentiator is **enforcement**, not the two phases. Phase 2 tools reject a raw string with `UNRESOLVED_ENTITY`; that rejection is asserted at the wire level in `tests/contract/`; and the refusal is part of the published contract rather than a convention. Comparable servers accept a bare gene symbol at the strict endpoint and resolve it silently, reintroducing exactly the ambiguity the two-phase split exists to remove.
+
+State this explicitly wherever the project is described. Without it, the architecture reads as a smaller ToolUniverse.
 
 ### 7.4 Cross-Reference Registry
 
@@ -434,11 +490,13 @@ Embracing alignment with standards like TRAPI, Biolink, and the Fuzzy-to-Fact pa
 
 ### Immediate Opportunities
 
-1. **TRAPI Compatibility** - Consider aligning envelope structure with TRAPI's `message.knowledge_graph` for federation compatibility
+1. **TRAPI Compatibility — deferred to 2.0.0 GA.** TRAPI is mid-migration: 1.5.0 → 1.6.0-beta → 2.0.0-beta (2026-04-02) → 2.0.0-beta2 (2026-09-10). Bindings (`id` → `ids`, `attributes` removed), constraints and required Edge properties all changed during 2026, `null` is now banned, and no stable 2.0.0 exists. Do not align envelopes against a moving target. Two stable ideas are worth borrowing today at no cost: **Knowledge Level / Agent Type as first-class edge properties**, and the **no-null discipline** already enforced here via `OmitNoneModel`.
 
-2. **Evidence Channels** - STRING's 7-channel evidence model (nscore, fscore, pscore, ascore, escore, dscore, tscore) is essential for agent reasoning about confidence
+2. **Evidence Channels — now cheaper than in January.** STRING's 7-channel evidence model (nscore, fscore, pscore, ascore, escore, dscore, tscore) remains essential for agent reasoning about confidence. Biolink v4.4.4 (2026-08-10) added first-class STRING confidence scores (PR #1772) and a StringDB-ingest association representation (PR #1771), so the mapping target now exists upstream.
 
-3. **Directionality** - STRING 2025 adds regulatory direction; consider extending interaction models for cause→effect relationships
+3. **Directionality** - STRING 2025 adds regulatory direction; consider extending interaction models for cause→effect relationships.
+
+   *Status 2026-09-12:* STRING v12.5 is a web-UI preview only. `version-12-5.string-db.org/api/tsv/version` returns `12.0` and `/help/api` documents no regulatory-network endpoint, so there is nothing to model against yet. Revisit at the 2027 NAR paper.
 
 ### Future Considerations
 
@@ -447,6 +505,24 @@ Embracing alignment with standards like TRAPI, Biolink, and the Fuzzy-to-Fact pa
 2. **Cross-Species Alignment** - STRING's FedCoder-based ortholog mapping could enable comparative biology queries
 
 3. **Fine-Tuned Literature Parsing** - STRING 2025 uses fine-tuned LLMs for evidence extraction; consider similar approach for novel relationship discovery
+
+---
+
+## 10. Comparable Systems (2026-09-12)
+
+v1.5.0 surveyed databases and standards but no comparable systems, because in January there were none worth naming. There now are, and one has independently built three of this document's five headline contributions.
+
+| System | Scale | Relationship |
+|--------|-------|--------------|
+| **BioMCP** (`genomoncology/biomcp`, 630★) | Overlapping sources | **Nearest competitor.** Independently implements two-phase search→get, identifier abstraction, progressive disclosure and next-command hints. Accepts bare symbols at strict endpoints. |
+| **ToolUniverse** (Harvard/Zitnik, arXiv 2509.23426, 1,680★) | 1,000–2,700+ tools *(counts disagree across sources)* | The scale reference, with its own AI-Tool Interaction Protocol. |
+| **string-mcp** (`meringlab`, `mcp.string-db.org`) | STRING only | **Vendor-operated.** First tool is `string_resolve_proteins` — independent confirmation of §1's reading. Makes this federation's STRING server a third-party duplicate. |
+| **BioContextAI Registry** (Nat Biotechnol 2025, `s41587-025-02900-9`) | 71 servers | The field's discovery layer, CI-enforced `meta.yaml`. **biosciences-mcp is not listed and clears the bar today.** |
+| **MCPmed** (Brief Bioinform, 2026-02-23) | — | A published *call* for EDAM/Bioschemas-tagged tool schemas, not an adopted convention: reference repos have 1–12 stars and mostly stopped in July 2025. Cite; do not adopt. |
+
+**Consequences for this document's claims.** Three of the five §7 contributions exist in a 630-star competitor. The remaining differentiators are narrow, real and defensible: the **enforced** strict phase (§7.3) and the 23-key cross-reference registry (§7.4). Compete on depth of contract, not breadth of tool surface — 36 tools against 1,000+ is a losing frame, and was never the axis.
+
+**One open decision this forces.** With `mcp.string-db.org` live and vendor-operated, the STRING server here duplicates an official upstream. That is a deliberate build-vs-defer call, not a default. No other upstream ships an official MCP server — per EMBL (2025-12-02), MCP is "something we are exploring across the EMBL-EBI services" — so there is no wave about to obsolete the rest of the federation.
 
 ---
 
@@ -510,3 +586,4 @@ Embracing alignment with standards like TRAPI, Biolink, and the Fuzzy-to-Fact pa
 | 1.3.0 | 2026-01-10 | Added §7.6 Competency Questions alignment with BTE-RAG benchmarks |
 | 1.4.0 | 2026-01-10 | Added §8 quantitative evidence and prior art documentation value |
 | 1.5.0 | 2026-01-24 | Added §4.5 CURIE Standard Foundation; W3C and Bioregistry references; fixed ChEMBL CURIE format |
+| 1.6.0 | 2026-09-12 | Added §4.6 MCP Protocol Layer and §10 Comparable Systems; retracted `slim=` and recovery-hint novelty claims (§6, §7.1, §7.2) as predated by Anthropic tool-design guidance 2025-09-11; sharpened §7.3 to name the enforced strict phase as the differentiator; TRAPI updated to 2.0.0-beta2 and alignment deferred to GA (§9); BioThings Explorer re-framed as pattern citation rather than reference implementation (§4). Derivation: `prior-art-revisions/2026-09-12-v1.5.0-to-v1.6.0-patch.md` |
