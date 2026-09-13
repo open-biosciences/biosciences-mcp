@@ -242,7 +242,16 @@ Do not re-derive these as project conventions:
 
 Relevant to a read-mostly federation:
 
-- **Deprecated under SEP-2577:** Sampling, Roots, Logging, Dynamic Client Registration. Earliest removal is the first revision released on or after 2027-07-28. Migration paths are stated: Sampling → integrate directly with provider APIs; Roots → pass directories via tool parameters or server configuration. Any design treating Sampling or Roots as forward-looking is building on features being wound down.
+- **Deprecations.** Four features moved to Deprecated in this revision, under the feature-lifecycle policy ([SEP-2596](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2596)). Earliest removal for all four is the first revision released on or after 2027-07-28 — "earliest removal" marks eligibility, not a scheduled date.
+
+  | Feature | Deprecated by | Migration path |
+  |---------|---------------|----------------|
+  | Sampling | [SEP-2577](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2577) | Integrate directly with LLM provider APIs |
+  | Roots | [SEP-2577](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2577) | Pass directories or files via tool parameters, resource URIs, or server configuration |
+  | Logging | [SEP-2577](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2577) | Log to `stderr` for stdio transports; OpenTelemetry for observability |
+  | Dynamic Client Registration | **[PR #2858](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2858)** — *not* SEP-2577 | Client ID Metadata Documents |
+
+  Any design treating Sampling or Roots as forward-looking is building on features being wound down. Verified against the deprecated-features registry at `/specification/2026-07-28/deprecated`, which notes it is a derived view — the per-feature notices and changelog entries are the normative records.
 - **Multi Round-Trip Requests (MRTR):** `resultType: "input_required"` with an `inputRequests` schema and a signed `requestState` continuation token — a server-enforced human-in-the-loop gate. Normative, and correctly declined here: this federation holds no server-side secrets with which to run a signing-key lifecycle, and the mechanism has an open defect in at least one major host.
 - **Elicitation is not the specification's human-in-the-loop guarantee.** Its approval language is SHOULD-only and it is capability-gated, so a server cannot rely on it being available. The actual statement lives on the Tools page: there **SHOULD** always be a human in the loop able to deny tool invocations.
 
