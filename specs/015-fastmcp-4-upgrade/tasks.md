@@ -117,7 +117,7 @@
   - with no collector running, the server still serves `list_tools` (graceful degradation)
 
   Record the in-container fastmcp version, the span names, and a screenshot path in `specs/015-fastmcp-4-upgrade/evidence/core-3.4.7/telemetry.md`.
-- [ ] T020 [US1] Write the core PR's "User-visible contract" section from the allowed-changes table in `contracts/tool-surface-invariants.md`, with the observed counts from T016 and T017, and its effect on biosciences-deepagents, biosciences-temporal, and Claude Code plugin users (FR-007). Include the gateway validation-message change (research R5).
+- [X] T020 [US1] Write the core PR's "User-visible contract" section from the allowed-changes table in `contracts/tool-surface-invariants.md`, with the observed counts from T016 and T017, and its effect on biosciences-deepagents, biosciences-temporal, and Claude Code plugin users (FR-007). Include the gateway validation-message change (research R5).
 
 **Checkpoint**: The core upgrade is complete and verified locally. Open the core PR.
 
@@ -229,7 +229,7 @@
   - the new test counts from T017
 - [ ] T047 Append rows to `docs/speckit-process-record.md`, each in the PR that carries the artifact: `/speckit-tasks` (this file), `/speckit-implement` (core PR, edge PR), and `/speckit-converge` (T048).
 - [X] T048 Run `/speckit-converge` with `SPECIFY_FEATURE_DIRECTORY=specs/015-fastmcp-4-upgrade` after the core PR's code is complete. It appends a Convergence phase to this file. Re-grade any constitution-derived CRITICAL item against accepted-ADR precedence before acting on it (CLAUDE.md, Spec Kit). Converge sees only core's code, so record edge's evidence (T031, T032, T036, T043) by hand in the edge PR.
-- [ ] T049 [P] When the core PR opens, link it from AGE-718 and set AGE-718 to In Progress. Its 3.4.7 target and title already match. Link the edge PR when it opens.
+- [X] T049 [P] When the core PR opens, link it from AGE-718 and set AGE-718 to In Progress. Its 3.4.7 target and title already match. Link the edge PR when it opens.
 - [ ] T050 Clean up per ADR-PRG-001 §3.4 after each merge: remove `.worktrees/implement-015-core`, `edge:.worktrees/implement-015-edge`, and the research scratch worktrees `.worktrees/scratch-015-core` and `_audits/fastmcp-4-2026-09-30/worktrees/edge` (each holds only unpushed research commits), plus the feature worktree `.worktrees/feature-015-fastmcp-4-upgrade` once the spec PR merges. Delete the matching local branches.
 - [ ] T051 Set `spec.md` **Status** to Implemented once T045 is done, and close AGE-718.
 - [ ] T052 [P] File the 4.x follow-up in Linear (project "Open-Biosciences Platform v1.1 — dogfooding + Synapse alignment", related to AGE-718): "Widen ADR-009 to FastMCP 4.x", gated by spec 015 FR-020. Carry the recorded 4.x work: the `fastmcp.tools.tool` → `fastmcp.tools.base` import in `tests/contract/test_serialization_unit.py`; `PaginationEnvelope[Item].create` at 22 core sites (13 client files) and 2 edge sites (`server.py:56`, `:97`) to clear 4.x serializer warnings; `mcp` 2.x; upstream issue #5213. Also carry the edge `title` annotations that 4.0.10 adds (allowed-changes table note), and rebasing `tests/contract/test_serialization_unit.py` onto 4.x's return-annotation `TypeAdapter` path (version-policy section 2a). Attach research R1, R8, and R13.
