@@ -43,6 +43,7 @@ All observed on 2026-10-01 against the PR #18 gateway and edge `91f6bab`, compar
 | Tool `_meta` key renamed from `_fastmcp` to `fastmcp` | core 34/34; edge already `fastmcp` on 3.0.2 | None known. No consumer reads `_meta` (research D, PR #19 review). Tags are unchanged. |
 | Call results carry `_meta: {"fastmcp": {"wrap_result": true}}` | every call to a tool whose output schema sets `x-fastmcp-wrap-result` (core 30/34; edge 2/2) | None known. deepagents reads only `content[].text`; no consumer reads result `_meta`. |
 | Gateway validation messages use FastMCP text (`Missing required argument(s): …`) | core, through the gateway only | No downstream parser (research D) |
+| Unhandled upstream exceptions get FastMCP's error text instead of the raw exception string | core: `pubchem_get_compound` under a 429 (core wire capture, 2026-10-01). PubChem doesn't map 429 to `RATE_LIMITED` (AGE-698). | Still `isError: true`; the text no longer echoes the request URL |
 
 Any change not in this table is a contract change and needs its own decision.
 
