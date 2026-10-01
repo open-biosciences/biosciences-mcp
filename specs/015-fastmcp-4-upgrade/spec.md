@@ -63,7 +63,7 @@ Edge's two tools (CRISPR screen essentiality, mechanism of action) move to the s
 **Acceptance Scenarios**:
 
 1. **Given** Edge on its current release, **When** it is upgraded, **Then** its tool names, parameters, and response envelopes are unchanged.
-2. **Given** free text passed to either Edge tool, **When** the upgraded release handles it, **Then** the caller receives `UNRESOLVED_ENTITY` with a hint naming a core search tool that exists in the core tool list.
+2. **Given** free text passed to either Edge tool, **When** the upgraded release handles it, **Then** the response is the same as on 3.0.2. For `get_mechanism`, that is `UNRESOLVED_ENTITY` whose hint names no tool. For `get_orcs_essentiality`, it is a framework validation error, because its parameter is typed `int`. The stronger behaviour, a hint naming an existing core tool, is AGE-735's (FR-014). (Amended 2026-10-01 after the PR #19 review: the earlier wording contradicted the committed 3.0.2 capture.)
 3. **Given** the upgraded Edge, **When** its dependencies are inspected, **Then** it still imports nothing from core.
 
 ---
@@ -92,7 +92,7 @@ A maintainer creating or updating any connector repository (core, Edge, psycholo
 - The hosting platform rejects requests for its own public hostname because of the framework's host validation (this happened on 3.4.3, HTTP 421). The upgrade must then stop before production. The framework default on 3.4.4 and later leaves host-origin protection off (research R2). Turning it on, or changing how it is configured, is a separate decision that needs its own preview evidence, because the guard reads only the raw `Host` header and Horizon's proxy behaviour is unknown.
 - Core and Edge reach the target major at different times. The version policy must say whether a temporary divergence is allowed and for how long.
 - A downstream repository pins or caches tool schemas. A schema change that is harmless to live callers could still invalidate a stored copy.
-- The supported transport-layer telemetry (ADR-008) must keep emitting tool-call spans, or degrade silently when no collector is configured, after the upgrade.
+- Telemetry. The only telemetry today is biosciences-otel-stack's `opentelemetry-instrument` wrapper; ADR-008 is not implemented. The wrapper must keep working after the upgrade, or degrade silently when no collector is configured. FastMCP 3.x adds its own tool spans, whose attribute names differ from ADR-008 §2(c). Reconciling the two is a follow-up this feature triggers, not a 4.x one.
 
 ## Requirements *(mandatory)*
 
@@ -133,7 +133,7 @@ A maintainer creating or updating any connector repository (core, Edge, psycholo
 
 **Telemetry**
 
-- **FR-019**: Transport-layer telemetry as defined by ADR-008, where implemented, MUST keep working after the upgrade, including its no-collector degradation.
+- **FR-019**: The existing telemetry path, biosciences-otel-stack's `opentelemetry-instrument` wrapper, MUST keep working after the upgrade, including its no-collector degradation. ADR-008 is not implemented today. The reconciliation of its span design with FastMCP's native tool spans, which arrive with 3.4.7, MUST be filed as a follow-up. (Amended 2026-10-01 after the PR #19 review.)
 
 **Path to FastMCP 4.x**
 
@@ -163,7 +163,7 @@ A maintainer creating or updating any connector repository (core, Edge, psycholo
 - **Target version**: FastMCP 3.4.7, the latest 3.x release (2026-08-10); no 3.x release has shipped since 4.0.0. The plan may select a later 3.4.x patch if one is released before implementation. Both core and edge move to it, so they share a major again (SC-006).
 - **Upgrade path**: Core moves directly from 2.14.5 to 3.4.7; edge moves from 3.0.2 to 3.4.7. The move to 4.x is a separate, later feature gated by FR-020.
 - **Client support**: Python MCP clients on protocol library 1.26 (what biosciences-deepagents and the tests use) were verified against a 4.0.10 server on 2026-10-01. The platform's own clients were not, which is the main reason for stopping at 3.x (research R13).
-- **Prerequisite already delivered**: biosciences-mcp PR #18 (`a319044`) removes the gateway mount arguments that double-prefix tool names on 3.x and fail on 4.x. It leaves the tool surface on 2.14.5 byte-identical, and the same 34 names were observed on 3.4.7 and 4.0.10. It was opened before this specification; the plan records it as a completed task.
+- **Prerequisite opened, reviewed, merge pending**: biosciences-mcp PR #18 (`a319044`) removes the gateway mount arguments that double-prefix tool names on 3.x and fail on 4.x. It leaves the tool list on 2.14.5 byte-identical, and the same 34 names were observed on 3.4.7 and 4.0.10. On 2.14.5 it also lets unprefixed tool names reach the last-mounted server until the pin moves (PR #18 review). It was opened before this specification. The plan records it as task T001 (implemented and reviewed), with the merge as T002.
 - **Preview deployments**: The hosting platform allows a second, non-production deployment of each server, which this feature uses for FR-009.
 - **Edge serialisation**: Edge's models do not use the null-omitting base class core relies on, and Edge has no contract test tier. Fixing that is a separate compliance item; this feature only guarantees no regression (FR-014).
 - **psychology-mcp**: The policy covers it (FR-016), but changing its dependency declarations or checks is a follow-up in that repository, not part of this feature.

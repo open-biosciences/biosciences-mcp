@@ -1,4 +1,4 @@
-# Phase 0 Research: FastMCP 4 Upgrade and Connector Version Policy
+# Phase 0 Research: FastMCP 3.4 Upgrade, Gated Path to 4.x, and Connector Version Policy
 
 **Feature**: [spec.md](spec.md) | **Plan**: [plan.md](plan.md) | **Date**: 2026-09-30
 
@@ -105,7 +105,7 @@ Labels: **CONFIRMED** means observed in a run or read in source or docs. **INFER
 
 ## R8. Pydantic serializer warnings: a 4.x issue, deferred
 
-- **Decision**: No change in this feature. Parameterizing envelope construction (`PaginationEnvelope[Item].create(...)`, 22 sites in 13 core client files and 2 in edge) moves to the 4.x follow-up.
+- **Decision**: No change in this feature. Parameterizing envelope construction (`PaginationEnvelope[Item].create(...)`, 20 sites in 13 core client files and 2 in edge) moves to the 4.x follow-up.
 - **Rationale**: CONFIRMED (B, C): the warnings appear only on 4.0.10. There are zero on 2.14.5, on 3.4.7, and on edge's 3.0.2. Output is correct and null omission holds on every version.
 - **Alternatives considered**: doing it now as preparation. Rejected, to keep the upgrade change minimal and every edit traceable to a 3.4.7 need.
 
@@ -114,7 +114,7 @@ Labels: **CONFIRMED** means observed in a run or read in source or docs. **INFER
 - **Decision**: No change needed in core. Edge's existing `null` output stays out of scope (FR-014).
 - **Rationale**:
   - CONFIRMED (B): contract+unit (104) passes on 3.4.7 and on 4.0.10, and null omission holds on both. The output schema changes are only `$defs`/`$ref` inlining.
-  - CONFIRMED (C): all 9 edge wire captures are byte-identical between 3.0.2 and 4.0.10, including the `null` fields edge already emits. Edge was not captured at 3.4.7; tasks T030/T031 do that before its pin moves.
+  - CONFIRMED (C): all 9 edge wire captures are byte-identical between 3.0.2 and 4.0.10, including the `null` fields edge already emits. Edge was not captured at 3.4.7; tasks T031/T032 do that before its pin moves.
 - **Alternatives considered**: fixing edge's nulls in this feature. Rejected, because it mixes framework migration with compliance work; it goes into the separate findings list below.
 
 ## R10. Version policy: ADR-009 plus a test and CI in each repository
@@ -135,10 +135,10 @@ Labels: **CONFIRMED** means observed in a run or read in source or docs. **INFER
 
 ## R11. Telemetry (FR-019)
 
-- **Decision**: The only telemetry today is biosciences-otel-stack wrapping the server in `opentelemetry-instrument`. Verify that wrapper still starts and emits on 3.4.7.10. Reconciling ADR-008 with FastMCP 4's native telemetry is a follow-up for ADR-008.
+- **Decision**: The only telemetry today is biosciences-otel-stack wrapping the server in `opentelemetry-instrument`. Verify that wrapper still starts and emits on 3.4.7. Reconciling ADR-008 with FastMCP's native tool spans is a follow-up **triggered by this feature**, because those spans arrive with 3.4.7, not with 4.x. ADR-008 §2(a) and §2(c) name `mcp.tool_call` and `mcp.tool.name`; FastMCP emits `gen_ai.tool.name`, and a custom parent span would duplicate the native one. (Amended 2026-10-01 after the PR #19 review.)
 - **Rationale**:
   - CONFIRMED (D): ADR-008 is not implemented anywhere: no `trace_tool`, no `telemetry/`.
-  - CONFIRMED (biosciences-otel-stack `README.md:113-114`): FastMCP's built-in tool spans (`fastmcp.server.name`, `gen_ai.tool.name`, `mcp.session.id`) arrived in 3.x. So 3.4.7 delivers AGE-718's telemetry motivation, and T018 checks it in Phoenix.
+  - CONFIRMED (biosciences-otel-stack `README.md:113-114`): FastMCP's built-in tool spans (`fastmcp.server.name`, `gen_ai.tool.name`, `mcp.session.id`) arrived in 3.x. So 3.4.7 delivers AGE-718's telemetry motivation, and T019 checks it in Phoenix.
   - CONFIRMED (A, D): FastMCP 4 adds trace propagation and a `telemetry_mode` setting, which overlap ADR-008's design. That's relevant to the 4.x follow-up.
 - **Alternatives considered**: implementing ADR-008 inside this feature. Rejected as scope creep.
 
@@ -182,16 +182,16 @@ The highest achievable outcome without a live deployment is **Conditional Go**. 
 | Criterion | Core → 3.4.7 | Edge → 3.4.7 |
 |---|---|---|
 | Host guard off by default, setting confirmed in source | Yes, since 3.4.4 (R2) | Yes. Local Host probe on 3.4.7 returned 200 (C). |
-| Tool names unchanged | Yes: 34/34 (R4) | Not yet captured at 3.4.7. Expected yes: 2/2 at 4.0.10, and the surfaces at 3.4.7 and 4.0.10 match for core. Verified by T027/T030. |
+| Tool names unchanged | Yes: 34/34 (R4) | Not yet captured at 3.4.7. Expected yes: 2/2 at 4.0.10, and the surfaces at 3.4.7 and 4.0.10 match for core. Verified by T028/T031. |
 | Parameters unchanged | Yes (R4) | As above |
-| Wire contract unchanged | Yes: contract+unit 104/104; network failures identical to baseline (R7, R9) | Not yet captured at 3.4.7 (R9); T030 |
+| Wire contract unchanged | Yes: contract+unit 104/104; network failures identical to baseline (R7, R9) | Not yet captured at 3.4.7 (R9); T031 |
 | Every new failure maps to a known fix | Yes: 1 test-only site (R7) | None found at 3.0.2 → 4.0.10 |
 | Caller-visible differences with a fix path | Descriptions (R6); gateway validation text, plus a logged traceback per rejected call (R5) | Descriptions (R6), titles |
 | Proven on Horizon | 3.x major: yes (edge 3.0.2 in production). 3.4.7 itself: preview check. | Same |
 | Unverified | 3.4.7 on Horizon, Host on Horizon (R2) | Same |
 
 - **Core: Conditional Go** for 3.4.7. Final Go depends on the quickstart preview checks.
-- **Edge: Conditional Go** for 3.4.7, conditional also on T030's local capture matching the 3.0.2 baseline.
+- **Edge: Conditional Go** for 3.4.7, conditional also on T031's local capture matching the 3.0.2 baseline.
 - **4.x: out of scope.** The gate for a later 4.x feature is FR-020 (R13).
 
 ## Findings outside this feature's scope
@@ -203,8 +203,10 @@ These were found during research. They are not upgrade regressions, and FR-014 k
 | F1 | Any ORCS HTTP error other than 429 returns the full request URL to the agent, including `accesskey=<BIOGRID_API_KEY>` | edge | **High (credential exposure)** | C §6: `server.py:44` with `biogrid_orcs.py:55-60`. Reproduced with a fake key. Present on 3.0.2 and 4.0.10. | AGE-733 (Urgent) |
 | F2 | `get_orcs_essentiality` with free text returns a raw validation error, not `UNRESOLVED_ENTITY` (the parameter is typed `int`). The `get_mechanism` hint names no tool. `invalid_input` holds exception text. A missing key is reported as `UNRESOLVED_ENTITY`. | edge | Medium (contradicts edge's ADR README) | C §4 | AGE-735 |
 | F3 | Error envelopes carry `invalid_input: null`, item fields are sent as `null` (1,409 in one ORCS response), and ORCS returns all 352 screens while reporting `page_size: 50` | edge | Medium (ADR-001 §4, §7) | C §3, §6 | AGE-736 |
-| F4 | Edge opens an HTTP client per call with no retry or backoff. Core's base client also lacks the ADR-007 retry logic (9 per-client copies remain). | edge, core | Medium (ADR-007) | C §6 | AGE-698 (existing) |
+| F4 | Edge opens an HTTP client per call with no retry or backoff. Core's base client also lacks the ADR-007 retry logic (9 per-client `_rate_limited_get` definitions; 11 clients carry their own retry loop). | edge, core | Medium (ADR-007) | C §6 | AGE-698 (existing) |
 | F5 | Argument names already wrong in 4 mirrored skill trees and in deepagents docstrings (`gene_id`, `ligand_id`, `cid`, `species`, `organism`, `ensembl_id` for `opentargets_get_associations`) | skills, deepagents | Medium (callers send rejected calls today) | D §1 | AGE-737 |
 | F6 | IUPHAR returns 401 on every call in the network contract tier | core | Medium (one server unusable live, if this reflects production) | B, baseline logs | AGE-734 (High; root cause confirmed 2026-09-30: GtoPdb now requires an API key) |
 | F7 | The committed edge `uv.lock` at `91f6bab` no longer matched the `<3.4.3` range in `pyproject.toml` | edge | Low | C §10 | Fixed by this feature's edge relock (no issue) |
 | F8 | Constitution principle VI names a `deploy-cloud` skill, but none exists in platform-skills or the marketplace | program | Low | plan.md Constitution Check | AGE-738 |
+| F9 | Through the gateway, core recovery hints name unprefixed tools that don't exist there: 13 of 13 strict tools (e.g. `hgnc_get_gene` says "Call search_genes …"). FR-004 freezes today's hint text. | core | Medium (ADR-001 §3 on the deployed surface) | PR #19 wire review; PR #18 review | To file (tasks: follow-up filing), with AGE-735 so core and edge share one hint policy |
+| F10 | `OmitNoneModel` entities render as empty `{}` in output schemas, so clients get no structural description of entity payloads | core | Low | PR #19 wire review; research B | To file (tasks: follow-up filing) |

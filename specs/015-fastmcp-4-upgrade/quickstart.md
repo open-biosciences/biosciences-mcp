@@ -1,4 +1,4 @@
-# Quickstart: Validating the FastMCP 4 Upgrade
+# Quickstart: Validating the FastMCP 3.4 Upgrade
 
 **Feature**: [spec.md](spec.md) | **Plan**: [plan.md](plan.md) | **Contracts**: [contracts/](contracts/)
 
@@ -57,9 +57,9 @@ Create a separate Horizon deployment from the upgrade branch. Use the same entry
 | 4.1 | Host accepted | Authenticated MCP `initialize` POST to the preview's public `/mcp` URL | HTTP 200, not 421 |
 | 4.2 | Tool count and names | `fastmcp.Client(url, auth=...)` then `list_tools` | Core: 34 names equal to the baseline keys. Edge: 2. |
 | 4.3 | One call per server | One representative success call per server (core 12, edge 2). Upstream failures follow FR-012. | Pagination envelope, or a documented upstream failure |
-| 4.4 | Strict-tool failure mode | `hgnc_get_gene` with free text (core), `get_mechanism` with free text (edge) | `UNRESOLVED_ENTITY` envelope |
+| 4.4 | Strict-tool failure mode | `hgnc_get_gene` with free text (core); `get_mechanism` and `get_orcs_essentiality` with free text (edge) | Core: `UNRESOLVED_ENTITY` envelope. Edge: the same as the 3.0.2 capture, meaning `UNRESOLVED_ENTITY` for `get_mechanism` and a framework validation error for `get_orcs_essentiality` (spec US3 scenario 2; AGE-735) |
 | 4.5 | Sessionless call (core) | Raw JSON-RPC `tools/call` POST with no `initialize` and no session header, as `biosciences-deepagents` `apps/api/shared/mcp.py` sends it | Success. "400 Missing session ID" means No-Go until Horizon's session mode is resolved (research R12). |
-| 4.6 | Telemetry wrapper | Run the gateway under biosciences-otel-stack's `opentelemetry-instrument` wrapper locally at 3.4.7 | Starts, serves `list_tools`, emits to the local collector, or degrades silently with no collector (FR-019) |
+| 4.6 | Telemetry wrapper | Run the gateway under biosciences-otel-stack's `opentelemetry-instrument` wrapper locally at 3.4.7, built from the upgrade worktree (not the primary checkout; see tasks.md telemetry task) | Starts, serves `list_tools`, emits to the local collector, or degrades silently with no collector (FR-019) |
 | 4.7 | Rollback timing | Redeploy the preview from the pre-upgrade commit, and time it until 4.2 passes on the old version | Under 15 minutes (SC-005) |
 | 4.8 | Temporal client (core) | Locally, with `BIOSCIENCES_MCP_PATH` pointing at the upgrade worktree, use biosciences-temporal's `create_mcp_client()` (stdio, PydanticAI) to list tools and call `hgnc_search_genes` and `hgnc_get_gene`. Then run one agent workflow if its LLM key is configured. | 34 tools, both calls succeed. Temporal picks up core's checkout as soon as it updates after merge, so this runs before merge (SC-003). |
 

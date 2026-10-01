@@ -6,7 +6,7 @@
   - `90f7bb0` runs `uv add 'fastmcp==4.0.10'`.
 - No respx and no other dependency was added. Every simulation monkeypatches `httpx.AsyncClient.send`.
 - Core reference: `biosciences-mcp` main `69f403b`, read-only.
-- Scripts: `C-edge_capture.py` (surface and wire capture) and `C-host_probe.sh` (HTTP Host probe), both copied here.
+- Scripts: `C-edge_capture.py` (surface and wire capture), versioned in this repository as `research/edge-capture/edge_capture.py`; `C-host_probe.sh` (HTTP Host probe) was not committed and remains in the out-of-repo audit folder.
 - Labels: **CONFIRMED** means observed in this run, or read directly in code at the cited line. **INFERRED** means reasoned but not executed.
 
 ## Decision-relevant summary

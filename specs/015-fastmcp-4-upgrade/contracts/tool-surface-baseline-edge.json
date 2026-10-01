@@ -1,8 +1,214 @@
 {
- "captured_with": "fastmcp 3.0.2 (edge 91f6bab)",
+ "captured_with": "fastmcp 3.0.2 (edge main 91f6bab)",
+ "fields": "description; params{type, required, default, description, constraints}; output_schema (-dereferenced); wrap_result (x-fastmcp-wrap-result); annotations; meta.tags (from _meta.fastmcp or _meta._fastmcp)",
+ "generator": "specs/015-fastmcp-4-upgrade/research/surface-tools/project_surface.py",
  "tools": {
   "get_mechanism": {
+   "annotations": null,
    "description": "Get mechanism-of-action data from ChEMBL.\n\nArgs:\n    chembl_id: ChEMBL CURIE (e.g. 'CHEMBL:225072' for Pemetrexed) or raw ID ('CHEMBL225072').\n    slim: If True, return fewer fields per result.\n\nReturns:\n    PaginationEnvelope with MechanismResult items, or ErrorEnvelope on failure.",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "description": "Generic wrapper for non-object return types.",
+    "properties": {
+     "result": {
+      "anyOf": [
+       {
+        "properties": {
+         "items": {
+          "description": "Data payload",
+          "items": {
+           "description": "A single mechanism-of-action record from ChEMBL.",
+           "properties": {
+            "action_type": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ],
+             "default": null
+            },
+            "direct_interaction": {
+             "anyOf": [
+              {
+               "type": "boolean"
+              },
+              {
+               "type": "null"
+              }
+             ],
+             "default": null
+            },
+            "max_phase": {
+             "anyOf": [
+              {
+               "type": "integer"
+              },
+              {
+               "type": "null"
+              }
+             ],
+             "default": null
+            },
+            "mechanism_of_action": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ],
+             "default": null
+            },
+            "molecule_chembl_id": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ],
+             "default": null
+            },
+            "target_chembl_id": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ],
+             "default": null
+            },
+            "target_name": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ],
+             "default": null
+            }
+           },
+           "type": "object"
+          },
+          "type": "array"
+         },
+         "pagination": {
+          "description": "Pagination metadata",
+          "properties": {
+           "cursor": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Opaque cursor for next page; null = end"
+           },
+           "page_size": {
+            "default": 50,
+            "description": "Items per page",
+            "type": "integer"
+           },
+           "total_count": {
+            "anyOf": [
+             {
+              "type": "integer"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Total items if known"
+           }
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "items",
+         "pagination"
+        ],
+        "type": "object"
+       },
+       {
+        "description": "Canonical error envelope per ADR-001 Section 8.",
+        "properties": {
+         "error": {
+          "description": "Error details with recovery hint",
+          "properties": {
+           "code": {
+            "description": "Error code from registry",
+            "enum": [
+             "UNRESOLVED_ENTITY",
+             "ENTITY_NOT_FOUND",
+             "RATE_LIMITED",
+             "UPSTREAM_ERROR"
+            ],
+            "type": "string"
+           },
+           "invalid_input": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "The input that caused the error"
+           },
+           "message": {
+            "description": "Human-readable error message",
+            "type": "string"
+           },
+           "recovery_hint": {
+            "description": "Agent-actionable guidance for recovery",
+            "type": "string"
+           }
+          },
+          "required": [
+           "code",
+           "message",
+           "recovery_hint"
+          ],
+          "type": "object"
+         },
+         "success": {
+          "default": false,
+          "description": "Always false for errors",
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "error"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "required": [
+     "result"
+    ],
+    "type": "object",
+    "x-fastmcp-wrap-result": true
+   },
    "params": {
     "chembl_id": {
      "required": true,
@@ -13,10 +219,203 @@
      "required": false,
      "type": "boolean"
     }
-   }
+   },
+   "wrap_result": true
   },
   "get_orcs_essentiality": {
+   "annotations": null,
    "description": "Get CRISPR screen essentiality data from BioGRID ORCS.\n\nArgs:\n    entrez_id: NCBI Entrez gene ID (e.g. 7298 for TYMS, 1723 for DHODH).\n    hit_only: If True, only return screens where the gene was scored as a hit.\n    slim: If True, return fewer fields per result.\n\nReturns:\n    PaginationEnvelope with OrcsScreenResult items, or ErrorEnvelope on failure.",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "description": "Generic wrapper for non-object return types.",
+    "properties": {
+     "result": {
+      "anyOf": [
+       {
+        "properties": {
+         "items": {
+          "description": "Data payload",
+          "items": {
+           "description": "A single CRISPR screen result from BioGRID ORCS.",
+           "properties": {
+            "cell_line": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ],
+             "default": null
+            },
+            "hit": {
+             "type": "string"
+            },
+            "phenotype": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ],
+             "default": null
+            },
+            "score": {
+             "anyOf": [
+              {
+               "type": "number"
+              },
+              {
+               "type": "null"
+              }
+             ],
+             "default": null
+            },
+            "scoring_method": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ],
+             "default": null
+            },
+            "screen_id": {
+             "type": "integer"
+            },
+            "source_id": {
+             "anyOf": [
+              {
+               "type": "integer"
+              },
+              {
+               "type": "null"
+              }
+             ],
+             "default": null
+            }
+           },
+           "required": [
+            "screen_id",
+            "hit"
+           ],
+           "type": "object"
+          },
+          "type": "array"
+         },
+         "pagination": {
+          "description": "Pagination metadata",
+          "properties": {
+           "cursor": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Opaque cursor for next page; null = end"
+           },
+           "page_size": {
+            "default": 50,
+            "description": "Items per page",
+            "type": "integer"
+           },
+           "total_count": {
+            "anyOf": [
+             {
+              "type": "integer"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Total items if known"
+           }
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "items",
+         "pagination"
+        ],
+        "type": "object"
+       },
+       {
+        "description": "Canonical error envelope per ADR-001 Section 8.",
+        "properties": {
+         "error": {
+          "description": "Error details with recovery hint",
+          "properties": {
+           "code": {
+            "description": "Error code from registry",
+            "enum": [
+             "UNRESOLVED_ENTITY",
+             "ENTITY_NOT_FOUND",
+             "RATE_LIMITED",
+             "UPSTREAM_ERROR"
+            ],
+            "type": "string"
+           },
+           "invalid_input": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "The input that caused the error"
+           },
+           "message": {
+            "description": "Human-readable error message",
+            "type": "string"
+           },
+           "recovery_hint": {
+            "description": "Agent-actionable guidance for recovery",
+            "type": "string"
+           }
+          },
+          "required": [
+           "code",
+           "message",
+           "recovery_hint"
+          ],
+          "type": "object"
+         },
+         "success": {
+          "default": false,
+          "description": "Always false for errors",
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "error"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "required": [
+     "result"
+    ],
+    "type": "object",
+    "x-fastmcp-wrap-result": true
+   },
    "params": {
     "entrez_id": {
      "required": true,
@@ -32,7 +431,8 @@
      "required": false,
      "type": "boolean"
     }
-   }
+   },
+   "wrap_result": true
   }
  }
 }

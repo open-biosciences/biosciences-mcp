@@ -1,8 +1,11 @@
 """Phase 0 capture for biosciences-mcp-edge: tool surface + wire payloads.
 
-Usage (from the edge worktree): uv run python edge_capture.py <step> <research_dir>
+Usage (from the edge worktree): uv run python edge_capture.py <step> <out_dir> [--allow-no-key]
 Writes C-tool_surface_edge_<step>.json and C-wire_edge_<step>.json.
-The real BIOGRID_API_KEY is redacted from every captured string.
+The real BIOGRID_API_KEY is redacted from every captured string. Without the key the
+live ORCS case captures the missing-key envelope at every version and the comparison
+proves nothing, so the script refuses to run unless --allow-no-key is given.
+Each call records content, structuredContent, isError and the result _meta.
 """
 
 import asyncio
@@ -14,13 +17,16 @@ from contextlib import contextmanager
 from unittest import mock
 
 import httpx
-from fastmcp import Client
-
 from biosciences_mcp_edge.server import mcp
+from fastmcp import Client
 
 STEP = sys.argv[1]
 OUT = sys.argv[2]
 REAL_KEY = os.environ.get("BIOGRID_API_KEY") or ""
+if not REAL_KEY and "--allow-no-key" not in sys.argv:
+    sys.exit(
+        "BIOGRID_API_KEY is not set; the live ORCS case would be vacuous. Set it or pass --allow-no-key."
+    )
 FAKE_KEY = "FAKE-KEY-FOR-CAPTURE"
 
 
@@ -81,6 +87,7 @@ def dump_result(res):
         "isError": res.isError,
         "content": content,
         "structuredContent": res.structuredContent,
+        "meta": getattr(res, "meta", None),
     }
 
 
@@ -103,9 +110,12 @@ def is_upstream_5xx(d):
     body = sc.get("result", sc) if isinstance(sc, dict) else {}
     err = (body or {}).get("error") or {}
     msg = err.get("message", "")
-    return err.get("code") == "UPSTREAM_ERROR" and any(
-        f"error {c}" in msg for c in range(500, 600)
-    )
+    return err.get("code") == "UPSTREAM_ERROR" and any(f"error {c}" in msg for c in range(500, 600))
+
+
+def write_json(path, obj):
+    with open(path, "w") as fh:
+        json.dump(obj, fh, indent=2, sort_keys=True)
 
 
 async def call(client, name, args):
@@ -170,17 +180,23 @@ async def main():
             d = redact(d)
             d["args"] = args
             d["simulated_status"] = mode
-            d["null_paths_structured"] = find_nulls(d.get("structuredContent"))
+            final = d.get("retry", d)
+            d["null_paths_structured"] = find_nulls(final.get("structuredContent"))
             wire["cases"][label] = d
 
-    with open(f"{OUT}/C-tool_surface_edge_{STEP}.json", "w") as f:
-        json.dump(redact(surface), f, indent=2, sort_keys=True)
-    with open(f"{OUT}/C-wire_edge_{STEP}.json", "w") as f:
-        json.dump(wire, f, indent=2, sort_keys=True)
+    write_json(f"{OUT}/C-tool_surface_edge_{STEP}.json", redact(surface))
+    write_json(f"{OUT}/C-wire_edge_{STEP}.json", wire)
     print(json.dumps(wire["versions"]))
     for k, v in wire["cases"].items():
-        print(k, "isError=", v.get("isError"), "nulls=", len(v["null_paths_structured"]),
-              "exc=" if "exception" in v else "", v.get("exception", "")[:120])
+        print(
+            k,
+            "isError=",
+            v.get("isError"),
+            "nulls=",
+            len(v["null_paths_structured"]),
+            "exc=" if "exception" in v else "",
+            v.get("exception", "")[:120],
+        )
 
 
 asyncio.run(main())
