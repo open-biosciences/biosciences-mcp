@@ -89,7 +89,7 @@ A maintainer creating or updating any connector repository (core, Edge, psycholo
 - A caller sends an argument the tool does not declare. Observed 2026-09-30 on `hgnc_get_gene`: 2.14.5, 3.4.7, and 4.0.10 all reject the call with a framework error (`isError: true`), not an ADR-001 error envelope; only the message text differs between versions. The newer framework's `additionalProperties: false` in the input schema documents this existing behaviour rather than changing it.
 - The upgraded framework moves the `Args:` and `Returns:` sections of a tool's docstring out of its description. Information an agent relied on for tool selection could disappear from the description even though the tool itself is unchanged.
 - An upstream API (ChEMBL, ClinicalTrials.gov, BioGRID) fails or rate-limits during before/after comparison. Its known instability must not be counted as an upgrade regression.
-- The hosting platform's host validation cannot be configured on the upgraded framework. The upgrade must then stop before production, not ship with a workaround that disables the protection.
+- The hosting platform rejects requests for its own public hostname because of the framework's host validation (this happened on 3.4.3, HTTP 421). The upgrade must then stop before production. The framework default on 3.4.4 and later leaves host-origin protection off (research R2). Turning it on, or changing how it is configured, is a separate decision that needs its own preview evidence, because the guard reads only the raw `Host` header and Horizon's proxy behaviour is unknown.
 - Core and Edge reach the target major at different times. The version policy must say whether a temporary divergence is allowed and for how long.
 - A downstream repository pins or caches tool schemas. A schema change that is harmless to live callers could still invalidate a stored copy.
 - The supported transport-layer telemetry (ADR-008) must keep emitting tool-call spans, or degrade silently when no collector is configured, after the upgrade.
@@ -110,7 +110,7 @@ A maintainer creating or updating any connector repository (core, Edge, psycholo
 
 **Deployability**
 
-- **FR-008**: The upgraded core and Edge MUST accept authenticated requests addressed to their hosting-platform hostnames without host-validation rejections, without disabling host validation entirely.
+- **FR-008**: The upgraded core and Edge MUST accept authenticated requests addressed to their hosting-platform hostnames with no host-validation rejections. Host-origin protection MUST stay at the framework default (off on 3.4.4 and later), with no `FASTMCP_HTTP_*` host settings. The servers are reachable only through the hosting platform's authenticated ingress. Enabling the protection requires a preview deployment showing that the platform preserves the public `Host` header (research R2). (Amended 2026-10-01, /speckit-analyze H1: the earlier wording, "without disabling host validation entirely", contradicted the plan's use of the default.)
 - **FR-009**: Each upgraded server MUST be verified on a non-production deployment of the hosting platform before its production deployment changes.
 - **FR-010**: Each upgrade MUST be reversible to the previous release by reverting a single change.
 
@@ -155,7 +155,7 @@ A maintainer creating or updating any connector repository (core, Edge, psycholo
 - **SC-003**: Zero downstream repositories (biosciences-deepagents, biosciences-temporal) need a code change to keep working after the upgrade.
 - **SC-004**: The upgraded core and Edge each serve authenticated clients on a preview deployment with zero host-validation rejections before production is touched.
 - **SC-005**: Returning to the previous release takes one revert and under 15 minutes, including redeployment.
-- **SC-006**: Core, Edge, and psychology-mcp all reference the same version policy, and the two repositories in this feature's scope run on the same framework major at completion.
+- **SC-006**: Core and Edge both enforce the same version policy and run on the same framework major at completion. The policy names psychology-mcp as a consumer (FR-016); psychology-mcp's own adoption is the follow-up in the Assumptions. (Amended 2026-10-01, /speckit-analyze H3.)
 - **SC-007**: A deliberate change to a known-bad framework version is caught by automated checks in 100% of attempts on core and Edge.
 
 ## Assumptions

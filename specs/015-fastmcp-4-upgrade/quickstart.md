@@ -61,6 +61,7 @@ Create a separate Horizon deployment from the upgrade branch. Use the same entry
 | 4.5 | Sessionless call (core) | Raw JSON-RPC `tools/call` POST with no `initialize` and no session header, as `biosciences-deepagents` `apps/api/shared/mcp.py` sends it | Success. "400 Missing session ID" means No-Go until Horizon's session mode is resolved (research R12). |
 | 4.6 | Telemetry wrapper | Run the gateway under biosciences-otel-stack's `opentelemetry-instrument` wrapper locally at 3.4.7 | Starts, serves `list_tools`, emits to the local collector, or degrades silently with no collector (FR-019) |
 | 4.7 | Rollback timing | Redeploy the preview from the pre-upgrade commit, and time it until 4.2 passes on the old version | Under 15 minutes (SC-005) |
+| 4.8 | Temporal client (core) | Locally, with `BIOSCIENCES_MCP_PATH` pointing at the upgrade worktree, use biosciences-temporal's `create_mcp_client()` (stdio, PydanticAI) to list tools and call `hgnc_search_genes` and `hgnc_get_gene`. Then run one agent workflow if its LLM key is configured. | 34 tools, both calls succeed. Temporal picks up core's checkout as soon as it updates after merge, so this runs before merge (SC-003). |
 
 Record each result with the date and the preview URL. All checks passing turns the Phase 0 Conditional Go into Go for that repository. Failure of 4.1, or of 4.5 with no configuration fix, means No-Go.
 

@@ -56,7 +56,7 @@ The platform decision that governs which framework versions connector repositori
 
 ## Upgrade evidence record
 
-The per-repository record that FR-011's gate reads before a pin may be raised on `main`. It lives in this feature's `tasks.md` Convergence and verification sections and in the upgrade PR description.
+The per-repository record that FR-011's gate reads before a pin may be raised on `main`. It lives in `specs/015-fastmcp-4-upgrade/evidence/` in core, for both repositories, and each upgrade PR description summarises it. Core evidence is committed on the core implement branch; edge evidence is committed in the core docs PR that accepts ADR-009 (see tasks.md Path Conventions → Evidence).
 
 | Field | Content |
 |---|---|

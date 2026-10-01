@@ -114,7 +114,7 @@ Labels: **CONFIRMED** means observed in a run or read in source or docs. **INFER
 - **Decision**: No change needed in core. Edge's existing `null` output stays out of scope (FR-014).
 - **Rationale**:
   - CONFIRMED (B): contract+unit (104) passes on 3.4.7 and on 4.0.10, and null omission holds on both. The output schema changes are only `$defs`/`$ref` inlining.
-  - CONFIRMED (C): all 9 edge wire captures are byte-identical between 3.0.2 and 4.0.10, including the `null` fields edge already emits. Edge was not captured at 3.4.7; tasks T028/T029 do that before its pin moves.
+  - CONFIRMED (C): all 9 edge wire captures are byte-identical between 3.0.2 and 4.0.10, including the `null` fields edge already emits. Edge was not captured at 3.4.7; tasks T030/T031 do that before its pin moves.
 - **Alternatives considered**: fixing edge's nulls in this feature. Rejected, because it mixes framework migration with compliance work; it goes into the separate findings list below.
 
 ## R10. Version policy: ADR-009 plus a test and CI in each repository
@@ -138,7 +138,7 @@ Labels: **CONFIRMED** means observed in a run or read in source or docs. **INFER
 - **Decision**: The only telemetry today is biosciences-otel-stack wrapping the server in `opentelemetry-instrument`. Verify that wrapper still starts and emits on 3.4.7.10. Reconciling ADR-008 with FastMCP 4's native telemetry is a follow-up for ADR-008.
 - **Rationale**:
   - CONFIRMED (D): ADR-008 is not implemented anywhere: no `trace_tool`, no `telemetry/`.
-  - CONFIRMED (biosciences-otel-stack `README.md:113-114`): FastMCP's built-in tool spans (`fastmcp.server.name`, `gen_ai.tool.name`, `mcp.session.id`) arrived in 3.x. So 3.4.7 delivers AGE-718's telemetry motivation, and T017 checks it in Phoenix.
+  - CONFIRMED (biosciences-otel-stack `README.md:113-114`): FastMCP's built-in tool spans (`fastmcp.server.name`, `gen_ai.tool.name`, `mcp.session.id`) arrived in 3.x. So 3.4.7 delivers AGE-718's telemetry motivation, and T018 checks it in Phoenix.
   - CONFIRMED (A, D): FastMCP 4 adds trace propagation and a `telemetry_mode` setting, which overlap ADR-008's design. That's relevant to the 4.x follow-up.
 - **Alternatives considered**: implementing ADR-008 inside this feature. Rejected as scope creep.
 
@@ -182,16 +182,16 @@ The highest achievable outcome without a live deployment is **Conditional Go**. 
 | Criterion | Core → 3.4.7 | Edge → 3.4.7 |
 |---|---|---|
 | Host guard off by default, setting confirmed in source | Yes, since 3.4.4 (R2) | Yes. Local Host probe on 3.4.7 returned 200 (C). |
-| Tool names unchanged | Yes: 34/34 (R4) | Not yet captured at 3.4.7. Expected yes: 2/2 at 4.0.10, and the surfaces at 3.4.7 and 4.0.10 match for core. Verified by T025/T028. |
+| Tool names unchanged | Yes: 34/34 (R4) | Not yet captured at 3.4.7. Expected yes: 2/2 at 4.0.10, and the surfaces at 3.4.7 and 4.0.10 match for core. Verified by T027/T030. |
 | Parameters unchanged | Yes (R4) | As above |
-| Wire contract unchanged | Yes: contract+unit 104/104; network failures identical to baseline (R7, R9) | Not yet captured at 3.4.7 (R9); T028 |
+| Wire contract unchanged | Yes: contract+unit 104/104; network failures identical to baseline (R7, R9) | Not yet captured at 3.4.7 (R9); T030 |
 | Every new failure maps to a known fix | Yes: 1 test-only site (R7) | None found at 3.0.2 → 4.0.10 |
 | Caller-visible differences with a fix path | Descriptions (R6); gateway validation text, plus a logged traceback per rejected call (R5) | Descriptions (R6), titles |
 | Proven on Horizon | 3.x major: yes (edge 3.0.2 in production). 3.4.7 itself: preview check. | Same |
 | Unverified | 3.4.7 on Horizon, Host on Horizon (R2) | Same |
 
 - **Core: Conditional Go** for 3.4.7. Final Go depends on the quickstart preview checks.
-- **Edge: Conditional Go** for 3.4.7, conditional also on T028's local capture matching the 3.0.2 baseline.
+- **Edge: Conditional Go** for 3.4.7, conditional also on T030's local capture matching the 3.0.2 baseline.
 - **4.x: out of scope.** The gate for a later 4.x feature is FR-020 (R13).
 
 ## Findings outside this feature's scope

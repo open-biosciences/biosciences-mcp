@@ -12,6 +12,7 @@ The tool surface is the interface these repositories expose to agent callers. Th
 
    *Why line-level*: FastMCP 3.2.4+ keeps only the first text section of a docstring as the description (research R6). The test proves nothing a caller could read on 2.14.5 has disappeared, without fixing where in the docstring it lives.
 4. **Per-parameter guidance.** Each baseline `Args:` entry's text appears in that parameter's `description` on 3.4.7 (FastMCP 3.2.4+ moves `Args:` text there).
+5. **Undeclared arguments stay rejected** (FR-003). A call with one undeclared argument returns `isError: true`. The message text may differ between versions; it is recorded for FR-007, not asserted. The test uses a call that is rejected before any network access.
 
 ## Allowed changes (MUST be listed in the upgrade PR under "User-visible contract")
 
