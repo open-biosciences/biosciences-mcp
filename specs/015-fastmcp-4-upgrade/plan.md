@@ -69,9 +69,9 @@ The constitution is v1.1.0, which predates ADR-007 and ADR-008. Its items are gr
 | V. Specification-Before-Code | **VIOLATION, justified** | **VIOLATION, justified** | PR #18 was opened before this spec and exceeds the trivial-change exception. See Complexity Tracking. All further code waits for approval of this plan (HUMAN GATE). |
 | VI. Platform Skill Delegation | PASS with gap | PASS with gap | No platform skill covers framework upgrades. The constitution's `deploy-cloud` skill for deployments doesn't exist (finding F8), so [quickstart.md](quickstart.md) defines the deployment pre-flight and post-deploy checks it would have provided. |
 | Forbidden: hardcoded credentials | PASS for this feature | PASS | Edge leaks the BioGRID key in error messages (F1). It's pre-existing and separate, but needs urgent handling outside this feature. |
-| Required: human approval gate | Pending | Pending | This plan must be approved before `/speckit-tasks` → `/speckit-implement`. |
+| Required: human approval gate | Pending | **Approved** | Plan approved by the repository owner on 2026-09-30, before `/speckit-tasks`. |
 
-**Result**: Gates pass, with one justified violation and one documented gap.
+**Result**: Gates pass, with one justified violation and one documented gap. Plan approved 2026-09-30.
 
 ## Project Structure
 
