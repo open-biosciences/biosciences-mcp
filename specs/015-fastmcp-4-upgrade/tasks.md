@@ -99,13 +99,13 @@
 - [X] T014 [P] [US1] Same restructuring as T011 in `src/biosciences_mcp/servers/ensembl.py` (`search_genes`, `get_gene`, `get_transcript`) and `src/biosciences_mcp/servers/entrez.py` (`search_genes`, `get_gene`, `get_pubmed_links`).
 - [X] T015 [P] [US1] Same restructuring as T011 in `src/biosciences_mcp/servers/pubchem.py` (`search_compounds`, `get_compound`), `src/biosciences_mcp/servers/wikipathways.py` (`search_pathways`, `get_pathway`, `get_pathways_for_gene`, `get_pathway_components`), and `src/biosciences_mcp/servers/clinicaltrials.py` (`search_trials`, `get_trial`, `get_trial_locations`). That completes 30 tools across T011 to T015. The 4 IUPHAR tools have no `Args:` section and need no change.
 - [X] T016 [US1] Run `uv run pytest tests/contract/test_tool_surface.py -v` on 3.4.7. It must pass for all 34 tools, with invariant 3 proving no guidance was lost (FR-006). Fix any reported missing line in its server file and rerun.
-- [ ] T017 [US1] Run quickstart §2 on 3.4.7 and save the outputs under `specs/015-fastmcp-4-upgrade/evidence/core-3.4.7/`. Confirm:
+- [X] T017 [US1] Run quickstart §2 on 3.4.7 and save the outputs under `specs/015-fastmcp-4-upgrade/evidence/core-3.4.7/`. Confirm:
   - unit and contract+unit all pass
   - `test_gateway.py` passes
   - contract-integration failures are a subset of T008's, with persistent upstream failures rerun once after 10 seconds per FR-012
   - `grep -c PydanticSerializationUnexpectedValue` on the logs returns 0 (none were seen at 3.4.7 in research; they're a 4.x issue)
   - the server log shows the new 3.4.7 traceback noise for rejected gateway calls only as expected (research R5); record it, don't fix it
-- [ ] T018 [US1] Core wire capture through the gateway (FR-003, FR-004, FR-005; data model "Representative call set"). Write `specs/015-fastmcp-4-upgrade/research/core-capture/core_capture.py`, modelled on `research/edge-capture/edge_capture.py`. It calls `biosciences_mcp.servers.gateway.mcp` in process through `fastmcp.Client.call_tool_mcp` and records `content`, `structuredContent`, `isError`, and `meta`. Cases, all network-free:
+- [X] T018 [US1] Core wire capture through the gateway (FR-003, FR-004, FR-005; data model "Representative call set"). Write `specs/015-fastmcp-4-upgrade/research/core-capture/core_capture.py`, modelled on `research/edge-capture/edge_capture.py`. It calls `biosciences_mcp.servers.gateway.mcp` in process through `fastmcp.Client.call_tool_mcp` and records `content`, `structuredContent`, `isError`, and `meta`. Cases, all network-free:
   - every strict lookup tool with free text (13 on 2026-10-01)
   - `hgnc_get_gene` with an undeclared argument, a missing argument, and a wrong type
   - a simulated upstream 500 and 429 for each httpx-based server, via a patched transport (record ChEMBL's SDK path as not simulated)
@@ -189,7 +189,7 @@
 
 **Placement**: T037 to T041 ship in the **core PR**, after T009. T042 and T043 ship in the **edge PR**, after T029.
 
-- [ ] T037 [US4] Write `docs/adr/proposed/adr-009-v0.1.md` (core). Create `docs/adr/proposed/`, and fill in every section required by `contracts/version-policy.md`:
+- [X] T037 [US4] Write `docs/adr/proposed/adr-009-v0.1.md` (core). Create `docs/adr/proposed/`, and fill in every section required by `contracts/version-policy.md`:
   - scope and consumers
   - the supported range with the reason for each bound
   - the known-bad table (`==3.4.3`)
@@ -201,16 +201,16 @@
   - section 5a: each consumer's status at acceptance (psychology-mcp's interim divergence and its expiry)
 
   Adopt AGE-718's pin convention (`>=X.Y.Z,<X.(Y+1)`, exact known-good floor, minor ceiling) as the rule for dependency bounds. Record biosciences-memory (`fastmcp>=2.13.3,<3`) as an open question: in scope or not.
-- [ ] T038 [US4] Write `tests/unit/test_framework_version_policy.py` (core; marker `unit`; no network) per `contracts/version-policy.md` "Policy test contract":
+- [X] T038 [US4] Write `tests/unit/test_framework_version_policy.py` (core; marker `unit`; no network) per `contracts/version-policy.md` "Policy test contract":
   - constants `SUPPORTED = ">=3.4.7,<3.5"` and `KNOWN_BAD`, with a comment citing ADR-009 v0.1. Because the range excludes 4.x, a 4.x lock fails check 2 with a message naming FR-020's gate.
   - check 1: the `pyproject.toml` specifier is within the range and excludes known-bad versions
   - check 2: the `uv.lock` version
   - check 3: the reason comment on the upper bound
 
   Failure messages name ADR-009 and the incident. Use `packaging.specifiers`, and add `packaging` to the dev extras if it isn't already available. Cite ADR-009 by its file version in a comment (`v0.1` until acceptance; T045 updates it).
-- [ ] T039 [US4] Add a self-check test in the same file (SC-007). It writes known-bad copies to `tmp_path` and asserts each check fails with the ADR-009 message: a `uv.lock` locking `fastmcp` 3.4.3 (check 2), a `pyproject.toml` whose specifier admits 3.4.3 or 4.x (check 1), and a `pyproject.toml` whose upper bound has **no reason comment** (check 3, which doesn't depend on the version).
-- [ ] T040 [P] [US4] Create `.github/workflows/ci.yml` (core): on `pull_request` and `push` to `main`, set up uv on Python 3.12, run `uv sync --extra dev`, then `uv run pytest -m unit -q`. Unit only: no secrets, no network.
-- [ ] T041 [US4] Run quickstart §3 by hand in the core worktree (set `fastmcp==3.4.3` in a scratch copy and run the policy test), and record the expected failure output in `specs/015-fastmcp-4-upgrade/evidence/core-3.4.7/policy-selfcheck.md`.
+- [X] T039 [US4] Add a self-check test in the same file (SC-007). It writes known-bad copies to `tmp_path` and asserts each check fails with the ADR-009 message: a `uv.lock` locking `fastmcp` 3.4.3 (check 2), a `pyproject.toml` whose specifier admits 3.4.3 or 4.x (check 1), and a `pyproject.toml` whose upper bound has **no reason comment** (check 3, which doesn't depend on the version).
+- [X] T040 [P] [US4] Create `.github/workflows/ci.yml` (core): on `pull_request` and `push` to `main`, set up uv on Python 3.12, run `uv sync --extra dev`, then `uv run pytest -m unit -q`. Unit only: no secrets, no network.
+- [X] T041 [US4] Run quickstart §3 by hand in the core worktree (set `fastmcp==3.4.3` in a scratch copy and run the policy test), and record the expected failure output in `specs/015-fastmcp-4-upgrade/evidence/core-3.4.7/policy-selfcheck.md`.
 - [ ] T042 [P] [US4] Write `edge:tests/unit/test_framework_version_policy.py` (a copy of T038 and T039 with edge paths; the constants are a local copy per FR-013, with a comment citing ADR-009 v0.1 and the core path), and `edge:.github/workflows/ci.yml` (as T040).
 - [ ] T043 [US4] Run quickstart §3 in the edge worktree, and record the result in `specs/015-fastmcp-4-upgrade/evidence/edge-3.4.7.md`.
 - [ ] T044 [P] [US4] File a Linear issue (project "Open-Biosciences Platform v1.1 — dogfooding + Synapse alignment"): psychology-mcp adopts ADR-009. It means raising `fastmcp>=2.14.1,<3.0` (locked 2.14.7) to the ADR-009 range, adding the policy test and the tool-surface test, and doing a preview deployment. As part of the same issue, record the interim divergence row in psychology-mcp's `docs/adr/README.md` (ADR-009 section 5a), expiring when this issue closes. Link it to AGE-718.

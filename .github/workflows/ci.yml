@@ -1,0 +1,27 @@
+name: CI
+
+# Unit tier on every pull request and on main (spec 015, SC-007). The unit marker
+# includes the tool-surface contract test and the ADR-009 framework version policy
+# test. No secrets are used. Importing the package fetches the ChEMBL schema from EBI
+# (AGE-703), so an EBI outage can fail this job without a code fault.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: uv sync --extra dev
+      - name: Unit tests
+        run: uv run pytest -m unit -q

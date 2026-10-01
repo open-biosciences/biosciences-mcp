@@ -18,6 +18,7 @@ dependencies = [
 dev = [
     "pytest>=8.0",
     "pytest-asyncio>=0.23",
+    "packaging>=23.0",
     "python-dotenv>=1.0",
     "ruff>=0.8",
     "pyright>=1.1",
