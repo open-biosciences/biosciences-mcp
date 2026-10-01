@@ -47,23 +47,19 @@ from biosciences_mcp.servers.wikipathways import mcp as wikipathways_mcp
 # Create the gateway server
 mcp = FastMCP("Biosciences MCP Gateway")
 
-# Mount all servers onto the gateway (direct mounting - no proxy overhead)
+# Mount all servers onto the gateway. tool_names carries the full public name;
+# don't add prefix= or namespace=. FastMCP 3.x applies the namespace on top of
+# tool_names (hgnc_hgnc_search_genes), and 4.x removes prefix/as_proxy (AGE-182).
 mcp.mount(
     hgnc_mcp,
-    prefix="hgnc",
-    as_proxy=False,
     tool_names={"search_genes": "hgnc_search_genes", "get_gene": "hgnc_get_gene"},
 )
 mcp.mount(
     uniprot_mcp,
-    prefix="uniprot",
-    as_proxy=False,
     tool_names={"search_proteins": "uniprot_search_proteins", "get_protein": "uniprot_get_protein"},
 )
 mcp.mount(
     chembl_mcp,
-    prefix="chembl",
-    as_proxy=False,
     tool_names={
         "search_compounds": "chembl_search_compounds",
         "get_compound": "chembl_get_compound",
@@ -72,8 +68,6 @@ mcp.mount(
 )
 mcp.mount(
     opentargets_mcp,
-    prefix="opentargets",
-    as_proxy=False,
     tool_names={
         "search_targets": "opentargets_search_targets",
         "get_target": "opentargets_get_target",
@@ -82,8 +76,6 @@ mcp.mount(
 )
 mcp.mount(
     string_mcp,
-    prefix="string",
-    as_proxy=False,
     tool_names={
         "search_proteins": "string_search_proteins",
         "get_interactions": "string_get_interactions",
@@ -92,8 +84,6 @@ mcp.mount(
 )
 mcp.mount(
     biogrid_mcp,
-    prefix="biogrid",
-    as_proxy=False,
     tool_names={
         "search_genes": "biogrid_search_genes",
         "get_interactions": "biogrid_get_interactions",
@@ -101,8 +91,6 @@ mcp.mount(
 )
 mcp.mount(
     ensembl_mcp,
-    prefix="ensembl",
-    as_proxy=False,
     tool_names={
         "search_genes": "ensembl_search_genes",
         "get_gene": "ensembl_get_gene",
@@ -111,8 +99,6 @@ mcp.mount(
 )
 mcp.mount(
     entrez_mcp,
-    prefix="entrez",
-    as_proxy=False,
     tool_names={
         "search_genes": "entrez_search_genes",
         "get_gene": "entrez_get_gene",
@@ -121,8 +107,6 @@ mcp.mount(
 )
 mcp.mount(
     pubchem_mcp,
-    prefix="pubchem",
-    as_proxy=False,
     tool_names={
         "search_compounds": "pubchem_search_compounds",
         "get_compound": "pubchem_get_compound",
@@ -130,8 +114,6 @@ mcp.mount(
 )
 mcp.mount(
     iuphar_mcp,
-    prefix="iuphar",
-    as_proxy=False,
     tool_names={
         "search_targets": "iuphar_search_targets",
         "get_target": "iuphar_get_target",
@@ -141,8 +123,6 @@ mcp.mount(
 )
 mcp.mount(
     wikipathways_mcp,
-    prefix="wikipathways",
-    as_proxy=False,
     tool_names={
         "search_pathways": "wikipathways_search_pathways",
         "get_pathway": "wikipathways_get_pathway",
@@ -152,8 +132,6 @@ mcp.mount(
 )
 mcp.mount(
     clinicaltrials_mcp,
-    prefix="clinicaltrials",
-    as_proxy=False,
     tool_names={
         "search_trials": "clinicaltrials_search_trials",
         "get_trial": "clinicaltrials_get_trial",
