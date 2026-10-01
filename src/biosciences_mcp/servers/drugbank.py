@@ -42,6 +42,8 @@ async def search_drugs(
 
     Returns ranked candidates for resolution. Use this before calling get_drug.
 
+    PaginationEnvelope with DrugSearchCandidate items, or ErrorEnvelope on failure.
+
     Args:
         query: Search term (drug name, brand name, or indication).
                Minimum 2 characters required.
@@ -49,9 +51,6 @@ async def search_drugs(
               Default false returns full candidates.
         cursor: Opaque cursor for pagination. Pass from previous response for next page.
         page_size: Number of results per page (1-100, default 50).
-
-    Returns:
-        PaginationEnvelope with DrugSearchCandidate items, or ErrorEnvelope on failure.
     """
     client = await get_client()
     return await client.search_drugs(
@@ -66,12 +65,11 @@ async def search_drugs(
 async def get_drug(drugbank_id: str, slim: bool = False) -> dict | ErrorEnvelope:
     """Get complete drug record by DrugBank CURIE.
 
+    Drug record with cross_references, or ErrorEnvelope on failure.
+
     Args:
         drugbank_id: DrugBank CURIE in format 'DrugBank:DBXXXXX' (e.g., 'DrugBank:DB00945').
         slim: If true, return minimal fields for token efficiency.
-
-    Returns:
-        Drug record with cross_references, or ErrorEnvelope on failure.
     """
     client = await get_client()
     return await client.get_drug(drugbank_id=drugbank_id, slim=slim)

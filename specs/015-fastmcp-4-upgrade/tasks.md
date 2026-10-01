@@ -303,3 +303,10 @@ Phase 1 → Phase 2 → US1 gives a core branch on FastMCP 3.4.7 that is provabl
 ### Out of scope here (tracked elsewhere)
 
 AGE-733 (edge key leak: fix before or alongside the edge PR, never inside it), AGE-734 (IUPHAR API key), AGE-735 and AGE-736 (edge compliance), AGE-737 (argument-name drift), AGE-738 (deploy-cloud skill), and AGE-698 (ADR-007 base client).
+
+---
+
+## Phase 8: Convergence
+
+- [X] T054 Restructure the `search_drugs` and `get_drug` docstrings in `src/biosciences_mcp/servers/drugbank.py` like T011 (move `Returns:` text above `Args:`, delete only the header line), and note in `contracts/tool-surface-invariants.md` that DrugBank is not on the gateway and so is outside the tool-surface baseline, per FR-006 (partial)
+- [X] T055 Measure on fastmcp 3.4.7 which column-0 `Name:` lines start a docstring section that is dropped (known Google section titles versus arbitrary `Success response structure:`-style lines). Then correct the rule stated in `CLAUDE.md` Known Issues ("Tool docstrings"), `contracts/tool-surface-invariants.md` invariant 3, and `research.md` R6. If any restructured docstring in `src/biosciences_mcp/servers/` keeps a column-0 line that 3.4.7 or 4.0.10 treats as a section start, re-indent it and re-run `tests/contract/test_tool_surface.py`. Per plan R6 / T046 (contradicts)
