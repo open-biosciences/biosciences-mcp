@@ -63,6 +63,7 @@ Legend: date = artifact header date; `✓` = artifact present, produced by the d
 | 2026-09-03 | 011 iuphar | `/speckit-converge` (baseline, main-equivalent code) | `specs/011-iuphar-mcp-server/tasks.md` Convergence phase, 13 tasks appended | `f2eb447` | AGE-702 baseline; see PR #9 for the per-feature CRITICAL counts |
 | 2026-09-03 | 012 wikipathways | `/speckit-converge` (baseline, main-equivalent code) | `specs/012-wikipathways-mcp-server/tasks.md` Convergence phase, 12 tasks appended | `f2eb447` | AGE-702 baseline; see PR #9 for the per-feature CRITICAL counts |
 | 2026-09-03 | 013 clinicaltrials | `/speckit-converge` (baseline, main-equivalent code) | `specs/013-clinicaltrials-mcp-server/tasks.md` Convergence phase, 8 tasks appended | `f2eb447` | AGE-702 baseline; see PR #9 for the per-feature CRITICAL counts |
+| 2026-09-30 | 015 fastmcp-4-upgrade | `/speckit-specify` | `specs/015-fastmcp-4-upgrade/spec.md`, `checklists/requirements.md` (all items pass, no clarifications) | this PR | First cross-cutting feature (core + edge). Number 015 because 014 is recorded below for depmap (built in the reference repo, not yet migrated). Prerequisite PR #18 was opened before the spec; its Principle V waiver goes in `plan.md` Complexity Tracking. `/speckit-clarify` skipped: three defaults recorded in checklist note 3. |
 
 ## Discrepancies worth knowing
 
@@ -76,3 +77,4 @@ Legend: date = artifact header date; `✓` = artifact present, produced by the d
 | Feature | Record |
 |---|---|
 | 014 depmap | Built in `donbr/lifesciences-research` (PRs #24, #25), not here. Order was scaffold → code → Spec Kit artifacts → fixes (commits `d1ea300`, `5a1f65a`, `9d32623`, `0e75fb8`, all 2026-09-02); `plan.md` records the Principle V violation. Not migrated to this repository as of 2026-09-03. |
+| 015 fastmcp-4-upgrade | Spec Kit in this repository from 2026-09-30, specify first; see the v1.0.4 runs table. Exception: PR #18 (gateway mount fix, a prerequisite) was opened before the spec. |
