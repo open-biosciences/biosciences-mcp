@@ -1,0 +1,38 @@
+{
+ "captured_with": "fastmcp 3.0.2 (edge 91f6bab)",
+ "tools": {
+  "get_mechanism": {
+   "description": "Get mechanism-of-action data from ChEMBL.\n\nArgs:\n    chembl_id: ChEMBL CURIE (e.g. 'CHEMBL:225072' for Pemetrexed) or raw ID ('CHEMBL225072').\n    slim: If True, return fewer fields per result.\n\nReturns:\n    PaginationEnvelope with MechanismResult items, or ErrorEnvelope on failure.",
+   "params": {
+    "chembl_id": {
+     "required": true,
+     "type": "string"
+    },
+    "slim": {
+     "default": false,
+     "required": false,
+     "type": "boolean"
+    }
+   }
+  },
+  "get_orcs_essentiality": {
+   "description": "Get CRISPR screen essentiality data from BioGRID ORCS.\n\nArgs:\n    entrez_id: NCBI Entrez gene ID (e.g. 7298 for TYMS, 1723 for DHODH).\n    hit_only: If True, only return screens where the gene was scored as a hit.\n    slim: If True, return fewer fields per result.\n\nReturns:\n    PaginationEnvelope with OrcsScreenResult items, or ErrorEnvelope on failure.",
+   "params": {
+    "entrez_id": {
+     "required": true,
+     "type": "integer"
+    },
+    "hit_only": {
+     "default": true,
+     "required": false,
+     "type": "boolean"
+    },
+    "slim": {
+     "default": false,
+     "required": false,
+     "type": "boolean"
+    }
+   }
+  }
+ }
+}

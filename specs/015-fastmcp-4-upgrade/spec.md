@@ -12,7 +12,7 @@
 
 Core runs FastMCP 2.14.5, held below 3.0 by a pin added on 2026-02-25 after 3.0.2 double-prefixed every gateway tool name (AGE-182). Edge was created five days later without that pin, resolved 3.0.2, and was later pinned below 3.4.3 because 3.4.3's host validation rejected the hosting platform's requests with HTTP 421. Neither decision was recorded outside a commit message, so the two repositories drifted onto different framework majors. FastMCP 4.0.0 was released 2026-08-31.
 
-The callers of these servers are AI agents: the LangGraph supervisor (biosciences-deepagents), Temporal activities (biosciences-temporal), graph-builder workflows (biosciences-research), and Claude Code plugin users. They bind to tool names, parameter names, and the ADR-001 wire contract. A framework upgrade that changes any of these breaks them without a code change on their side, which makes caller-visible stability the central requirement of this feature.
+The callers of these servers are AI agents: the LangGraph supervisor (biosciences-deepagents), Temporal agents (biosciences-temporal), and Claude Code plugin users. biosciences-research names the tools in documentation and an evaluation dataset but makes no MCP calls (research D). They bind to tool names, parameter names, and the ADR-001 wire contract. A framework upgrade that changes any of these breaks them without a code change on their side, which makes caller-visible stability the central requirement of this feature.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -102,7 +102,7 @@ A maintainer creating or updating any connector repository (core, Edge, psycholo
 - **FR-004**: The upgraded release MUST return the ADR-001 envelopes (pagination and error) with the same fields, error codes, and recovery hints as today, and MUST omit absent optional fields rather than send `null`.
 - **FR-005**: Strict tools given an unresolved identifier MUST continue to return the `UNRESOLVED_ENTITY` error envelope produced by the tool, not a framework-level validation error.
 - **FR-006**: Every piece of guidance in a tool's current description and parameter documentation MUST remain available to callers after the upgrade, whether in the tool description or in parameter descriptions.
-- **FR-007**: Any caller-visible difference that does remain after FR-001 to FR-006 MUST be listed with its effect on biosciences-deepagents, biosciences-temporal, and biosciences-research before release.
+- **FR-007**: Any caller-visible difference that does remain after FR-001 to FR-006 MUST be listed with its effect on biosciences-deepagents, biosciences-temporal, and Claude Code plugin users before release.
 
 **Deployability**
 
@@ -144,7 +144,7 @@ A maintainer creating or updating any connector repository (core, Edge, psycholo
 
 - **SC-001**: 100% of the tools available today (34 on core, 2 on Edge) are available under the same names after the upgrade.
 - **SC-002**: Zero calls that succeed on the current release fail on the upgraded release, across the representative call set and the full existing contract test tiers.
-- **SC-003**: Zero downstream repositories (biosciences-deepagents, biosciences-temporal, biosciences-research) need a code change to keep working after the upgrade.
+- **SC-003**: Zero downstream repositories (biosciences-deepagents, biosciences-temporal) need a code change to keep working after the upgrade.
 - **SC-004**: The upgraded core and Edge each serve authenticated clients on a preview deployment with zero host-validation rejections before production is touched.
 - **SC-005**: Returning to the previous release takes one revert and under 15 minutes, including redeployment.
 - **SC-006**: Core, Edge, and psychology-mcp all reference the same version policy, and the two repositories in this feature's scope run on the same framework major at completion.
