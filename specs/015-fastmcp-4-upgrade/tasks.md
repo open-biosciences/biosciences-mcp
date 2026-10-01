@@ -4,6 +4,8 @@
 
 **Remediated 2026-10-01** (/speckit-analyze H1–H5, E1, E2, B1, C1, C2, F1, approved by the owner): added the spec-PR merge task (H2), the temporal check (H5), and edge's user-visible-contract task (E2); added an undeclared-argument invariant (E1); clarified the docstring rule (B1); versioned the edge capture script (C1); fixed the evidence location (C2); corrected the CLAUDE.md task (F1). Renumbered again.
 
+**Remediated again 2026-10-01** (/speckit-analyze re-run: F4, C3, F5, F6, C4, approved by the owner): edge evidence is committed to core before the edge PR merges (T035, FR-011); the edge wire comparison recaptures 3.0.2 in the same session (T030); smaller consistency fixes. No renumbering.
+
 **Input**: Design documents from `specs/015-fastmcp-4-upgrade/`
 
 **Prerequisites**: [plan.md](plan.md) (approved 2026-09-30; amended plan approved 2026-10-01), [spec.md](spec.md), [research.md](research.md), [data-model.md](data-model.md), [contracts/](contracts/), [quickstart.md](quickstart.md)
@@ -29,7 +31,7 @@
 - Core: repository root `biosciences-mcp/`. Paths below are relative to it unless prefixed `edge:`.
 - Edge: repository root `biosciences-mcp-edge/`, written `edge:<path>`.
 - Feature artifacts: `specs/015-fastmcp-4-upgrade/` in core.
-- Evidence: every evidence file for both repositories lives under `specs/015-fastmcp-4-upgrade/evidence/` in **core**. Core evidence is committed on the core implement branch. Edge evidence (T030, T035, T042, and the edge contract note) is committed in the core docs PR that T044 opens, and summarised in the edge PR description.
+- Evidence: every evidence file for both repositories lives under `specs/015-fastmcp-4-upgrade/evidence/` in **core**. Core evidence is committed on the core implement branch. Edge evidence (T030, T032, T042, and T035's preview record) is committed to core in a docs PR that T035 opens and merges **before** the edge PR merges (FR-011), and summarised in the edge PR description. T044 adds only edge's production results.
 - Worktrees live under each repository's `.worktrees/` (ADR-PRG-001 §3.3). Launch Claude from the main checkout, not from inside a worktree (§3.6).
 
 ---
@@ -114,7 +116,7 @@
 
 **Goal**: The core PR's head runs on a Horizon preview deployment with no host-validation rejections; then production is updated with a timed rollback path.
 
-**Independent Test**: Quickstart §4 checks 4.1 to 4.5 and 4.7 pass against the preview URL.
+**Independent Test**: Quickstart §4 checks 4.1 to 4.5 and 4.7 pass against the preview URL, and check 4.8 (temporal, local) passes against the upgrade worktree.
 
 - [ ] T020 [US2] Create a Horizon preview deployment from `implement/015-fastmcp-4-upgrade-core`. Use entrypoint `src/biosciences_mcp/servers/gateway.py:mcp` and the same secrets as production (`BIOGRID_API_KEY`, `NCBI_API_KEY`), under a non-production server name. Leave every `FASTMCP_HTTP_*` variable unset (research R2). This needs Horizon web UI access, so it's a repository-owner action.
 - [ ] T021 [US2] Run quickstart §4 checks 4.1 (Host accepted), 4.2 (34 names equal to the baseline keys), 4.3 (one success call per server; upstream failures per FR-012, IUPHAR expected to fail until AGE-734), and 4.4 (`hgnc_get_gene` free text returns `UNRESOLVED_ENTITY`) against the preview URL. Record the results in `specs/015-fastmcp-4-upgrade/evidence/core-preview.md`.
@@ -146,7 +148,11 @@
 - [ ] T028 [US3] In `edge:pyproject.toml`, replace `"fastmcp>=2.0,<3.4.3"` with `"fastmcp>=3.4.7,<3.5",`, with a reason comment as in T009. The `<3.4.3` Host-guard reason is obsolete since 3.4.4 (research R2). Run `uv lock` (this also clears finding F7, the lock/pyproject drift) and `uv sync --extra dev`, and record the resolved versions.
 - [ ] T029 [P] [US3] In `edge:src/biosciences_mcp_edge/server.py`, restructure the `get_orcs_essentiality` and `get_mechanism` docstrings as in T011: move the `Returns:` text into the leading section, above `Args:`.
   - Don't change parameter types, hint text, or error mapping. Those belong to AGE-735 and AGE-733 (FR-014).
-- [ ] T030 [US3] Run `uv run pytest -m unit -v`; it must pass, including `test_tool_surface.py`. Then rerun the wire capture against the worktree: `uv run python /home/donbr/open-biosciences/biosciences-mcp/specs/015-fastmcp-4-upgrade/research/edge-capture/edge_capture.py 3.4.7 <scratch-out-dir>` (from the edge worktree; the script is versioned in core since T003). Diff `<scratch-out-dir>/C-wire_edge_3.4.7.json` with `specs/015-fastmcp-4-upgrade/research/edge-capture/wire_edge_3.0.2.json`: payloads must be identical (FR-004, FR-014). The script redacts the real BioGRID key and uses a fake one for error cases. Edge was never captured at 3.4.7 in research, so this is the first wire evidence for it (research R9). Save the diff summary to `specs/015-fastmcp-4-upgrade/evidence/edge-3.4.7.md` (core repository; committed per Path Conventions → Evidence).
+- [ ] T030 [US3] Run `uv run pytest -m unit -v`; it must pass, including `test_tool_surface.py`. Then compare wire payloads, with both versions captured in the same session so upstream data changes can't masquerade as framework changes:
+  - The script is `/home/donbr/open-biosciences/biosciences-mcp/specs/015-fastmcp-4-upgrade/research/edge-capture/edge_capture.py`, versioned in core since T003. Run `git -C /home/donbr/open-biosciences/biosciences-mcp pull --ff-only` first, so the primary core checkout (on `main`) has it.
+  - 3.0.2: create a temporary detached edge worktree at the commit T005 branched from (`git -C /home/donbr/open-biosciences/biosciences-mcp-edge worktree add --detach .worktrees/edge-baseline-015 <base-sha>`), run `uv run python <script> 3.0.2 <scratch-out-dir>` there, then remove it. `uv` may relock there because of finding F7; that's harmless in a throwaway worktree.
+  - 3.4.7: immediately afterwards, run `uv run python <script> 3.4.7 <scratch-out-dir>` in the implement worktree.
+  - Diff `C-wire_edge_3.0.2.json` with `C-wire_edge_3.4.7.json`: payloads must be identical (FR-004, FR-014). Use `specs/015-fastmcp-4-upgrade/research/edge-capture/wire_edge_3.0.2.json` (captured 2026-09-30) only as a reference for the payload's shape. The script redacts the real BioGRID key and uses a fake one for error cases. Edge was never captured at 3.4.7 in research, so this is the first wire evidence for it (research R9). Save the diff summary to `specs/015-fastmcp-4-upgrade/evidence/edge-3.4.7.md` (core repository; committed per Path Conventions → Evidence).
 - [ ] T031 [US3] Confirm FR-013 with `grep -rn "biosciences_mcp\b" edge:src edge:tests | grep -v biosciences_mcp_edge`: no output.
 - [ ] T032 [US3] Write the edge PR's "User-visible contract" section (FR-007), following T019. List the description changes from T029, the auto-generated `title` annotations, the unchanged `additionalProperties: false` (edge already had it on 3.0.2), and the undeclared-argument message text from invariant 5, with the effect on Claude Code plugin users (the edge tools' callers). Copy it into `specs/015-fastmcp-4-upgrade/evidence/edge-3.4.7.md`.
 - [ ] T033 [P] [US3] In `edge:docs/adr/README.md`:
@@ -154,7 +160,11 @@
   - Add a row for ADR-009 (adopted via `tests/unit/test_framework_version_policy.py`; status "proposed" until T044).
   - Don't change the other rows; AGE-735 and AGE-736 own those corrections.
 - [ ] T034 [P] [US3] Update `edge:CLAUDE.md`: the framework version line, the removal of the `<3.4.3` rationale, and a note that tool descriptions keep only the first docstring section, so return and error guidance goes above `Args:`.
-- [ ] T035 [US3] Edge preview and production: run quickstart §4 checks 4.1 to 4.4 and 4.7 on an edge preview deployment (no `FASTMCP_HTTP_*` variables). Record them in `specs/015-fastmcp-4-upgrade/evidence/edge-preview.md` with the Go or No-Go decision. On Go, merge the edge PR, redeploy production, and repeat 4.1 and 4.2 against the production edge URL.
+- [ ] T035 [US3] Edge preview, decision, evidence, then merge, in this order (after T041 and T042):
+  1. Run quickstart §4 checks 4.1 to 4.4 and 4.7 on an edge preview deployment (no `FASTMCP_HTTP_*` variables).
+  2. Record the results and the Go or No-Go decision (date, decider) in `specs/015-fastmcp-4-upgrade/evidence/edge-preview.md`.
+  3. Commit all edge evidence (`edge-3.4.7.md` from T030, T032 and T042, plus `edge-preview.md`) to core on a branch `docs/015-edge-evidence`, open the PR, and merge it. This records the evidence in the feature's artifacts before edge's pin reaches edge `main` (FR-011).
+  4. On Go: merge the edge PR by merge commit, redeploy production, and repeat 4.1 and 4.2 against the production edge URL. Those production results go into T044's PR. On No-Go: stop, leave the pin on the branch, and file the blocker.
 
 **Checkpoint**: Core and edge run the same framework major (SC-006, partial; US4 completes it).
 
@@ -192,7 +202,7 @@
 - [ ] T041 [P] [US4] Write `edge:tests/unit/test_framework_version_policy.py` (a copy of T037 and T038 with edge paths; the constants are a local copy per FR-013, with a comment citing ADR-009 v0.1 and the core path), and `edge:.github/workflows/ci.yml` (as T039).
 - [ ] T042 [US4] Run quickstart §3 in the edge worktree, and record the result in `specs/015-fastmcp-4-upgrade/evidence/edge-3.4.7.md`.
 - [ ] T043 [P] [US4] File a Linear issue (project "Open-Biosciences Platform v1.1 — dogfooding + Synapse alignment"): psychology-mcp adopts ADR-009. It means raising `fastmcp>=2.14.1,<3.0` (locked 2.14.7) to the ADR-009 range, adding the policy test and the tool-surface test, and doing a preview deployment. Link it to AGE-718.
-- [ ] T044 [US4] After both PRs merge and production runs inside the range: move `docs/adr/proposed/adr-009-v0.1.md` to `docs/adr/accepted/adr-009-v1.0.md` with status Accepted, in a core docs PR. The same PR commits edge's evidence files under `specs/015-fastmcp-4-upgrade/evidence/` (Path Conventions → Evidence). In a separate biosciences-program PR, add an ADR-009 row to the "Where things are" table in `biosciences-program/docs/adr/README.md`. Update edge's ADR-009 row (T033) to "adopted".
+- [ ] T044 [US4] After both PRs merge and production runs inside the range: move `docs/adr/proposed/adr-009-v0.1.md` to `docs/adr/accepted/adr-009-v1.0.md` with status Accepted, in a core docs PR. The same PR appends edge's production results (T035 step 4) to `specs/015-fastmcp-4-upgrade/evidence/edge-preview.md`. In a separate biosciences-program PR, add an ADR-009 row to the "Where things are" table in `biosciences-program/docs/adr/README.md`. Update edge's ADR-009 row (T033) to "adopted".
 
 **Checkpoint**: The policy is accepted and enforced in core and edge (SC-006, SC-007).
 
@@ -236,7 +246,7 @@ T006 → T008 → T009 → T010 → (T011–T015) → T016 → T017 → T018 →
 
 ### Within the edge PR (commit order)
 
-T005 (.gitignore) → T027 → T028 → T029 → T030 → T031 → T032 → T033, T034 → T041 → T042
+T005 (.gitignore) → T027 → T028 → T029 → T030 → T031 → T032 → T033, T034 → T041 → T042 → T035 (preview → core evidence PR → merge)
 
 ### Parallel opportunities
 

@@ -126,12 +126,13 @@ biosciences-mcp-edge/                             # edge (separate repository an
 | Outcome | Core | Edge |
 |---|---|---|
 | **Conditional Go** | ✅ | ✅ |
-| Condition for final Go | Preview deployment on 3.4.7 passes the quickstart checks, including Host, 34 tools, one call per server, and deepagents' sessionless `tools/call` (R12) | Local capture at 3.4.7 matches the 3.0.2 baseline (T030); the preview passes Host, 2 tools, and both calls |
+| Condition for final Go | Preview deployment on 3.4.7 passes the quickstart checks, including Host, 34 tools, one call per server, and deepagents' sessionless `tools/call` (R12); temporal's stdio client lists and calls tools against the upgrade worktree (quickstart 4.8) | Same-session captures at 3.0.2 and 3.4.7 match (T030); the preview passes Host, 2 tools, and both calls; edge evidence is merged to core before the edge PR (T035) |
 | What would make it No-Go | Horizon rejects the public `Host`, or Horizon runs with sessions in a way deepagents can't use and that can't be configured | Horizon rejects the public `Host` |
 
 ## Delivery sequence and rollback
 
 1. **Done:** PR #18, the gateway mounts use `tool_names` only. It's safe on 2.14.5 and doesn't depend on the rest of the feature.
+1a. **Spec PR:** merge `feature/015-fastmcp-4-upgrade` to `main` before any implementation branch exists (tasks T003; CLAUDE.md git workflow).
 2. **Core upgrade PR (implement branch):** these land together, since the pin change without them breaks the tests:
    - the pin and lock change
    - the R7 test fix
@@ -142,7 +143,7 @@ biosciences-mcp-edge/                             # edge (separate repository an
    - CLAUDE.md updates
 3. **Core preview deployment:** run quickstart §4, record the results in the evidence record, then make the go/no-go decision (FR-011).
 4. **Core production:** merge, then redeploy. Rollback is a revert of the upgrade PR's merge commit plus a redeploy. Time it during the preview to check SC-005.
-5. **Edge upgrade PR,** then preview, then production, following the same pattern.
+5. **Edge upgrade PR,** then preview, then production, following the same pattern. Edge's evidence is committed to core in a docs PR before the edge PR merges (FR-011, tasks T035).
 6. **ADR-009 acceptance:** move it to `accepted/` once both repositories run inside the policy. File the psychology-mcp follow-up issue.
 7. **4.x follow-up:** file a Linear issue for a later feature that moves the range to 4.x, gated by FR-020. It carries the deferred R7 import fix and the R8 envelope parameterization.
 
