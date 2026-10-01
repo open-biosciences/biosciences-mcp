@@ -43,9 +43,9 @@
 **Purpose**: Prerequisite fix and isolated workspaces
 
 - [x] T001 Gateway mounts use `tool_names` only; `prefix=`/`as_proxy=` removed in `src/biosciences_mcp/servers/gateway.py` (PR #18, `a319044`). Implemented and reviewed (`/pr-review 18`: no blocking findings); the merge is T002. Verified: identical 34-tool list on 2.14.5, and the same 34 names on 3.4.7 and 4.0.10. On 2.14.5 unprefixed names now reach the last-mounted server until the pin moves (PR #18 description). Principle V waiver in plan.md Complexity Tracking.
-- [ ] T002 Get PR #18 reviewed (`/pr-review 18`) and merged to `main` by merge commit. Then remove `.worktrees/fix-gateway-mount-tool-names` and its local branch (ADR-PRG-001 §3.4).
-- [ ] T003 Open the spec PR from `feature/015-fastmcp-4-upgrade` to `main` (spec, plan, research, contracts, tasks, process record), review it with `/pr-review`, and merge it by merge commit. CLAUDE.md starts implementation branches only after the spec is merged, and T006 reads `specs/015-fastmcp-4-upgrade/contracts/tool-surface-baseline-core.json` from `main`.
-- [ ] T004 Create the core worktree `.worktrees/implement-015-core` on a new branch `implement/015-fastmcp-4-upgrade-core` from `origin/main` (after T002 and T003). Run `uv sync --extra dev`, and record `fastmcp`/`mcp` versions (quickstart §1; expect 2.14.5 / 1.26.0).
+- [X] T002 Get PR #18 reviewed (`/pr-review 18`) and merged to `main` by merge commit. Then remove `.worktrees/fix-gateway-mount-tool-names` and its local branch (ADR-PRG-001 §3.4).
+- [X] T003 Open the spec PR from `feature/015-fastmcp-4-upgrade` to `main` (spec, plan, research, contracts, tasks, process record), review it with `/pr-review`, and merge it by merge commit. CLAUDE.md starts implementation branches only after the spec is merged, and T006 reads `specs/015-fastmcp-4-upgrade/contracts/tool-surface-baseline-core.json` from `main`.
+- [X] T004 Create the core worktree `.worktrees/implement-015-core` on a new branch `implement/015-fastmcp-4-upgrade-core` from `origin/main` (after T002 and T003). Run `uv sync --extra dev`, and record `fastmcp`/`mcp` versions (quickstart §1; expect 2.14.5 / 1.26.0).
 - [ ] T005 [P] Create the edge worktree `edge:.worktrees/implement-015-edge` on a new branch `implement/015-fastmcp-4-upgrade-edge` from edge `origin/main` (after T003, so the baseline it copies is on core `main`). Add `.worktrees/` to `edge:.gitignore` as the branch's first commit; edge lacks the entry that ADR-PRG-001 assumes is org-wide.
 
 ---
@@ -56,7 +56,7 @@
 
 **⚠️ CRITICAL**: T006 must be committed and green on 2.14.5 before T009 raises the pin.
 
-- [ ] T006 Write `tests/contract/test_tool_surface.py` (markers `contract`, `unit`; no network). Load `biosciences_mcp.servers.gateway.mcp` in process with `fastmcp.Client`, call `list_tools`, and compare against `specs/015-fastmcp-4-upgrade/contracts/tool-surface-baseline-core.json` (path resolved from the repository root), implementing all six invariants in `contracts/tool-surface-invariants.md`. Project `list_tools` with the functions from `specs/015-fastmcp-4-upgrade/research/surface-tools/project_surface.py`, copied into a test helper, so test and baseline can't drift.
+- [X] T006 Write `tests/contract/test_tool_surface.py` (markers `contract`, `unit`; no network). Load `biosciences_mcp.servers.gateway.mcp` in process with `fastmcp.Client`, call `list_tools`, and compare against `specs/015-fastmcp-4-upgrade/contracts/tool-surface-baseline-core.json` (path resolved from the repository root), implementing all six invariants in `contracts/tool-surface-invariants.md`. Project `list_tools` with the functions from `specs/015-fastmcp-4-upgrade/research/surface-tools/project_surface.py`, copied into a test helper, so test and baseline can't drift.
   1. The name set is equal.
   2. Each parameter's name, `type`, `required`, `default`, and `constraints` are equal.
   3. Every guidance line of the baseline description appears in the current tool description or in one of its parameter descriptions. Every column-0 `Name:` header line is ignored.
@@ -67,7 +67,7 @@
   Add the self-test from the invariants contract: a scratch change that removes `x-fastmcp-wrap-result`, edits one IUPHAR `Field(description=…)`, or changes one constraint must fail.
 
   Read schema fields version-tolerantly (`inputSchema`, else `input_schema`) so the same test runs on 2.14.5, 3.4.7, and a later 4.x. On failure, the test names the tool and the missing line.
-- [ ] T007 Run `uv run pytest tests/contract/test_tool_surface.py -v` on 2.14.5. It must pass for all 34 tools. Commit T006 alone, message citing FR-001, FR-002, FR-006, and AGE-718 Step 1.
+- [X] T007 Run `uv run pytest tests/contract/test_tool_surface.py -v` on 2.14.5. It must pass for all 34 tools. Commit T006 alone, message citing FR-001, FR-002, FR-006, and AGE-718 Step 1.
 
 **Checkpoint**: The guard is in place on the current version; the pin can now move.
 
