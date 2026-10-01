@@ -1,0 +1,2377 @@
+{
+ "captured_with": "fastmcp 2.14.5 (core main 072f47d; same surface as PR #18 head a319044)",
+ "fields": "description; params{type, required, default, description, constraints}; output_schema (-dereferenced); wrap_result (x-fastmcp-wrap-result); annotations; meta.tags (from _meta.fastmcp or _meta._fastmcp)",
+ "generator": "specs/015-fastmcp-4-upgrade/research/surface-tools/project_surface.py",
+ "tools": {
+  "biogrid_get_interactions": {
+   "annotations": null,
+   "description": "Get genetic/protein interactions for a validated gene symbol (Strict Phase 2).\n\nRetrieves experimentally validated interactions from BioGRID with evidence types.\nRequires a validated gene symbol from search_genes tool.\n\nArgs:\n    gene_symbol: Validated gene symbol (uppercase, e.g., \"TP53\")\n    organism: NCBI Taxonomy ID (default: 9606 for Homo sapiens)\n    max_results: Max interactions to return (default/max: 10000)\n    include_interspecies: Include interspecies interactions (default: False)\n    slim: Token budgeting (Constitution Principle IV). When True, returns\n        minimal fields (~15 tokens/interaction): symbol_b and\n        experimental_system_type only, plus counts. Default: False.\n\nReturns:\n    InteractionResult (full), slim dict, or ErrorEnvelope on error\n\nExamples:\n    >>> get_interactions(\"TP53\")  # Full interaction records\n    >>> get_interactions(\"TP53\", slim=True)  # Minimal fields for token budgeting\n    >>> get_interactions(\"MDM2\", max_results=100)  # Limit results\n\nError Codes:\n    - AMBIGUOUS_QUERY: Invalid gene symbol format\n    - ENTITY_NOT_FOUND: No interactions found for gene\n    - UPSTREAM_ERROR: BioGRID API error (invalid key, timeout, etc.)\n    - RATE_LIMITED: Rate limit exceeded (2 req/sec)\n\nNote:\n    Full mode includes experimental_system (e.g., \"Affinity Capture-Western\"),\n    experimental_system_type (\"physical\" or \"genetic\"), PubMed ID, and throughput.\n    Slim mode returns only symbol_b and experimental_system_type per interaction.",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "properties": {
+     "result": {
+      "anyOf": [
+       {},
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "description": "Canonical error envelope per ADR-001 Section 8.\n\nAll error responses from Biosciences MCP tools use this format.\nThe recovery_hint field enables agent self-correction.",
+        "properties": {
+         "error": {},
+         "success": {
+          "default": false,
+          "description": "Always false for errors",
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "error"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "required": [
+     "result"
+    ],
+    "type": "object",
+    "x-fastmcp-wrap-result": true
+   },
+   "params": {
+    "gene_symbol": {
+     "required": true,
+     "type": "string"
+    },
+    "include_interspecies": {
+     "default": false,
+     "required": false,
+     "type": "boolean"
+    },
+    "max_results": {
+     "default": 10000,
+     "required": false,
+     "type": "integer"
+    },
+    "organism": {
+     "default": 9606,
+     "required": false,
+     "type": "integer"
+    },
+    "slim": {
+     "default": false,
+     "required": false,
+     "type": "boolean"
+    }
+   },
+   "wrap_result": true
+  },
+  "biogrid_search_genes": {
+   "annotations": null,
+   "description": "Search for a gene in BioGRID and confirm it exists (Fuzzy Phase 1).\n\nQueries BioGRID to confirm the gene exists in the database and returns\nthe interaction count. Use the confirmed symbol in get_interactions for\nstrict lookup.\n\nArgs:\n    query: Gene symbol to search (e.g., \"TP53\", \"brca1\")\n    organism: NCBI Taxonomy ID (default: 9606 for Homo sapiens)\n    slim: Token budgeting (Constitution Principle IV). No behavior change\n        since search candidates are already minimal (~30 tokens).\n\nReturns:\n    PaginationEnvelope with confirmed gene and interaction_count, or ErrorEnvelope\n\nExamples:\n    >>> search_genes(\"TP53\")  # Confirmed in BioGRID with interaction count\n    >>> search_genes(\"brca1\")  # Normalized to \"BRCA1\", confirmed via API\n    >>> search_genes(\"ZZZZZ99\")  # ENTITY_NOT_FOUND: gene not in BioGRID\n\nError Codes:\n    - AMBIGUOUS_QUERY: Query too short or invalid format\n    - ENTITY_NOT_FOUND: Gene not found in BioGRID database\n    - UPSTREAM_ERROR: BioGRID API error (invalid key, timeout, etc.)\n    - RATE_LIMITED: Rate limit exceeded (2 req/sec)",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "properties": {
+     "result": {
+      "anyOf": [
+       {
+        "properties": {
+         "items": {
+          "description": "Data payload",
+          "items": {},
+          "type": "array"
+         },
+         "pagination": {
+          "description": "Pagination metadata within PaginationEnvelope.",
+          "properties": {
+           "cursor": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Opaque cursor for next page; null = end"
+           },
+           "page_size": {
+            "default": 50,
+            "description": "Items per page",
+            "type": "integer"
+           },
+           "total_count": {
+            "anyOf": [
+             {
+              "type": "integer"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Total items if known"
+           }
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "items",
+         "pagination"
+        ],
+        "type": "object"
+       },
+       {
+        "description": "Canonical error envelope per ADR-001 Section 8.\n\nAll error responses from Biosciences MCP tools use this format.\nThe recovery_hint field enables agent self-correction.",
+        "properties": {
+         "error": {},
+         "success": {
+          "default": false,
+          "description": "Always false for errors",
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "error"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "required": [
+     "result"
+    ],
+    "type": "object",
+    "x-fastmcp-wrap-result": true
+   },
+   "params": {
+    "organism": {
+     "default": 9606,
+     "required": false,
+     "type": "integer"
+    },
+    "query": {
+     "required": true,
+     "type": "string"
+    },
+    "slim": {
+     "default": false,
+     "required": false,
+     "type": "boolean"
+    }
+   },
+   "wrap_result": true
+  },
+  "chembl_get_compound": {
+   "annotations": null,
+   "description": "Get complete compound record by ChEMBL CURIE.\n\nReturns full Agentic Biolink entity with cross-references.\nRequires resolved CURIE from search_compounds.\n\nArgs:\n    chembl_id: ChEMBL CURIE in format 'CHEMBL:NNNNN' (e.g., 'CHEMBL:25', 'CHEMBL:1201583').\n    slim: If true, return minimal fields for token efficiency.\n\nReturns:\n    Compound record with cross_references, or ErrorEnvelope on failure.",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "properties": {
+     "result": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "description": "Canonical error envelope per ADR-001 Section 8.\n\nAll error responses from Biosciences MCP tools use this format.\nThe recovery_hint field enables agent self-correction.",
+        "properties": {
+         "error": {},
+         "success": {
+          "default": false,
+          "description": "Always false for errors",
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "error"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "required": [
+     "result"
+    ],
+    "type": "object",
+    "x-fastmcp-wrap-result": true
+   },
+   "params": {
+    "chembl_id": {
+     "required": true,
+     "type": "string"
+    },
+    "slim": {
+     "default": false,
+     "required": false,
+     "type": "boolean"
+    }
+   },
+   "wrap_result": true
+  },
+  "chembl_get_compounds_batch": {
+   "annotations": null,
+   "description": "Batch lookup for multiple compounds to prevent thread pool exhaustion.\n\nUse this for bulk operations instead of calling get_compound repeatedly.\n\nArgs:\n    chembl_ids: List of ChEMBL CURIEs (e.g., ['CHEMBL:25', 'CHEMBL:941']).\n    slim: If true (default), return minimal fields to reduce tokens.\n\nReturns:\n    List of Compound records, or ErrorEnvelope on failure.",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "properties": {
+     "result": {
+      "anyOf": [
+       {
+        "items": {
+         "additionalProperties": true,
+         "type": "object"
+        },
+        "type": "array"
+       },
+       {
+        "description": "Canonical error envelope per ADR-001 Section 8.\n\nAll error responses from Biosciences MCP tools use this format.\nThe recovery_hint field enables agent self-correction.",
+        "properties": {
+         "error": {},
+         "success": {
+          "default": false,
+          "description": "Always false for errors",
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "error"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "required": [
+     "result"
+    ],
+    "type": "object",
+    "x-fastmcp-wrap-result": true
+   },
+   "params": {
+    "chembl_ids": {
+     "constraints": {
+      "items": {
+       "type": "string"
+      }
+     },
+     "required": true,
+     "type": "array"
+    },
+    "slim": {
+     "default": true,
+     "required": false,
+     "type": "boolean"
+    }
+   },
+   "wrap_result": true
+  },
+  "chembl_search_compounds": {
+   "annotations": null,
+   "description": "Fuzzy search for compounds by name, synonym, or identifier.\n\nReturns ranked candidates for resolution. Use this before calling get_compound.\n\nArgs:\n    query: Search term (compound name, synonym, or natural language query).\n           Minimum 2 characters required.\n    slim: If true, return minimal fields (~20 tokens per entity).\n          Default false returns full candidates.\n    cursor: Opaque cursor for pagination. Pass from previous response for next page.\n    page_size: Number of results per page (1-100, default 50).\n\nReturns:\n    PaginationEnvelope with CompoundSearchCandidate items, or ErrorEnvelope on failure.",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "properties": {
+     "result": {
+      "anyOf": [
+       {
+        "description": "Canonical pagination envelope per ADR-001 Section 8.\n\nAll list/search operations return this format with items and pagination metadata.",
+        "properties": {
+         "items": {
+          "description": "Data payload",
+          "items": {},
+          "type": "array"
+         },
+         "pagination": {
+          "description": "Pagination metadata within PaginationEnvelope.",
+          "properties": {
+           "cursor": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Opaque cursor for next page; null = end"
+           },
+           "page_size": {
+            "default": 50,
+            "description": "Items per page",
+            "type": "integer"
+           },
+           "total_count": {
+            "anyOf": [
+             {
+              "type": "integer"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Total items if known"
+           }
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "items",
+         "pagination"
+        ],
+        "type": "object"
+       },
+       {
+        "description": "Canonical error envelope per ADR-001 Section 8.\n\nAll error responses from Biosciences MCP tools use this format.\nThe recovery_hint field enables agent self-correction.",
+        "properties": {
+         "error": {},
+         "success": {
+          "default": false,
+          "description": "Always false for errors",
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "error"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "required": [
+     "result"
+    ],
+    "type": "object",
+    "x-fastmcp-wrap-result": true
+   },
+   "params": {
+    "cursor": {
+     "default": null,
+     "required": false,
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "page_size": {
+     "default": 50,
+     "required": false,
+     "type": "integer"
+    },
+    "query": {
+     "required": true,
+     "type": "string"
+    },
+    "slim": {
+     "default": false,
+     "required": false,
+     "type": "boolean"
+    }
+   },
+   "wrap_result": true
+  },
+  "clinicaltrials_get_trial": {
+   "annotations": null,
+   "description": "Get complete trial record by NCT CURIE.\n\nRetrieves full clinical trial data with detailed protocol information.\nRequires resolved NCT CURIE from search_trials (Fuzzy-to-Fact protocol).\n\nArgs:\n    nct_id: NCT CURIE in format 'NCT:NNNNNNNN' (e.g., 'NCT:00461032').\n            Must be exactly 8 digits after the colon.\n            Obtain from search_trials results - do NOT pass raw query strings.\n\nReturns:\n    Trial record with full protocol details (~5K-10K tokens), or ErrorEnvelope on failure.\n\n    Success response includes:\n    - Protocol: study_type, allocation, intervention_model, masking, primary_purpose\n    - Eligibility: criteria_text, age range, sex, healthy_volunteers\n    - Outcomes: primary and secondary endpoints with timeframes\n    - Sponsors: lead sponsor and collaborators\n    - Administrative: phase, status, enrollment, dates\n    - Cross-references: PubMed, registry links, MeSH IDs\n\n    Error responses:\n    - UNRESOLVED_ENTITY: Raw string passed instead of NCT CURIE\n      \u2192 Recovery: Call search_trials first\n    - INVALID_INPUT: Malformed NCT CURIE (wrong format)\n      \u2192 Recovery: Verify format is NCT:NNNNNNNN with 8 digits\n    - ENTITY_NOT_FOUND: Valid CURIE but trial doesn't exist\n      \u2192 Recovery: Verify NCT ID or search again\n    - UPSTREAM_ERROR: API failure\n      \u2192 Recovery: Retry later\n\nExamples:\n    >>> # Correct usage (Fuzzy-to-Fact workflow)\n    >>> results = await search_trials(\"bevacizumab breast cancer\")\n    >>> trial = await get_trial(results[\"items\"][0][\"id\"])  # \"NCT:00461032\"\n\n    >>> # WRONG: Passing raw query string\n    >>> trial = await get_trial(\"breast cancer\")  # Returns UNRESOLVED_ENTITY error\n\n    >>> # WRONG: Malformed CURIE\n    >>> trial = await get_trial(\"NCT:123\")  # Returns INVALID_INPUT error",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "properties": {
+     "result": {
+      "anyOf": [
+       {},
+       {
+        "description": "Canonical error envelope per ADR-001 Section 8.\n\nAll error responses from Biosciences MCP tools use this format.\nThe recovery_hint field enables agent self-correction.",
+        "properties": {
+         "error": {},
+         "success": {
+          "default": false,
+          "description": "Always false for errors",
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "error"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "required": [
+     "result"
+    ],
+    "type": "object",
+    "x-fastmcp-wrap-result": true
+   },
+   "params": {
+    "nct_id": {
+     "required": true,
+     "type": "string"
+    }
+   },
+   "wrap_result": true
+  },
+  "clinicaltrials_get_trial_locations": {
+   "annotations": null,
+   "description": "Get trial facility locations and contact information.\n\nRetrieves geographic facility data for a clinical trial including addresses,\ncontact details, and recruitment status for each site.\n\nArgs:\n    nct_id: NCT CURIE in format 'NCT:NNNNNNNN' (e.g., 'NCT:04123456').\n            Must be exactly 8 digits after the colon.\n            Obtain from search_trials results.\n\nReturns:\n    List of TrialLocation objects (~50-100 tokens per location), or ErrorEnvelope on failure.\n\n    Success response structure:\n    [\n        {\n            \"facility_name\": \"Dana-Farber Cancer Institute\",\n            \"city\": \"Boston\",\n            \"state\": \"Massachusetts\",  # Omitted for non-US/Canada\n            \"country\": \"United States\",\n            \"zip\": \"02215\",\n            \"contact_name\": \"Dr. Jane Smith\",  # May be null\n            \"contact_phone\": \"617-555-0123\",   # May be null\n            \"contact_email\": \"trials@dfci.harvard.edu\",  # May be null\n            \"recruitment_status\": \"RECRUITING\"\n        },\n        ...\n    ]\n\n    Empty list: Trial has no facilities (e.g., remote/virtual trial)\n\n    Error responses:\n    - UNRESOLVED_ENTITY: Raw string passed instead of NCT CURIE\n    - INVALID_INPUT: Malformed NCT CURIE\n    - ENTITY_NOT_FOUND: Trial doesn't exist\n    - UPSTREAM_ERROR: API failure\n\nExamples:\n    >>> # Get locations for a multi-site trial\n    >>> results = await search_trials(\"cancer\", location=\"Boston\")\n    >>> locations = await get_trial_locations(results[\"items\"][0][\"id\"])\n    >>> recruiting_sites = [loc for loc in locations if loc[\"recruitment_status\"] == \"RECRUITING\"]\n\n    >>> # Filter by geographic region\n    >>> ma_sites = [loc for loc in locations if loc.get(\"state\") == \"Massachusetts\"]",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "properties": {
+     "result": {
+      "anyOf": [
+       {
+        "items": {},
+        "type": "array"
+       },
+       {
+        "description": "Canonical error envelope per ADR-001 Section 8.\n\nAll error responses from Biosciences MCP tools use this format.\nThe recovery_hint field enables agent self-correction.",
+        "properties": {
+         "error": {},
+         "success": {
+          "default": false,
+          "description": "Always false for errors",
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "error"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "required": [
+     "result"
+    ],
+    "type": "object",
+    "x-fastmcp-wrap-result": true
+   },
+   "params": {
+    "nct_id": {
+     "required": true,
+     "type": "string"
+    }
+   },
+   "wrap_result": true
+  },
+  "clinicaltrials_search_trials": {
+   "annotations": null,
+   "description": "Fuzzy search for clinical trials.\n\nSearches ClinicalTrials.gov database using natural language queries with optional filters.\nReturns ranked trial candidates with NCT CURIEs for strict lookup.\n\nArgs:\n    query: Natural language search term (e.g., \"breast cancer immunotherapy\").\n           Searches across conditions, interventions, titles, and descriptions.\n           Minimum 2 characters required.\n    status: Filter by recruitment status (RECRUITING, COMPLETED, NOT_YET_RECRUITING, etc.).\n            Optional - omit to search all statuses.\n    phase: Filter by trial phase (PHASE1, PHASE2, PHASE3, PHASE4, EARLY_PHASE1, NA).\n           Optional - omit to search all phases.\n    condition: Filter by condition/disease name (e.g., \"diabetes\", \"lung cancer\").\n               Optional - narrows results to specific conditions.\n    intervention: Filter by intervention/treatment name (e.g., \"bevacizumab\", \"surgery\").\n                  Optional - narrows results to specific treatments.\n    location: Filter by geographic location (city, state, or country).\n              Examples: \"Boston\", \"Massachusetts\", \"United States\", \"Japan\".\n              Optional - narrows results to specific locations.\n    slim: If true, return minimal fields for token efficiency (~100 tokens/trial).\n          If false (default), return full candidate details (~200 tokens/trial).\n    cursor: Opaque pagination cursor from previous response.\n            Pass to retrieve next page of results.\n    page_size: Number of results per page (1-200, default 50).\n               Larger pages use more tokens but fewer API calls.\n\nReturns:\n    PaginationEnvelope with TrialSearchCandidate items, or ErrorEnvelope on failure.\n\n    Success response structure:\n    {\n        \"items\": [\n            {\n                \"id\": \"NCT:00461032\",\n                \"title\": \"Bevacizumab and Erlotinib in Treating Patients...\",\n                \"brief_summary\": \"This phase II trial is studying...\",\n                \"phase\": \"PHASE2\",\n                \"status\": \"COMPLETED\",\n                \"conditions\": [\"Breast Cancer\", \"Metastatic Breast Cancer\"],\n                \"interventions\": [\"Bevacizumab\", \"Erlotinib Hydrochloride\"]\n            },\n            ...\n        ],\n        \"pagination\": {\n            \"cursor\": \"eyJraW5kIjo...\" or null,\n            \"total_count\": 1543,\n            \"page_size\": 50\n        }\n    }\n\n    Error responses include recovery hints for autonomous agents.\n\nExamples:\n    >>> # Simple search\n    >>> results = await search_trials(\"diabetes\")\n\n    >>> # Filtered search\n    >>> results = await search_trials(\n    ...     query=\"immunotherapy\",\n    ...     condition=\"lung cancer\",\n    ...     phase=\"PHASE3\",\n    ...     status=\"RECRUITING\"\n    ... )\n\n    >>> # Pagination\n    >>> page1 = await search_trials(\"cancer\", page_size=20)\n    >>> page2 = await search_trials(\"cancer\", cursor=page1[\"pagination\"][\"cursor\"])",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "properties": {
+     "result": {
+      "anyOf": [
+       {
+        "description": "Canonical pagination envelope per ADR-001 Section 8.\n\nAll list/search operations return this format with items and pagination metadata.",
+        "properties": {
+         "items": {
+          "description": "Data payload",
+          "items": {},
+          "type": "array"
+         },
+         "pagination": {
+          "description": "Pagination metadata within PaginationEnvelope.",
+          "properties": {
+           "cursor": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Opaque cursor for next page; null = end"
+           },
+           "page_size": {
+            "default": 50,
+            "description": "Items per page",
+            "type": "integer"
+           },
+           "total_count": {
+            "anyOf": [
+             {
+              "type": "integer"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Total items if known"
+           }
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "items",
+         "pagination"
+        ],
+        "type": "object"
+       },
+       {
+        "description": "Canonical error envelope per ADR-001 Section 8.\n\nAll error responses from Biosciences MCP tools use this format.\nThe recovery_hint field enables agent self-correction.",
+        "properties": {
+         "error": {},
+         "success": {
+          "default": false,
+          "description": "Always false for errors",
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "error"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "required": [
+     "result"
+    ],
+    "type": "object",
+    "x-fastmcp-wrap-result": true
+   },
+   "params": {
+    "condition": {
+     "default": null,
+     "required": false,
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "cursor": {
+     "default": null,
+     "required": false,
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "intervention": {
+     "default": null,
+     "required": false,
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "location": {
+     "default": null,
+     "required": false,
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "page_size": {
+     "default": 50,
+     "required": false,
+     "type": "integer"
+    },
+    "phase": {
+     "default": null,
+     "required": false,
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "query": {
+     "required": true,
+     "type": "string"
+    },
+    "slim": {
+     "default": false,
+     "required": false,
+     "type": "boolean"
+    },
+    "status": {
+     "default": null,
+     "required": false,
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   },
+   "wrap_result": true
+  },
+  "ensembl_get_gene": {
+   "annotations": null,
+   "description": "Get complete gene record by Ensembl Gene ID.\n\nReturns full Agentic Biolink entity with cross-references.\nRequires resolved ENSG* ID from search_genes (Phase 2 of Fuzzy-to-Fact).\n\nArgs:\n    ensembl_id: Ensembl Gene ID in format 'ENSG' + 11 digits.\n                Example: \"ENSG00000141510\" (TP53), \"ENSG00000012048\" (BRCA1).\n                Versioned IDs are accepted (e.g., \"ENSG00000141510.12\").\n    slim: If true, omit cross_references to reduce token count.\n          Full mode: ~150-350 tokens, Slim mode: ~50 tokens.\n\nReturns:\n    EnsemblGene with:\n    - id, symbol, name, biotype, species\n    - assembly_name, chromosome, start, end, strand\n    - transcripts: list of ENST* IDs for this gene\n    - cross_references: HGNC, UniProt, Entrez, RefSeq, OMIM, PDB, KEGG, ChEMBL\n\n    On error: ErrorEnvelope with code, message, recovery_hint.\n    - UNRESOLVED_ENTITY: Invalid ID format (use search_genes first)\n    - ENTITY_NOT_FOUND: Valid format but gene doesn't exist\n    - RATE_LIMITED: Too many requests (retry after delay)\n    - UPSTREAM_ERROR: Ensembl API unavailable (retry later)\n\nExample:\n    >>> gene = await get_gene(\"ENSG00000141510\")\n    >>> print(gene.symbol)  # \"TP53\"\n    >>> print(gene.cross_references.hgnc)  # \"HGNC:11998\"",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "properties": {
+     "result": {
+      "anyOf": [
+       {},
+       {
+        "description": "Canonical error envelope per ADR-001 Section 8.\n\nAll error responses from Biosciences MCP tools use this format.\nThe recovery_hint field enables agent self-correction.",
+        "properties": {
+         "error": {},
+         "success": {
+          "default": false,
+          "description": "Always false for errors",
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "error"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "required": [
+     "result"
+    ],
+    "type": "object",
+    "x-fastmcp-wrap-result": true
+   },
+   "params": {
+    "ensembl_id": {
+     "required": true,
+     "type": "string"
+    },
+    "slim": {
+     "default": false,
+     "required": false,
+     "type": "boolean"
+    }
+   },
+   "wrap_result": true
+  },
+  "ensembl_get_transcript": {
+   "annotations": null,
+   "description": "Get transcript record by Ensembl Transcript ID.\n\nReturns full transcript details with parent gene reference.\nTypically obtained from get_gene's transcripts list.\n\nArgs:\n    transcript_id: Ensembl Transcript ID in format 'ENST' + 11 digits.\n                   Example: \"ENST00000269305\" (TP53 canonical transcript).\n                   Versioned IDs are accepted (e.g., \"ENST00000269305.8\").\n    slim: If true, omit cross_references to reduce token count.\n          Full mode: ~100-200 tokens, Slim mode: ~50 tokens.\n\nReturns:\n    EnsemblTranscript with:\n    - id, display_name, biotype, parent_gene\n    - is_canonical: whether this is the canonical transcript\n    - species, assembly_name, chromosome, start, end, strand\n    - cross_references: UniProt, RefSeq, CCDS\n\n    On error: ErrorEnvelope with code, message, recovery_hint.\n    - UNRESOLVED_ENTITY: Invalid ID format or wrong ID type (ENSG passed instead of ENST)\n    - ENTITY_NOT_FOUND: Valid format but transcript doesn't exist\n    - RATE_LIMITED: Too many requests (retry after delay)\n    - UPSTREAM_ERROR: Ensembl API unavailable (retry later)\n\nExample:\n    >>> gene = await get_gene(\"ENSG00000141510\")\n    >>> transcript = await get_transcript(gene.transcripts[0])\n    >>> print(transcript.display_name)  # \"TP53-201\"\n    >>> print(transcript.is_canonical)  # True",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "properties": {
+     "result": {
+      "anyOf": [
+       {},
+       {
+        "description": "Canonical error envelope per ADR-001 Section 8.\n\nAll error responses from Biosciences MCP tools use this format.\nThe recovery_hint field enables agent self-correction.",
+        "properties": {
+         "error": {},
+         "success": {
+          "default": false,
+          "description": "Always false for errors",
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "error"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "required": [
+     "result"
+    ],
+    "type": "object",
+    "x-fastmcp-wrap-result": true
+   },
+   "params": {
+    "slim": {
+     "default": false,
+     "required": false,
+     "type": "boolean"
+    },
+    "transcript_id": {
+     "required": true,
+     "type": "string"
+    }
+   },
+   "wrap_result": true
+  },
+  "ensembl_search_genes": {
+   "annotations": null,
+   "description": "Fuzzy search for genes by symbol, name, or description.\n\nReturns ranked candidates with Ensembl Gene IDs for Phase 2 strict lookup.\nThis is Phase 1 of the Fuzzy-to-Fact protocol - use before calling get_gene.\n\nArgs:\n    query: Search term (gene symbol, name, or description).\n           Minimum 2 characters required.\n           Examples: \"BRCA1\", \"TP53\", \"tumor protein\"\n    species: Species name or alias. Default is \"homo_sapiens\" (human).\n             Supported aliases: human, mouse, rat, zebrafish, drosophila, fly,\n             c.elegans, worm, yeast, chicken, pig, dog, cow.\n    page_size: Number of results per page (1-100, default 50).\n    cursor: Opaque cursor for pagination. Pass from previous response for next page.\n    slim: If true, return minimal fields (~25 tokens per entity).\n          Default false returns full candidates.\n\nReturns:\n    PaginationEnvelope with GeneSearchCandidate items (id, symbol, name, biotype, species, score).\n    On error: ErrorEnvelope with code, message, recovery_hint.\n\nExample:\n    >>> result = await search_genes(\"BRCA1\", species=\"human\")\n    >>> top_gene_id = result.items[0].id  # \"ENSG00000012048\"\n    >>> gene = await get_gene(top_gene_id)  # Phase 2: strict lookup",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "properties": {
+     "result": {
+      "anyOf": [
+       {
+        "properties": {
+         "items": {
+          "description": "Data payload",
+          "items": {},
+          "type": "array"
+         },
+         "pagination": {
+          "description": "Pagination metadata within PaginationEnvelope.",
+          "properties": {
+           "cursor": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Opaque cursor for next page; null = end"
+           },
+           "page_size": {
+            "default": 50,
+            "description": "Items per page",
+            "type": "integer"
+           },
+           "total_count": {
+            "anyOf": [
+             {
+              "type": "integer"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Total items if known"
+           }
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "items",
+         "pagination"
+        ],
+        "type": "object"
+       },
+       {
+        "description": "Canonical error envelope per ADR-001 Section 8.\n\nAll error responses from Biosciences MCP tools use this format.\nThe recovery_hint field enables agent self-correction.",
+        "properties": {
+         "error": {},
+         "success": {
+          "default": false,
+          "description": "Always false for errors",
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "error"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "required": [
+     "result"
+    ],
+    "type": "object",
+    "x-fastmcp-wrap-result": true
+   },
+   "params": {
+    "cursor": {
+     "default": null,
+     "required": false,
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "page_size": {
+     "default": 50,
+     "required": false,
+     "type": "integer"
+    },
+    "query": {
+     "required": true,
+     "type": "string"
+    },
+    "slim": {
+     "default": false,
+     "required": false,
+     "type": "boolean"
+    },
+    "species": {
+     "default": "homo_sapiens",
+     "required": false,
+     "type": "string"
+    }
+   },
+   "wrap_result": true
+  },
+  "entrez_get_gene": {
+   "annotations": null,
+   "description": "Get complete gene record from NCBI Gene database by NCBIGene CURIE.\n\nReturns full Agentic Biolink entity with cross-references to HGNC, Ensembl,\nUniProt, RefSeq, and OMIM. Requires resolved CURIE from search_genes.\n\nArgs:\n    entrez_id: NCBIGene CURIE in format 'NCBIGene:NNNNN'\n               (e.g., 'NCBIGene:7157' for TP53, 'NCBIGene:672' for BRCA1).\n    slim: If True, return minimal fields (id, symbol, name, organism)\n          for token efficiency (~25 vs ~115-300 tokens).\n\nReturns:\n    EntrezGene record with:\n    - id, symbol, name, organism (always present)\n    - summary, description, map_location, chromosome, aliases (full mode)\n    - cross_references: HGNC, Ensembl, UniProt, RefSeq, OMIM links\n\n    Or ErrorEnvelope with recovery hints on failure.\n\nExamples:\n    Get TP53: entrez_id=\"NCBIGene:7157\"\n    Get BRCA1 slim: entrez_id=\"NCBIGene:672\", slim=True",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "properties": {
+     "result": {
+      "anyOf": [
+       {},
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "description": "Canonical error envelope per ADR-001 Section 8.\n\nAll error responses from Biosciences MCP tools use this format.\nThe recovery_hint field enables agent self-correction.",
+        "properties": {
+         "error": {},
+         "success": {
+          "default": false,
+          "description": "Always false for errors",
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "error"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "required": [
+     "result"
+    ],
+    "type": "object",
+    "x-fastmcp-wrap-result": true
+   },
+   "params": {
+    "entrez_id": {
+     "required": true,
+     "type": "string"
+    },
+    "slim": {
+     "default": false,
+     "required": false,
+     "type": "boolean"
+    }
+   },
+   "wrap_result": true
+  },
+  "entrez_get_pubmed_links": {
+   "annotations": null,
+   "description": "Get PubMed IDs associated with a gene for evidence gathering.\n\nReturns list of PubMed IDs linked to the gene. Use these IDs with a\nPubMed MCP server for full article metadata.\n\nArgs:\n    entrez_id: NCBIGene CURIE in format 'NCBIGene:NNNNN'\n               (e.g., 'NCBIGene:7157' for TP53).\n    limit: Maximum number of PubMed IDs to return (1-100, default 10).\n\nReturns:\n    List of PubMed ID strings (e.g., [\"39804234\", \"39804163\"]).\n    Empty list if gene has no associated literature (not an error).\n\n    Or ErrorEnvelope with recovery hints on failure.\n\nExamples:\n    Get TP53 citations: entrez_id=\"NCBIGene:7157\", limit=10\n    Get top 5 BRCA1 papers: entrez_id=\"NCBIGene:672\", limit=5",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "properties": {
+     "result": {
+      "anyOf": [
+       {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       {
+        "description": "Canonical error envelope per ADR-001 Section 8.\n\nAll error responses from Biosciences MCP tools use this format.\nThe recovery_hint field enables agent self-correction.",
+        "properties": {
+         "error": {},
+         "success": {
+          "default": false,
+          "description": "Always false for errors",
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "error"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "required": [
+     "result"
+    ],
+    "type": "object",
+    "x-fastmcp-wrap-result": true
+   },
+   "params": {
+    "entrez_id": {
+     "required": true,
+     "type": "string"
+    },
+    "limit": {
+     "default": 10,
+     "required": false,
+     "type": "integer"
+    }
+   },
+   "wrap_result": true
+  },
+  "entrez_search_genes": {
+   "annotations": null,
+   "description": "Fuzzy search for genes in NCBI Gene database by symbol, name, or description.\n\nReturns ranked candidates with NCBIGene CURIEs for Phase 2 strict lookup.\nUses NCBI E-utilities esearch + esummary two-step pattern.\n\nArgs:\n    query: Search term (gene symbol, name, description, or natural language).\n           Minimum 2 characters required.\n    organism: Organism filter (e.g., \"human\", \"Homo sapiens\", \"mouse\").\n              Default: \"human\" (Homo sapiens). Pass None for all organisms.\n    page_size: Number of results per page (1-100, default 50).\n    cursor: Opaque cursor for pagination (from previous response).\n\nReturns:\n    PaginationEnvelope with GeneSearchCandidate items containing:\n    - id: NCBIGene CURIE (e.g., \"NCBIGene:7157\")\n    - symbol: Gene symbol (e.g., \"TP53\")\n    - name: Gene name/description\n    - organism: Scientific name\n    - score: Relevance score (0.0-1.0)\n\n    Or ErrorEnvelope with recovery hints on failure.\n\nExamples:\n    Search for TP53: query=\"TP53\", organism=\"human\"\n    Search for BRCA genes: query=\"BRCA\"\n    Paginate results: cursor=<cursor from previous response>",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "properties": {
+     "result": {
+      "anyOf": [
+       {
+        "properties": {
+         "items": {
+          "description": "Data payload",
+          "items": {},
+          "type": "array"
+         },
+         "pagination": {
+          "description": "Pagination metadata within PaginationEnvelope.",
+          "properties": {
+           "cursor": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Opaque cursor for next page; null = end"
+           },
+           "page_size": {
+            "default": 50,
+            "description": "Items per page",
+            "type": "integer"
+           },
+           "total_count": {
+            "anyOf": [
+             {
+              "type": "integer"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Total items if known"
+           }
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "items",
+         "pagination"
+        ],
+        "type": "object"
+       },
+       {
+        "description": "Canonical error envelope per ADR-001 Section 8.\n\nAll error responses from Biosciences MCP tools use this format.\nThe recovery_hint field enables agent self-correction.",
+        "properties": {
+         "error": {},
+         "success": {
+          "default": false,
+          "description": "Always false for errors",
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "error"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "required": [
+     "result"
+    ],
+    "type": "object",
+    "x-fastmcp-wrap-result": true
+   },
+   "params": {
+    "cursor": {
+     "default": null,
+     "required": false,
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "organism": {
+     "default": "human",
+     "required": false,
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "page_size": {
+     "default": 50,
+     "required": false,
+     "type": "integer"
+    },
+    "query": {
+     "required": true,
+     "type": "string"
+    }
+   },
+   "wrap_result": true
+  },
+  "hgnc_get_gene": {
+   "annotations": null,
+   "description": "Get complete gene record by HGNC CURIE.\n\nReturns full Agentic Biolink entity with cross-references.\nRequires resolved CURIE from search_genes.\n\nArgs:\n    hgnc_id: HGNC CURIE in format 'HGNC:NNNNN' (e.g., 'HGNC:1100' for BRCA1).\n\nReturns:\n    Gene record with cross_references, or ErrorEnvelope on failure.",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "properties": {
+     "result": {
+      "anyOf": [
+       {},
+       {
+        "description": "Canonical error envelope per ADR-001 Section 8.\n\nAll error responses from Biosciences MCP tools use this format.\nThe recovery_hint field enables agent self-correction.",
+        "properties": {
+         "error": {},
+         "success": {
+          "default": false,
+          "description": "Always false for errors",
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "error"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "required": [
+     "result"
+    ],
+    "type": "object",
+    "x-fastmcp-wrap-result": true
+   },
+   "params": {
+    "hgnc_id": {
+     "required": true,
+     "type": "string"
+    }
+   },
+   "wrap_result": true
+  },
+  "hgnc_search_genes": {
+   "annotations": null,
+   "description": "Fuzzy search for genes by name, symbol, synonym, or description.\n\nReturns ranked candidates for resolution. Use this before calling get_gene.\n\nArgs:\n    query: Search term (gene symbol, name, synonym, or natural language query).\n           Minimum 2 characters required.\n    slim: If true, return only id/symbol/name/score (~20 tokens per entity).\n          Default false returns full candidates.\n    cursor: Opaque cursor for pagination. Pass from previous response for next page.\n    page_size: Number of results per page (1-100, default 50).\n\nReturns:\n    PaginationEnvelope with SearchCandidate items, or ErrorEnvelope on failure.",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "properties": {
+     "result": {
+      "anyOf": [
+       {
+        "properties": {
+         "items": {
+          "description": "Data payload",
+          "items": {},
+          "type": "array"
+         },
+         "pagination": {
+          "description": "Pagination metadata within PaginationEnvelope.",
+          "properties": {
+           "cursor": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Opaque cursor for next page; null = end"
+           },
+           "page_size": {
+            "default": 50,
+            "description": "Items per page",
+            "type": "integer"
+           },
+           "total_count": {
+            "anyOf": [
+             {
+              "type": "integer"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Total items if known"
+           }
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "items",
+         "pagination"
+        ],
+        "type": "object"
+       },
+       {
+        "description": "Canonical error envelope per ADR-001 Section 8.\n\nAll error responses from Biosciences MCP tools use this format.\nThe recovery_hint field enables agent self-correction.",
+        "properties": {
+         "error": {},
+         "success": {
+          "default": false,
+          "description": "Always false for errors",
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "error"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "required": [
+     "result"
+    ],
+    "type": "object",
+    "x-fastmcp-wrap-result": true
+   },
+   "params": {
+    "cursor": {
+     "default": null,
+     "required": false,
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "page_size": {
+     "default": 50,
+     "required": false,
+     "type": "integer"
+    },
+    "query": {
+     "required": true,
+     "type": "string"
+    },
+    "slim": {
+     "default": false,
+     "required": false,
+     "type": "boolean"
+    }
+   },
+   "wrap_result": true
+  },
+  "iuphar_get_ligand": {
+   "annotations": null,
+   "description": "Get complete ligand record by IUPHAR CURIE with full cross-references.\n\nThis tool implements Phase 2 of the Fuzzy-to-Fact protocol for ligand retrieval.\nRequires an exact IUPHAR CURIE from search_ligands results.\n\nUse cases:\n- Get complete drug details after fuzzy search\n- Retrieve cross-references to ChEMBL, DrugBank, PubChem\n- Access regulatory information (approval status, WHO essential list)\n- Get brand names and synonyms\n\nWorkflow:\n    1. First: search_ligands(\"ibuprofen\") \u2192 Get IUPHAR:2713\n    2. Then: get_ligand(\"IUPHAR:2713\") \u2192 Get complete record\n\nExamples:\n    # Get ibuprofen details\n    >>> get_ligand(\"IUPHAR:2713\")\n    {\n        \"id\": \"IUPHAR:2713\",\n        \"ligand_id\": 2713,\n        \"name\": \"ibuprofen\",\n        \"approved_name\": \"ibuprofen\",\n        \"type\": \"Synthetic organic\",\n        \"approved\": true,\n        \"approval_source\": \"FDA (1974)\",\n        \"who_essential\": true,\n        \"synonyms\": [\"Advil\", \"Motrin\", \"Nurofen\"],\n        \"cross_references\": {\n            \"chembl\": \"CHEMBL521\",\n            \"drugbank\": \"DB01050\",\n            \"pubchem_compound\": \"3672\"\n        }\n    }\n\n    # Invalid format (will fail)\n    >>> get_ligand(\"ibuprofen\")\n    ERROR: Invalid IUPHAR CURIE format. Use search_ligands() first.\n\n    # Non-existent ID (will fail)\n    >>> get_ligand(\"IUPHAR:999999\")\n    ERROR: Ligand not found. Try get_target() instead.\n\nReturns:\n    Complete Ligand entity with all available fields and cross-references.\n    Fields with no data are omitted (never null).\n\nErrors:\n    - UNRESOLVED_ENTITY: Invalid CURIE format \u2192 Use search_ligands() first\n    - ENTITY_NOT_FOUND: ID not found \u2192 Try get_target() (shared ID space)",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "additionalProperties": true,
+    "type": "object"
+   },
+   "params": {
+    "iuphar_id": {
+     "description": "IUPHAR ligand CURIE (e.g., 'IUPHAR:2713' for ibuprofen)",
+     "required": true,
+     "type": "string"
+    }
+   },
+   "wrap_result": false
+  },
+  "iuphar_get_target": {
+   "annotations": null,
+   "description": "Get complete target record by IUPHAR CURIE with full cross-references.\n\nThis tool implements Phase 2 of the Fuzzy-to-Fact protocol for target retrieval.\nRequires an exact IUPHAR CURIE from search_targets results.\n\nUse cases:\n- Get complete target details after fuzzy search\n- Retrieve cross-references to UniProt, Ensembl, HGNC, RefSeq\n- Access gene symbols and protein information\n- Link targets to external databases\n\nWorkflow:\n    1. First: search_targets(\"dopamine\") \u2192 Get IUPHAR:215\n    2. Then: get_target(\"IUPHAR:215\") \u2192 Get complete record\n\nExamples:\n    # Get D2 receptor details\n    >>> get_target(\"IUPHAR:215\")\n    {\n        \"id\": \"IUPHAR:215\",\n        \"target_id\": 215,\n        \"name\": \"D2 receptor\",\n        \"target_family\": \"GPCR\",\n        \"family_ids\": [20],\n        \"species\": \"Homo sapiens\",\n        \"gene_symbol\": \"DRD2\",\n        \"cross_references\": {\n            \"uniprot\": [\"P14416\"],\n            \"ensembl_gene\": \"ENSG00000149295\",\n            \"hgnc\": \"HGNC:3023\",\n            \"entrez\": \"1813\",\n            \"refseq\": [\"NM_000795\"]\n        }\n    }\n\n    # Invalid format (will fail)\n    >>> get_target(\"DRD2\")\n    ERROR: Invalid IUPHAR CURIE format. Use search_targets() first.\n\n    # Non-existent ID (will fail)\n    >>> get_target(\"IUPHAR:999999\")\n    ERROR: Target not found. Try get_ligand() instead.\n\nReturns:\n    Complete Target entity with all available fields and cross-references.\n    Fields with no data are omitted (never null).\n\nErrors:\n    - UNRESOLVED_ENTITY: Invalid CURIE format \u2192 Use search_targets() first\n    - ENTITY_NOT_FOUND: ID not found \u2192 Try get_ligand() (shared ID space)",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "additionalProperties": true,
+    "type": "object"
+   },
+   "params": {
+    "iuphar_id": {
+     "description": "IUPHAR target CURIE (e.g., 'IUPHAR:215' for D2 receptor)",
+     "required": true,
+     "type": "string"
+    }
+   },
+   "wrap_result": false
+  },
+  "iuphar_search_ligands": {
+   "annotations": null,
+   "description": "Search for pharmacological ligands (drugs, chemicals, peptides) using fuzzy name matching.\n\nThis tool implements Phase 1 of the Fuzzy-to-Fact protocol for ligand discovery.\nResults are ranked by relevance with position-based scoring.\n\nUse cases:\n- Find approved drugs: search_ligands(\"aspirin\", approved_only=True)\n- Search by drug class: search_ligands(\"NSAID\")\n- Filter by type: search_ligands(\"insulin\", type_filter=\"Peptide\")\n- Browse all ligands: search_ligands(\"a\", page_size=100)\n\nOnce you have a candidate, use get_ligand(iuphar_id) for complete details.\n\nExamples:\n    # Search for ibuprofen\n    >>> search_ligands(\"ibuprofen\")\n    {\n        \"items\": [\n            {\n                \"id\": \"IUPHAR:2713\",\n                \"name\": \"ibuprofen\",\n                \"type\": \"Synthetic organic\",\n                \"approved\": true,\n                \"score\": 1.0\n            }\n        ],\n        \"pagination\": {\"cursor\": null, \"total_count\": 1, \"page_size\": 50}\n    }\n\n    # Search for COX inhibitors\n    >>> search_ligands(\"COX inhibitor\")\n    {\n        \"items\": [\n            {\"id\": \"IUPHAR:2713\", \"name\": \"ibuprofen\", ...},\n            {\"id\": \"IUPHAR:4139\", \"name\": \"aspirin\", ...}\n        ],\n        \"pagination\": {...}\n    }\n\nReturns:\n    PaginationEnvelope with LigandSearchCandidate items, sorted by relevance.\n    Each candidate includes: id (IUPHAR CURIE), name, type, approved status, score.",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "additionalProperties": true,
+    "type": "object"
+   },
+   "params": {
+    "approved_only": {
+     "default": false,
+     "description": "Filter for approved drugs only",
+     "required": false,
+     "type": "boolean"
+    },
+    "cursor": {
+     "default": null,
+     "description": "Pagination cursor from previous response",
+     "required": false,
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "page_size": {
+     "constraints": {
+      "maximum": 100,
+      "minimum": 1
+     },
+     "default": 50,
+     "description": "Results per page (default 50, max 100)",
+     "required": false,
+     "type": "integer"
+    },
+    "query": {
+     "constraints": {
+      "minLength": 2
+     },
+     "description": "Search query for ligand name (e.g., 'ibuprofen', 'NSAID')",
+     "required": true,
+     "type": "string"
+    },
+    "type_filter": {
+     "default": null,
+     "description": "Optional ligand type filter (e.g., 'Synthetic organic', 'Peptide', 'Antibody')",
+     "required": false,
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   },
+   "wrap_result": false
+  },
+  "iuphar_search_targets": {
+   "annotations": null,
+   "description": "Search for pharmacological targets (receptors, enzymes, ion channels) using fuzzy name matching.\n\nThis tool implements Phase 1 of the Fuzzy-to-Fact protocol for target discovery.\nResults are ranked by relevance with position-based scoring.\n\nUse cases:\n- Find receptors by name: search_targets(\"dopamine\")\n- Search by gene symbol: search_targets(\"DRD2\")\n- Filter by type: search_targets(\"receptor\", type_filter=\"GPCR\")\n- Browse all targets: search_targets(\"a\", page_size=100)\n\nNote: The GtoPdb API works best with single-word queries. For multi-word searches,\nuse the most specific term or filter through results client-side.\n\nOnce you have a candidate, use get_target(iuphar_id) for complete details.\n\nExamples:\n    # Search for dopamine targets\n    >>> search_targets(\"dopamine\")\n    {\n        \"items\": [\n            {\n                \"id\": \"IUPHAR:214\",\n                \"name\": \"D2 receptor\",\n                \"family\": \"GPCR\",\n                \"type\": \"GPCR\",\n                \"score\": 1.0\n            }\n        ],\n        \"pagination\": {\"cursor\": null, \"total_count\": 7, \"page_size\": 50}\n    }\n\n    # Search for GPCRs\n    >>> search_targets(\"receptor\", type_filter=\"GPCR\")\n    {\n        \"items\": [\n            {\"id\": \"IUPHAR:214\", \"name\": \"D2 receptor\", ...},\n            {\"id\": \"IUPHAR:1\", \"name\": \"5-HT1A receptor\", ...}\n        ],\n        \"pagination\": {...}\n    }\n\nReturns:\n    PaginationEnvelope with TargetSearchCandidate items, sorted by relevance.\n    Each candidate includes: id (IUPHAR CURIE), name, family, type, score.",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "additionalProperties": true,
+    "type": "object"
+   },
+   "params": {
+    "cursor": {
+     "default": null,
+     "description": "Pagination cursor from previous response",
+     "required": false,
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "page_size": {
+     "constraints": {
+      "maximum": 100,
+      "minimum": 1
+     },
+     "default": 50,
+     "description": "Results per page (default 50, max 100)",
+     "required": false,
+     "type": "integer"
+    },
+    "query": {
+     "constraints": {
+      "minLength": 2
+     },
+     "description": "Search query for target name (e.g., 'dopamine receptor', 'GPCR')",
+     "required": true,
+     "type": "string"
+    },
+    "type_filter": {
+     "default": null,
+     "description": "Optional target type filter (e.g., 'GPCR', 'Enzyme', 'Ion channel')",
+     "required": false,
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   },
+   "wrap_result": false
+  },
+  "opentargets_get_associations": {
+   "annotations": null,
+   "description": "Get target-disease associations with evidence.\n\nArgs:\n    target_id: Ensembl gene ID CURIE.\n    disease_id: Optional EFO disease ID to filter associations.\n    cursor: Opaque cursor for pagination.\n    page_size: Number of results per page (1-100, default 50).\n\nReturns:\n    PaginationEnvelope with association records, or ErrorEnvelope on failure.",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "properties": {
+     "result": {
+      "anyOf": [
+       {
+        "description": "Canonical pagination envelope per ADR-001 Section 8.\n\nAll list/search operations return this format with items and pagination metadata.",
+        "properties": {
+         "items": {
+          "description": "Data payload",
+          "items": {},
+          "type": "array"
+         },
+         "pagination": {
+          "description": "Pagination metadata within PaginationEnvelope.",
+          "properties": {
+           "cursor": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Opaque cursor for next page; null = end"
+           },
+           "page_size": {
+            "default": 50,
+            "description": "Items per page",
+            "type": "integer"
+           },
+           "total_count": {
+            "anyOf": [
+             {
+              "type": "integer"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Total items if known"
+           }
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "items",
+         "pagination"
+        ],
+        "type": "object"
+       },
+       {
+        "description": "Canonical error envelope per ADR-001 Section 8.\n\nAll error responses from Biosciences MCP tools use this format.\nThe recovery_hint field enables agent self-correction.",
+        "properties": {
+         "error": {},
+         "success": {
+          "default": false,
+          "description": "Always false for errors",
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "error"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "required": [
+     "result"
+    ],
+    "type": "object",
+    "x-fastmcp-wrap-result": true
+   },
+   "params": {
+    "cursor": {
+     "default": null,
+     "required": false,
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "disease_id": {
+     "default": null,
+     "required": false,
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "page_size": {
+     "default": 50,
+     "required": false,
+     "type": "integer"
+    },
+    "target_id": {
+     "required": true,
+     "type": "string"
+    }
+   },
+   "wrap_result": true
+  },
+  "opentargets_get_target": {
+   "annotations": null,
+   "description": "Get complete target record by Ensembl gene ID CURIE.\n\nReturns full Agentic Biolink entity with cross-references.\nRequires resolved CURIE from search_targets.\n\nArgs:\n    ensembl_id: Ensembl gene ID CURIE in format 'ENSG[0-9]{11}' (e.g., 'ENSG00000141510').\n    slim: If true, return minimal fields for token efficiency.\n\nReturns:\n    Target record with cross_references, or ErrorEnvelope on failure.",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "properties": {
+     "result": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "description": "Canonical error envelope per ADR-001 Section 8.\n\nAll error responses from Biosciences MCP tools use this format.\nThe recovery_hint field enables agent self-correction.",
+        "properties": {
+         "error": {},
+         "success": {
+          "default": false,
+          "description": "Always false for errors",
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "error"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "required": [
+     "result"
+    ],
+    "type": "object",
+    "x-fastmcp-wrap-result": true
+   },
+   "params": {
+    "ensembl_id": {
+     "required": true,
+     "type": "string"
+    },
+    "slim": {
+     "default": false,
+     "required": false,
+     "type": "boolean"
+    }
+   },
+   "wrap_result": true
+  },
+  "opentargets_search_targets": {
+   "annotations": null,
+   "description": "Fuzzy search for targets (genes/proteins) by name, symbol, or description.\n\nReturns ranked candidates for resolution. Use this before calling get_target.\n\nArgs:\n    query: Search term (gene symbol, name, or natural language query).\n           Minimum 2 characters required.\n    slim: If true, return minimal fields (~20 tokens per entity).\n          Default false returns full candidates.\n    cursor: Opaque cursor for pagination. Pass from previous response for next page.\n    page_size: Number of results per page (1-100, default 50).\n\nReturns:\n    PaginationEnvelope with target candidates, or ErrorEnvelope on failure.",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "properties": {
+     "result": {
+      "anyOf": [
+       {
+        "description": "Canonical pagination envelope per ADR-001 Section 8.\n\nAll list/search operations return this format with items and pagination metadata.",
+        "properties": {
+         "items": {
+          "description": "Data payload",
+          "items": {},
+          "type": "array"
+         },
+         "pagination": {
+          "description": "Pagination metadata within PaginationEnvelope.",
+          "properties": {
+           "cursor": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Opaque cursor for next page; null = end"
+           },
+           "page_size": {
+            "default": 50,
+            "description": "Items per page",
+            "type": "integer"
+           },
+           "total_count": {
+            "anyOf": [
+             {
+              "type": "integer"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Total items if known"
+           }
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "items",
+         "pagination"
+        ],
+        "type": "object"
+       },
+       {
+        "description": "Canonical error envelope per ADR-001 Section 8.\n\nAll error responses from Biosciences MCP tools use this format.\nThe recovery_hint field enables agent self-correction.",
+        "properties": {
+         "error": {},
+         "success": {
+          "default": false,
+          "description": "Always false for errors",
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "error"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "required": [
+     "result"
+    ],
+    "type": "object",
+    "x-fastmcp-wrap-result": true
+   },
+   "params": {
+    "cursor": {
+     "default": null,
+     "required": false,
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "page_size": {
+     "default": 50,
+     "required": false,
+     "type": "integer"
+    },
+    "query": {
+     "required": true,
+     "type": "string"
+    },
+    "slim": {
+     "default": false,
+     "required": false,
+     "type": "boolean"
+    }
+   },
+   "wrap_result": true
+  },
+  "pubchem_get_compound": {
+   "annotations": null,
+   "description": "Get complete compound record by PubChem CURIE (T093-T097).\n\nReturns full Agentic Biolink entity with SMILES, InChI, InChIKey, and\ncross-references. Requires resolved CURIE from search_compounds.\n\nThis is Phase 2 of the Fuzzy-to-Fact protocol. Use after identifying the\ncorrect compound with search_compounds.\n\nArgs:\n    pubchem_id: PubChem CURIE in format 'PubChem:CID{number}' (e.g., 'PubChem:CID2244').\n                Must be a valid CURIE obtained from search_compounds.\n    slim: If true, return minimal fields (id, name, molecular_formula only) for\n          token efficiency. Default false.\n\nReturns:\n    PubChemCompound with complete data including cross_references on success,\n    or ErrorEnvelope on error.\n\nError Codes:\n    UNRESOLVED_ENTITY: Invalid CURIE format (missing 'PubChem:CID' prefix or non-numeric ID)\n    ENTITY_NOT_FOUND: Valid CURIE but compound doesn't exist in PubChem\n    RATE_LIMITED: Rate limit exceeded (>5 req/s or >400 req/min)\n    UPSTREAM_ERROR: PubChem API unavailable or returned error\n\nExamples:\n    # Get full compound data for aspirin\n    >>> compound = await get_compound(pubchem_id=\"PubChem:CID2244\")\n    >>> compound[\"name\"]\n    \"Aspirin\"\n    >>> compound[\"molecular_formula\"]\n    \"C9H8O4\"\n    >>> compound[\"cross_references\"][\"chembl\"]\n    \"CHEMBL25\"\n    >>> compound[\"cross_references\"][\"drugbank\"]\n    \"DB00945\"\n\n    # Get slim compound data (minimal tokens)\n    >>> compound = await get_compound(pubchem_id=\"PubChem:CID2244\", slim=True)\n    >>> compound.keys()\n    dict_keys(['id', 'name', 'molecular_formula'])\n\n    # Fuzzy-to-Fact workflow\n    >>> search_result = await search_compounds(query=\"aspirin\", page_size=10)\n    >>> top_candidate = search_result[\"items\"][0]\n    >>> compound = await get_compound(pubchem_id=top_candidate[\"id\"])\n    >>> compound[\"name\"]\n    \"Aspirin\"\n\n    # Error: Invalid CURIE format\n    >>> result = await get_compound(pubchem_id=\"CID2244\")\n    >>> result[\"success\"]\n    False\n    >>> result[\"error\"][\"code\"]\n    \"UNRESOLVED_ENTITY\"\n    >>> result[\"error\"][\"recovery_hint\"]\n    \"Use format 'PubChem:CID{number}' (e.g., 'PubChem:CID2244'). Call search_compounds to find valid CIDs.\"\n\n    # Error: Compound not found\n    >>> result = await get_compound(pubchem_id=\"PubChem:CID999999999999\")\n    >>> result[\"success\"]\n    False\n    >>> result[\"error\"][\"code\"]\n    \"ENTITY_NOT_FOUND\"\n    >>> result[\"error\"][\"recovery_hint\"]\n    \"CID not found in PubChem. Verify CURIE from search_compounds results.\"",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "additionalProperties": true,
+    "type": "object"
+   },
+   "params": {
+    "pubchem_id": {
+     "required": true,
+     "type": "string"
+    },
+    "slim": {
+     "default": false,
+     "required": false,
+     "type": "boolean"
+    }
+   },
+   "wrap_result": false
+  },
+  "pubchem_search_compounds": {
+   "annotations": null,
+   "description": "Fuzzy search for compounds by name, synonym, or identifier (T052).\n\nThis is Phase 1 of the Fuzzy-to-Fact protocol. Returns ranked candidates\nfor resolution. Use this before calling get_compound for strict lookups.\n\nArgs:\n    query: Search term (compound name, synonym, or natural language query).\n           Minimum 2 characters required.\n    slim: If true, return minimal fields (~20 tokens per entity).\n          Default true for token efficiency.\n    cursor: Opaque cursor for pagination. Pass from previous response for next page.\n    page_size: Number of results per page (1-100, default 50).\n\nReturns:\n    PaginationEnvelope with PubChemSearchCandidate items on success, or ErrorEnvelope on error.\n\nError Codes:\n    AMBIGUOUS_QUERY: Query too short (<2 characters)\n    RATE_LIMITED: Rate limit exceeded (>5 req/s or >400 req/min)\n    UPSTREAM_ERROR: PubChem API unavailable or returned error\n\nExamples:\n    # Search for aspirin\n    >>> result = await search_compounds(query=\"aspirin\", page_size=10)\n    >>> result[\"items\"][0][\"id\"]\n    \"PubChem:CID2244\"\n\n    # Search for ibuprofen\n    >>> result = await search_compounds(query=\"ibuprofen\")\n    >>> len(result[\"items\"])\n    50  # page_size default\n\n    # Pagination\n    >>> page1 = await search_compounds(query=\"acetylsalicylic acid\", page_size=10)\n    >>> page2 = await search_compounds(\n    ...     query=\"acetylsalicylic acid\",\n    ...     page_size=10,\n    ...     cursor=page1[\"pagination\"][\"cursor\"]\n    ... )\n\n    # Empty results (no error)\n    >>> result = await search_compounds(query=\"xyznonexistent999\")\n    >>> result[\"items\"]\n    []\n    >>> result[\"pagination\"][\"total_count\"]\n    0\n\n    # Error: query too short\n    >>> result = await search_compounds(query=\"a\")\n    >>> result[\"success\"]\n    False\n    >>> result[\"error\"][\"code\"]\n    \"AMBIGUOUS_QUERY\"",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "additionalProperties": true,
+    "type": "object"
+   },
+   "params": {
+    "cursor": {
+     "default": null,
+     "required": false,
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "page_size": {
+     "default": 50,
+     "required": false,
+     "type": "integer"
+    },
+    "query": {
+     "required": true,
+     "type": "string"
+    },
+    "slim": {
+     "default": true,
+     "required": false,
+     "type": "boolean"
+    }
+   },
+   "wrap_result": false
+  },
+  "string_get_interactions": {
+   "annotations": null,
+   "description": "Get protein-protein interactions by STRING CURIE.\n\nReturns the interaction network with evidence scores for each edge.\nRequires resolved CURIE from search_proteins.\n\nArgs:\n    string_id: STRING CURIE in format 'STRING:<taxid>.ENSP<id>'\n               (e.g., 'STRING:9606.ENSP00000269305' for TP53).\n    required_score: Minimum combined confidence score (0-1000).\n                    400 = medium confidence (default).\n                    700 = high confidence.\n                    900 = highest confidence.\n    limit: Maximum number of interactions to return.\n\nReturns:\n    InteractionNetwork with interactions and evidence scores, or ErrorEnvelope on failure.\n\nExample:\n    # Get high-confidence interactions for TP53\n    result = await get_interactions(\n        \"STRING:9606.ENSP00000269305\",\n        required_score=700,\n        limit=10\n    )\n    # Returns MDM2, ATM, BRCA1 interactions with evidence breakdown",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "properties": {
+     "result": {
+      "anyOf": [
+       {},
+       {
+        "description": "Canonical error envelope per ADR-001 Section 8.\n\nAll error responses from Biosciences MCP tools use this format.\nThe recovery_hint field enables agent self-correction.",
+        "properties": {
+         "error": {},
+         "success": {
+          "default": false,
+          "description": "Always false for errors",
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "error"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "required": [
+     "result"
+    ],
+    "type": "object",
+    "x-fastmcp-wrap-result": true
+   },
+   "params": {
+    "limit": {
+     "default": 10,
+     "required": false,
+     "type": "integer"
+    },
+    "required_score": {
+     "default": 400,
+     "required": false,
+     "type": "integer"
+    },
+    "string_id": {
+     "required": true,
+     "type": "string"
+    }
+   },
+   "wrap_result": true
+  },
+  "string_get_network_image_url": {
+   "annotations": null,
+   "description": "Generate a STRING network visualization URL.\n\nReturns a URL that can be used to display the protein interaction network.\nThe URL points to a high-resolution PNG image.\n\nArgs:\n    identifiers: Gene symbol(s) or STRING ID(s), separated by newlines.\n                 Example: \"TP53\" or \"TP53\\nMDM2\\nBRCA1\"\n    species: NCBI Taxonomy ID (default 9606 for Homo sapiens).\n    add_nodes: Number of additional interaction partners to include (default 10).\n    network_flavor: Visual style for edges:\n                    - 'confidence': Edge thickness shows confidence score (default)\n                    - 'evidence': Edge color shows evidence type\n                    - 'actions': Edge color shows effect type\n\nReturns:\n    URL string for the network visualization image.\n\nExample:\n    url = get_network_image_url(\"TP53\", species=9606, add_nodes=10)\n    # Returns: https://string-db.org/api/highres_image/network?identifiers=TP53&species=9606&add_nodes=10",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "properties": {
+     "result": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "result"
+    ],
+    "type": "object",
+    "x-fastmcp-wrap-result": true
+   },
+   "params": {
+    "add_nodes": {
+     "default": 10,
+     "required": false,
+     "type": "integer"
+    },
+    "identifiers": {
+     "required": true,
+     "type": "string"
+    },
+    "network_flavor": {
+     "default": "confidence",
+     "required": false,
+     "type": "string"
+    },
+    "species": {
+     "default": 9606,
+     "required": false,
+     "type": "integer"
+    }
+   },
+   "wrap_result": true
+  },
+  "string_search_proteins": {
+   "annotations": null,
+   "description": "Fuzzy search for proteins by name, gene symbol, or identifier.\n\nReturns ranked candidates for resolution. Use this before calling get_interactions.\n\nArgs:\n    query: Search term (gene symbol, protein name, or identifier).\n           Minimum 2 characters required.\n    species: NCBI Taxonomy ID (default 9606 for Homo sapiens).\n             Common species: 9606 (human), 10090 (mouse), 10116 (rat).\n    limit: Number of results per page (1-100, default 10).\n    cursor: Opaque cursor for pagination. Pass from previous response for next page.\n\nReturns:\n    PaginationEnvelope with InteractionSearchCandidate items, or ErrorEnvelope on failure.\n\nExample:\n    # Search for TP53 in human\n    result = await search_proteins(\"TP53\", species=9606)\n    # Top candidate: STRING:9606.ENSP00000269305",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "properties": {
+     "result": {
+      "anyOf": [
+       {
+        "properties": {
+         "items": {
+          "description": "Data payload",
+          "items": {},
+          "type": "array"
+         },
+         "pagination": {
+          "description": "Pagination metadata within PaginationEnvelope.",
+          "properties": {
+           "cursor": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Opaque cursor for next page; null = end"
+           },
+           "page_size": {
+            "default": 50,
+            "description": "Items per page",
+            "type": "integer"
+           },
+           "total_count": {
+            "anyOf": [
+             {
+              "type": "integer"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Total items if known"
+           }
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "items",
+         "pagination"
+        ],
+        "type": "object"
+       },
+       {
+        "description": "Canonical error envelope per ADR-001 Section 8.\n\nAll error responses from Biosciences MCP tools use this format.\nThe recovery_hint field enables agent self-correction.",
+        "properties": {
+         "error": {},
+         "success": {
+          "default": false,
+          "description": "Always false for errors",
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "error"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "required": [
+     "result"
+    ],
+    "type": "object",
+    "x-fastmcp-wrap-result": true
+   },
+   "params": {
+    "cursor": {
+     "default": null,
+     "required": false,
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "limit": {
+     "default": 10,
+     "required": false,
+     "type": "integer"
+    },
+    "query": {
+     "required": true,
+     "type": "string"
+    },
+    "species": {
+     "default": 9606,
+     "required": false,
+     "type": "integer"
+    }
+   },
+   "wrap_result": true
+  },
+  "uniprot_get_protein": {
+   "annotations": null,
+   "description": "Get complete protein record by UniProt CURIE.\n\nReturns full Agentic Biolink entity with cross-references.\nRequires resolved CURIE from search_proteins.\n\nImplements User Story 2: Strict Protein Lookup (T041-T043).\n\nArgs:\n    uniprot_id: UniProt CURIE in format 'UniProtKB:XXXXXX' (e.g., 'UniProtKB:P38398' for BRCA1).\n    slim: If true, return only id/name/organism (~20 tokens vs ~115-300 full record).\n\nReturns:\n    Protein record with cross_references, or ErrorEnvelope on failure.",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "properties": {
+     "result": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "description": "Canonical error envelope per ADR-001 Section 8.\n\nAll error responses from Biosciences MCP tools use this format.\nThe recovery_hint field enables agent self-correction.",
+        "properties": {
+         "error": {},
+         "success": {
+          "default": false,
+          "description": "Always false for errors",
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "error"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "required": [
+     "result"
+    ],
+    "type": "object",
+    "x-fastmcp-wrap-result": true
+   },
+   "params": {
+    "slim": {
+     "default": false,
+     "required": false,
+     "type": "boolean"
+    },
+    "uniprot_id": {
+     "required": true,
+     "type": "string"
+    }
+   },
+   "wrap_result": true
+  },
+  "uniprot_search_proteins": {
+   "annotations": null,
+   "description": "Fuzzy search for proteins by name, accession, gene, or organism.\n\nReturns ranked candidates for resolution. Use this before calling get_protein.\n\nArgs:\n    query: Search term (protein name, accession, gene symbol, or organism).\n           Minimum 2 characters required.\n    slim: If true, return only id/name/organism/score (~20 tokens per entity).\n          Default false returns full candidates.\n    cursor: Opaque cursor for pagination. Pass from previous response for next page.\n    page_size: Number of results per page (1-500, default 50).\n\nReturns:\n    PaginationEnvelope with protein candidates, or ErrorEnvelope on failure.",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "properties": {
+     "result": {
+      "anyOf": [
+       {
+        "description": "Canonical pagination envelope per ADR-001 Section 8.\n\nAll list/search operations return this format with items and pagination metadata.",
+        "properties": {
+         "items": {
+          "description": "Data payload",
+          "items": {},
+          "type": "array"
+         },
+         "pagination": {
+          "description": "Pagination metadata within PaginationEnvelope.",
+          "properties": {
+           "cursor": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Opaque cursor for next page; null = end"
+           },
+           "page_size": {
+            "default": 50,
+            "description": "Items per page",
+            "type": "integer"
+           },
+           "total_count": {
+            "anyOf": [
+             {
+              "type": "integer"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Total items if known"
+           }
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "items",
+         "pagination"
+        ],
+        "type": "object"
+       },
+       {
+        "description": "Canonical error envelope per ADR-001 Section 8.\n\nAll error responses from Biosciences MCP tools use this format.\nThe recovery_hint field enables agent self-correction.",
+        "properties": {
+         "error": {},
+         "success": {
+          "default": false,
+          "description": "Always false for errors",
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "error"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "required": [
+     "result"
+    ],
+    "type": "object",
+    "x-fastmcp-wrap-result": true
+   },
+   "params": {
+    "cursor": {
+     "default": null,
+     "required": false,
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "page_size": {
+     "default": 50,
+     "required": false,
+     "type": "integer"
+    },
+    "query": {
+     "required": true,
+     "type": "string"
+    },
+    "slim": {
+     "default": false,
+     "required": false,
+     "type": "boolean"
+    }
+   },
+   "wrap_result": true
+  },
+  "wikipathways_get_pathway": {
+   "annotations": null,
+   "description": "Get complete pathway record by WikiPathways CURIE.\n\nReturns full pathway details with cross-references.\nRequires resolved CURIE from search_pathways.\n\nArgs:\n    pathway_id: WikiPathways CURIE in format 'WP:WPNNNNN' (e.g., 'WP:WP4868' for ACE2 pathway).\n\nReturns:\n    Pathway record with cross_references, or ErrorEnvelope on failure.",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "properties": {
+     "result": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "description": "Canonical error envelope per ADR-001 Section 8.\n\nAll error responses from Biosciences MCP tools use this format.\nThe recovery_hint field enables agent self-correction.",
+        "properties": {
+         "error": {},
+         "success": {
+          "default": false,
+          "description": "Always false for errors",
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "error"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "required": [
+     "result"
+    ],
+    "type": "object",
+    "x-fastmcp-wrap-result": true
+   },
+   "params": {
+    "pathway_id": {
+     "required": true,
+     "type": "string"
+    }
+   },
+   "wrap_result": true
+  },
+  "wikipathways_get_pathway_components": {
+   "annotations": null,
+   "description": "Extract all biological entities from a pathway.\n\nReturns genes, proteins, metabolites, and interactions from the pathway.\nRequires resolved CURIE from search_pathways or get_pathways_for_gene.\n\nArgs:\n    pathway_id: WikiPathways CURIE in format 'WP:WPNNNNN' (e.g., 'WP:WP534' for Glycolysis).\n\nReturns:\n    PathwayComponents with genes, proteins, metabolites, interactions or ErrorEnvelope on failure.\n    Note: Empty component lists are omitted from response (ADR-001 \u00a74 omit-if-null pattern).",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "properties": {
+     "result": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "description": "Canonical error envelope per ADR-001 Section 8.\n\nAll error responses from Biosciences MCP tools use this format.\nThe recovery_hint field enables agent self-correction.",
+        "properties": {
+         "error": {},
+         "success": {
+          "default": false,
+          "description": "Always false for errors",
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "error"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "required": [
+     "result"
+    ],
+    "type": "object",
+    "x-fastmcp-wrap-result": true
+   },
+   "params": {
+    "pathway_id": {
+     "required": true,
+     "type": "string"
+    }
+   },
+   "wrap_result": true
+  },
+  "wikipathways_get_pathways_for_gene": {
+   "annotations": null,
+   "description": "Find all pathways containing a specific gene.\n\nReturns ranked pathway candidates containing the specified gene.\nUseful for reverse lookup: gene \u2192 pathways.\n\nArgs:\n    gene_id: Gene identifier (symbol like \"BRCA1\", Entrez ID like \"672\",\n             or Ensembl ID like \"ENSG00000012048\").\n             Case-insensitive for gene symbols (converted to uppercase).\n    organism: Organism filter (exact scientific name, e.g., \"Homo sapiens\").\n              Default: \"Homo sapiens\". Pass None for all organisms.\n    cursor: Opaque cursor for pagination. Pass from previous response for next page.\n    page_size: Number of results per page (1-100, default 50).\n\nReturns:\n    PaginationEnvelope with PathwaySearchCandidate items, or ErrorEnvelope on failure.",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "properties": {
+     "result": {
+      "anyOf": [
+       {
+        "description": "Canonical pagination envelope per ADR-001 Section 8.\n\nAll list/search operations return this format with items and pagination metadata.",
+        "properties": {
+         "items": {
+          "description": "Data payload",
+          "items": {},
+          "type": "array"
+         },
+         "pagination": {
+          "description": "Pagination metadata within PaginationEnvelope.",
+          "properties": {
+           "cursor": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Opaque cursor for next page; null = end"
+           },
+           "page_size": {
+            "default": 50,
+            "description": "Items per page",
+            "type": "integer"
+           },
+           "total_count": {
+            "anyOf": [
+             {
+              "type": "integer"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Total items if known"
+           }
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "items",
+         "pagination"
+        ],
+        "type": "object"
+       },
+       {
+        "description": "Canonical error envelope per ADR-001 Section 8.\n\nAll error responses from Biosciences MCP tools use this format.\nThe recovery_hint field enables agent self-correction.",
+        "properties": {
+         "error": {},
+         "success": {
+          "default": false,
+          "description": "Always false for errors",
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "error"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "required": [
+     "result"
+    ],
+    "type": "object",
+    "x-fastmcp-wrap-result": true
+   },
+   "params": {
+    "cursor": {
+     "default": null,
+     "required": false,
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "gene_id": {
+     "required": true,
+     "type": "string"
+    },
+    "organism": {
+     "default": "Homo sapiens",
+     "required": false,
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "page_size": {
+     "default": 50,
+     "required": false,
+     "type": "integer"
+    }
+   },
+   "wrap_result": true
+  },
+  "wikipathways_search_pathways": {
+   "annotations": null,
+   "description": "Fuzzy search for pathways by name, description, or gene.\n\nReturns ranked candidates for resolution. Use this before calling get_pathway.\n\nArgs:\n    query: Search term (pathway name, description, gene, or natural language query).\n           Minimum 2 characters required.\n    organism: Organism filter (exact scientific name, e.g., \"Homo sapiens\", \"Mus musculus\").\n              Default: \"Homo sapiens\". Pass None for all organisms.\n    slim: If true, return only id/name/organism/score (~20 tokens per entity).\n          Default false returns full candidates.\n    cursor: Opaque cursor for pagination. Pass from previous response for next page.\n    page_size: Number of results per page (1-100, default 50).\n\nReturns:\n    PaginationEnvelope with PathwaySearchCandidate items, or ErrorEnvelope on failure.",
+   "meta": {
+    "tags": []
+   },
+   "output_schema": {
+    "properties": {
+     "result": {
+      "anyOf": [
+       {
+        "description": "Canonical pagination envelope per ADR-001 Section 8.\n\nAll list/search operations return this format with items and pagination metadata.",
+        "properties": {
+         "items": {
+          "description": "Data payload",
+          "items": {},
+          "type": "array"
+         },
+         "pagination": {
+          "description": "Pagination metadata within PaginationEnvelope.",
+          "properties": {
+           "cursor": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Opaque cursor for next page; null = end"
+           },
+           "page_size": {
+            "default": 50,
+            "description": "Items per page",
+            "type": "integer"
+           },
+           "total_count": {
+            "anyOf": [
+             {
+              "type": "integer"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Total items if known"
+           }
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "items",
+         "pagination"
+        ],
+        "type": "object"
+       },
+       {
+        "description": "Canonical error envelope per ADR-001 Section 8.\n\nAll error responses from Biosciences MCP tools use this format.\nThe recovery_hint field enables agent self-correction.",
+        "properties": {
+         "error": {},
+         "success": {
+          "default": false,
+          "description": "Always false for errors",
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "error"
+        ],
+        "type": "object"
+       }
+      ]
+     }
+    },
+    "required": [
+     "result"
+    ],
+    "type": "object",
+    "x-fastmcp-wrap-result": true
+   },
+   "params": {
+    "cursor": {
+     "default": null,
+     "required": false,
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "organism": {
+     "default": "Homo sapiens",
+     "required": false,
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "page_size": {
+     "default": 50,
+     "required": false,
+     "type": "integer"
+    },
+    "query": {
+     "required": true,
+     "type": "string"
+    },
+    "slim": {
+     "default": false,
+     "required": false,
+     "type": "boolean"
+    }
+   },
+   "wrap_result": true
+  }
+ }
+}
