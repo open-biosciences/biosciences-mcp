@@ -7,7 +7,9 @@ requires-python = ">=3.11"
 dependencies = [
     "chembl-webresource-client>=0.10.9",
     "defusedxml>=0.7.1",
-    "fastmcp>=2.14.1,<3.0",
+    # ADR-009 (spec 015): floor = the version verified in spec 015; ceiling = minor
+    # ceiling, and 4.x is not yet supported until FR-020's evidence exists.
+    "fastmcp>=3.4.7,<3.5",
     "httpx>=0.27",
     "pydantic>=2.0",
 ]
