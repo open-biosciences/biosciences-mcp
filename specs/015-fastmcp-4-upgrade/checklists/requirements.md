@@ -36,3 +36,4 @@
 3. Defaults chosen without asking, to revisit in `/speckit-clarify` if wrong: SC-005's 15-minute rollback target; psychology-mcp adoption of the policy as a follow-up in that repository; Edge serialisation alignment out of scope.
 4. One candidate clarification was removed by evidence: whether undeclared arguments would start being rejected. A probe on 2026-09-30 showed 2.14.5 already rejects them, as do 3.4.7 and 4.0.10 (FR-003, Edge Cases).
 5. Validation passed on the first iteration after the FR-003 correction.
+6. Re-validated after the 2026-10-01 amendment (target 3.4.7, new FR-020). All items still pass. FR-020 is testable: ADR-009 lists 4.x as not yet supported with named evidence, and the policy test rejects a 4.x lock. No clarification markers were added.

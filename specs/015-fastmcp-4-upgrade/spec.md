@@ -1,16 +1,20 @@
-# Feature Specification: FastMCP 4 Upgrade and Connector Version Policy
+# Feature Specification: FastMCP 3.4 Upgrade, Gated Path to 4.x, and Connector Version Policy
 
 **Feature Branch**: `feature/015-fastmcp-4-upgrade`
 
 **Created**: 2026-09-30
 
-**Status**: Draft
+**Status**: Draft (amended 2026-10-01)
 
-**Input**: User description: "Upgrade biosciences-mcp (core, 12 mounted servers + gateway, fastmcp 2.14.5) and biosciences-mcp-edge (2 tools, fastmcp 3.0.2) to FastMCP 4.x while staying deployable on FastMCP Cloud / Prefect Horizon, and record a single FastMCP version policy for connector repos."
+**Amendment 2026-10-01**: The target changes from FastMCP 4.0.10 to **3.4.7**, by decision of the repository owner (option B). FastMCP 4.x becomes a gated follow-up (FR-020). This restores the decision in `biosciences-program/docs/plans/2026-09-12-interface-version-tradeoff-analysis.md` and AGE-718. The directory and branch keep the `fastmcp-4-upgrade` name for traceability.
+
+**Input**: User description: "Upgrade biosciences-mcp (core, 12 mounted servers + gateway, fastmcp 2.14.5) and biosciences-mcp-edge (2 tools, fastmcp 3.0.2) to FastMCP 4.x while staying deployable on FastMCP Cloud / Prefect Horizon, and record a single FastMCP version policy for connector repos." Amended 2026-10-01: "go with option B" (3.4.7 now, 4.x later).
 
 ## Context
 
 Core runs FastMCP 2.14.5, held below 3.0 by a pin added on 2026-02-25 after 3.0.2 double-prefixed every gateway tool name (AGE-182). Edge was created five days later without that pin, resolved 3.0.2, and was later pinned below 3.4.3 because 3.4.3's host validation rejected the hosting platform's requests with HTTP 421. Neither decision was recorded outside a commit message, so the two repositories drifted onto different framework majors. FastMCP 4.0.0 was released 2026-08-31.
+
+The 2026-09-12 interface analysis chose 3.4.7 and declined FastMCP 4 for now. The 3.x line keeps the MCP protocol library on 1.x, and 3.x is the only major already proven on the hosting platform (edge runs 3.0.2 there in production). FastMCP 4 also brings the MCP protocol library 2.x, whose behaviour with the platform's own clients (Claude Code, the claude.ai connector, Claude Desktop) and with biosciences-temporal's client has not been verified. Phase 0 research (2026-09-30) and a client check (2026-10-01) narrowed but did not close that gap (research R13), so this feature upgrades to 3.4.7 and records what a later move to 4.x must prove.
 
 The callers of these servers are AI agents: the LangGraph supervisor (biosciences-deepagents), Temporal agents (biosciences-temporal), and Claude Code plugin users. biosciences-research names the tools in documentation and an evaluation dataset but makes no MCP calls (research D). They bind to tool names, parameter names, and the ADR-001 wire contract. A framework upgrade that changes any of these breaks them without a code change on their side, which makes caller-visible stability the central requirement of this feature.
 
@@ -18,7 +22,7 @@ The callers of these servers are AI agents: the LangGraph supervisor (bioscience
 
 ### User Story 1 - Agent callers are unaffected by the core upgrade (Priority: P1)
 
-An agent that calls the core gateway today (for example, it searches for a gene, resolves the CURIE, then fetches the record) keeps working unchanged after core moves to FastMCP 4.x. It sees the same tool names, sends the same arguments, receives the same envelopes and error codes, and gets the same recovery guidance.
+An agent that calls the core gateway today (for example, it searches for a gene, resolves the CURIE, then fetches the record) keeps working unchanged after core moves to FastMCP 3.4.x. It sees the same tool names, sends the same arguments, receives the same envelopes and error codes, and gets the same recovery guidance.
 
 **Why this priority**: Every downstream repository depends on this surface. Without it, the upgrade is a breaking change for the whole platform, and no other story is worth delivering.
 
@@ -131,6 +135,10 @@ A maintainer creating or updating any connector repository (core, Edge, psycholo
 
 - **FR-019**: Transport-layer telemetry as defined by ADR-008, where implemented, MUST keep working after the upgrade, including its no-collector degradation.
 
+**Path to FastMCP 4.x**
+
+- **FR-020**: The version policy MUST mark FastMCP 4.x as not yet supported, and name the evidence required before its range may include 4.x: a preview deployment of each repository on 4.x passing the same checks as FR-008 and FR-009; the platform's own clients (Claude Code, the claude.ai connector, Claude Desktop) and biosciences-temporal's client completing list and call against that preview; and the research already gathered on 4.x (research R1, R13). This feature does not upgrade to 4.x.
+
 ### Key Entities
 
 - **Tool surface**: The complete, caller-visible description of a server's tools: names, descriptions, parameter definitions, output definitions, and annotations. The unit of before/after comparison.
@@ -152,11 +160,12 @@ A maintainer creating or updating any connector repository (core, Edge, psycholo
 
 ## Assumptions
 
-- **Target version**: FastMCP 4.0.10, the latest release on 2026-09-30. The plan may select a later 4.x patch if one is released before implementation.
-- **Upgrade path**: Whether core moves directly from 2.x to 4.x or through 3.x is a plan-level decision informed by research, not a requirement.
+- **Target version**: FastMCP 3.4.7, the latest 3.x release (2026-08-10); no 3.x release has shipped since 4.0.0. The plan may select a later 3.4.x patch if one is released before implementation. Both core and edge move to it, so they share a major again (SC-006).
+- **Upgrade path**: Core moves directly from 2.14.5 to 3.4.7; edge moves from 3.0.2 to 3.4.7. The move to 4.x is a separate, later feature gated by FR-020.
+- **Client support**: Python MCP clients on protocol library 1.26 (what biosciences-deepagents and the tests use) were verified against a 4.0.10 server on 2026-10-01. The platform's own clients were not, which is the main reason for stopping at 3.x (research R13).
 - **Prerequisite already delivered**: biosciences-mcp PR #18 (`a319044`) removes the gateway mount arguments that double-prefix tool names on 3.x and fail on 4.x. It leaves the tool surface on 2.14.5 byte-identical, and the same 34 names were observed on 3.4.7 and 4.0.10. It was opened before this specification; the plan records it as a completed task.
 - **Preview deployments**: The hosting platform allows a second, non-production deployment of each server, which this feature uses for FR-009.
 - **Edge serialisation**: Edge's models do not use the null-omitting base class core relies on, and Edge has no contract test tier. Fixing that is a separate compliance item; this feature only guarantees no regression (FR-014).
 - **psychology-mcp**: The policy covers it (FR-016), but changing its dependency declarations or checks is a follow-up in that repository, not part of this feature.
-- **Decision records**: The version policy becomes ADR-009 or an amendment to ADR-004 (ADR-008 is taken). The choice belongs to the plan.
+- **Decision records**: The version policy becomes ADR-009 (ADR-008 is taken).
 - **Existing research**: The verified facts and research protocol in `_audits/fastmcp-4-2026-09-30/PROMPT.md` (outside the repository) are inputs to `/speckit-plan`'s Phase 0 research, not a separate deliverable.

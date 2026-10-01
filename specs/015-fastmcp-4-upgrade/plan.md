@@ -1,21 +1,23 @@
-# Implementation Plan: FastMCP 4 Upgrade and Connector Version Policy
+# Implementation Plan: FastMCP 3.4 Upgrade, Gated Path to 4.x, and Connector Version Policy
 
-**Branch**: `feature/015-fastmcp-4-upgrade` | **Date**: 2026-09-30 | **Spec**: [spec.md](spec.md)
+**Branch**: `feature/015-fastmcp-4-upgrade` | **Date**: 2026-09-30, amended 2026-10-01 | **Spec**: [spec.md](spec.md)
+
+**Amendment 2026-10-01**: The target changes from `>=4.0.10,<4.1` to `>=3.4.7,<3.5` (owner decision, option B; spec amendment; research R1, R13). Removed as 4.x-only: the `test_serialization_unit.py` import fix (R7) and the envelope parameterization (R8); both are recorded for the 4.x follow-up. Added: FR-020's 4.x gate in ADR-009.
 
 **Input**: Feature specification from `specs/015-fastmcp-4-upgrade/spec.md`
 
 ## Summary
 
-Move core (`biosciences-mcp`, FastMCP 2.14.5) and edge (`biosciences-mcp-edge`, 3.0.2) straight to FastMCP `>=4.0.10,<4.1`, with no caller-visible change to tool names, parameters, or the ADR-001 wire contract. Then record one framework version policy (ADR-009) and enforce it in both repositories.
+Move core (`biosciences-mcp`, FastMCP 2.14.5) and edge (`biosciences-mcp-edge`, 3.0.2) to FastMCP `>=3.4.7,<3.5`, with no caller-visible change to tool names, parameters, or the ADR-001 wire contract. Then record one framework version policy (ADR-009) that enforces the range in both repositories and names the evidence a later move to 4.x must produce (spec FR-020).
 
 Phase 0 research ([research.md](research.md)) ran the full core and edge test matrices on 2.14.5/3.0.2, 3.4.7, and 4.0.10, and read the framework source. Findings:
 - The Host guard behind edge's `<3.4.3` pin has been off by default since 3.4.4.
 - All 36 tool names and every parameter are unchanged.
 - The wire contract holds.
-- Core's only new failures are two test-only sites.
+- On 3.4.7, core's only new failure is one test-only site, and the MCP protocol library stays on 1.x.
 - The one substantive caller-visible regression is that FastMCP 3.2.4+ drops `Returns:`, `Examples:`, and `Error Codes:` text from tool descriptions (30 of 34 core tools, both edge tools). Restructuring those docstrings is the main code work.
 
-The Phase 0 gate is **Conditional Go** for both repositories. Final Go comes from a Horizon preview deployment.
+The Phase 0 gate, re-evaluated for 3.4.7, is **Conditional Go** for both repositories. Final Go comes from a Horizon preview deployment. FastMCP 4 is deferred: Python clients work against a 4.0.10 server, but the platform's own clients and Horizon on 4.x are unverified (research R13).
 
 Delivery order:
 - **Core first:** PR #18 (done) → upgrade PR → preview deploy → production.
@@ -27,7 +29,7 @@ Delivery order:
 **Language/Version**: Python >=3.11 (repo floor). Horizon runs Python 3.12 (research R3, CONFIRMED for 3.0rc1).
 
 **Primary Dependencies**:
-- From fastmcp 2.14.5 → 4.0.10, which brings mcp 1.26.0 → 2.2.0 and adds mcp-types, httpx2, httpcore2, fastmcp-slim, and starlette 1.7.0 (research R1, B).
+- From fastmcp 2.14.5 → 3.4.7. `mcp` stays on 1.x (1.26.0 locked; 3.x requires `<2.0`). The upgrade adds fastmcp-slim and moves starlette 0.52.1 → 1.7.0 (research R1, B).
 - Pydantic v2 and httpx are unchanged.
 
 **Storage**: N/A
@@ -50,8 +52,8 @@ Delivery order:
 - Rollback in one revert, in under 15 minutes (SC-005).
 
 **Scale/Scope**:
-- Core: 12 mounted servers, 34 tools, 22 envelope construction sites in 13 client files, and 30 docstrings to restructure.
-- Edge: 2 tools and 2 envelope sites.
+- Core: 12 mounted servers, 34 tools, 30 docstrings to restructure across 11 server files, and 1 test fix.
+- Edge: 2 tools and 2 docstrings.
 - Plus 1 ADR, 2 policy tests, and 2 CI workflows.
 
 ## Constitution Check
@@ -63,13 +65,13 @@ The constitution is v1.1.0, which predates ADR-007 and ADR-008. Its items are gr
 | Principle | Pre-research | Post-design | Notes |
 |---|---|---|---|
 | I. Async-First | PASS | PASS | No client code changes. The httpx async clients are untouched. |
-| II. Fuzzy-to-Fact | PASS | PASS | Free text to strict tools still returns `UNRESOLVED_ENTITY` on 4.0.10 (R5); the contract tier enforces it. Edge's documented departure is unchanged (FR-014), and its gaps are findings F2. |
-| III. Schema Determinism | PASS | PASS | Envelopes and null omission hold on 4.0.10 (R9). The R8 envelope construction change removes warnings without changing output; contract+unit verifies it. |
+| II. Fuzzy-to-Fact | PASS | PASS | Free text to strict tools still returns `UNRESOLVED_ENTITY` on 3.4.7 and 4.0.10 (R5); the contract tier enforces it. Edge's documented departure is unchanged (FR-014), and its gaps are findings F2. |
+| III. Schema Determinism | PASS | PASS | Envelopes and null omission hold on 3.4.7 (R9): contract+unit passes 104/104. |
 | IV. Token Budgeting | PASS | PASS | `slim` parameters and page-size defaults are unchanged (R4: every parameter identical). |
 | V. Specification-Before-Code | **VIOLATION, justified** | **VIOLATION, justified** | PR #18 was opened before this spec and exceeds the trivial-change exception. See Complexity Tracking. All further code waits for approval of this plan (HUMAN GATE). |
 | VI. Platform Skill Delegation | PASS with gap | PASS with gap | No platform skill covers framework upgrades. The constitution's `deploy-cloud` skill for deployments doesn't exist (finding F8), so [quickstart.md](quickstart.md) defines the deployment pre-flight and post-deploy checks it would have provided. |
 | Forbidden: hardcoded credentials | PASS for this feature | PASS | Edge leaks the BioGRID key in error messages (F1). It's pre-existing and separate, but needs urgent handling outside this feature. |
-| Required: human approval gate | Pending | **Approved** | Plan approved by the repository owner on 2026-09-30, before `/speckit-tasks`. |
+| Required: human approval gate | Pending | **Approved** | Plan approved by the repository owner on 2026-09-30, before `/speckit-tasks`. Target amendment to 3.4.7 directed by the owner on 2026-10-01 (option B). |
 
 **Result**: Gates pass, with one justified violation and one documented gap. Plan approved 2026-09-30.
 
@@ -98,20 +100,18 @@ specs/015-fastmcp-4-upgrade/
 
 ```text
 biosciences-mcp/                                  # core
-├── pyproject.toml, uv.lock                       # fastmcp>=4.0.10,<4.1 with a reason comment (FR-018)
+├── pyproject.toml, uv.lock                       # fastmcp>=3.4.7,<3.5 with a reason comment (FR-018)
 ├── src/biosciences_mcp/servers/*.py              # 30 docstrings restructured across 11 server files (R6)
-├── src/biosciences_mcp/clients/*.py              # 22 PaginationEnvelope.create sites across 13 client files (R8)
 ├── tests/integration/test_gateway.py             # get_tools() → list_tools() (R7)
-├── tests/contract/test_serialization_unit.py     # 4.x module path (R7)
 ├── tests/contract/test_tool_surface.py           # NEW: names, params, description guidance vs baseline (FR-001/002/006)
 ├── tests/unit/test_framework_version_policy.py   # NEW: pyproject range + uv.lock vs policy (FR-017)
 ├── .github/workflows/ci.yml                      # NEW: pytest -m unit on PRs (SC-007)
-├── docs/adr/proposed/adr-009-v0.1.md             # NEW: version policy (FR-015/016)
+├── docs/adr/proposed/adr-009-v0.1.md             # NEW: version policy and the 4.x gate (FR-015/016/020)
 └── CLAUDE.md                                     # FastMCP version statements, deployment notes
 
 biosciences-mcp-edge/                             # edge (separate repository and PR)
-├── pyproject.toml, uv.lock                       # drop <3.4.3; fastmcp>=4.0.10,<4.1 with reason
-├── src/biosciences_mcp_edge/server.py            # 2 docstrings (R6); 2 envelope sites (R8)
+├── pyproject.toml, uv.lock                       # drop <3.4.3; fastmcp>=3.4.7,<3.5 with reason
+├── src/biosciences_mcp_edge/server.py            # 2 docstrings (R6)
 ├── tests/unit/test_framework_version_policy.py   # NEW: local copy of policy values (FR-013, FR-017)
 ├── tests/unit/test_tool_surface.py               # NEW: in-process surface check vs edge baseline
 ├── .github/workflows/ci.yml                      # NEW
@@ -126,7 +126,7 @@ biosciences-mcp-edge/                             # edge (separate repository an
 | Outcome | Core | Edge |
 |---|---|---|
 | **Conditional Go** | ✅ | ✅ |
-| Condition for final Go | Preview deployment passes the quickstart checks, including Host, 34 tools, one call per server, and deepagents' sessionless `tools/call` (R12) | Preview passes Host, 2 tools, and both calls |
+| Condition for final Go | Preview deployment on 3.4.7 passes the quickstart checks, including Host, 34 tools, one call per server, and deepagents' sessionless `tools/call` (R12) | Local capture at 3.4.7 matches the 3.0.2 baseline (T028); the preview passes Host, 2 tools, and both calls |
 | What would make it No-Go | Horizon rejects the public `Host`, or Horizon runs with sessions in a way deepagents can't use and that can't be configured | Horizon rejects the public `Host` |
 
 ## Delivery sequence and rollback
@@ -134,8 +134,7 @@ biosciences-mcp-edge/                             # edge (separate repository an
 1. **Done:** PR #18, the gateway mounts use `tool_names` only. It's safe on 2.14.5 and doesn't depend on the rest of the feature.
 2. **Core upgrade PR (implement branch):** these land together, since the pin change without them breaks the tests:
    - the pin and lock change
-   - the R7 test fixes
-   - the R8 envelope construction change
+   - the R7 test fix
    - the R6 docstring restructuring
    - the tool-surface contract test
    - the policy test and CI workflow
@@ -145,6 +144,7 @@ biosciences-mcp-edge/                             # edge (separate repository an
 4. **Core production:** merge, then redeploy. Rollback is a revert of the upgrade PR's merge commit plus a redeploy. Time it during the preview to check SC-005.
 5. **Edge upgrade PR,** then preview, then production, following the same pattern.
 6. **ADR-009 acceptance:** move it to `accepted/` once both repositories run inside the policy. File the psychology-mcp follow-up issue.
+7. **4.x follow-up:** file a Linear issue for a later feature that moves the range to 4.x, gated by FR-020. It carries the deferred R7 import fix and the R8 envelope parameterization.
 
 ## Complexity Tracking
 

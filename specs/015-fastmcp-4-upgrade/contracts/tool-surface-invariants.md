@@ -11,7 +11,7 @@ The tool surface is the interface these repositories expose to agent callers. Th
 3. **Guidance preserved.** Take each baseline `description` and drop section-header lines (`Args:`, `Returns:`, `Examples:`, `Error Codes:`, `Raises:`, `Note:`). Also drop blank lines and the per-parameter lines of `Args:`; those are checked separately against parameter descriptions. Every remaining line must appear, after whitespace normalisation, in either the tool's current `description` or one of its parameter `description`s.
 
    *Why line-level*: FastMCP 3.2.4+ keeps only the first text section of a docstring as the description (research R6). The test proves nothing a caller could read on 2.14.5 has disappeared, without fixing where in the docstring it lives.
-4. **Per-parameter guidance.** Each baseline `Args:` entry's text appears in that parameter's `description` on 4.x.
+4. **Per-parameter guidance.** Each baseline `Args:` entry's text appears in that parameter's `description` on 3.4.7 (FastMCP 3.2.4+ moves `Args:` text there).
 
 ## Allowed changes (MUST be listed in the upgrade PR under "User-visible contract")
 
@@ -30,4 +30,4 @@ Any change not in this table is a contract change and needs its own decision.
 
 - Core: `tests/contract/test_tool_surface.py`, marked `contract` and `unit` (no network). It loads the gateway in process with `fastmcp.Client`, calls `list_tools`, and compares against `contracts/tool-surface-baseline-core.json`. The baseline path is read relative to the repository root, so the test works from any worktree.
 - Edge: `tests/unit/test_tool_surface.py`, marked `unit`. It does the same against a copy of `tool-surface-baseline-edge.json` placed in edge's `tests/fixtures/`, because edge cannot read core's files (FR-013).
-- The test reads the 4.x field names (`input_schema`, `output_schema`), so it raises no camelCase deprecation warnings.
+- The test reads schema fields version-tolerantly: `inputSchema`/`outputSchema` on 2.x and 3.x (mcp 1.x types), and `input_schema`/`output_schema` on a later 4.x (mcp 2.x, which deprecates the camelCase names). The same test then serves the 4.x follow-up unchanged.

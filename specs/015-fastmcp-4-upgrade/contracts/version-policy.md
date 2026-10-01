@@ -7,9 +7,14 @@ This is the content ADR-009 must carry and the behaviour each repository's polic
 ## ADR-009 required sections
 
 1. **Scope**: platform ADR under the placement rule in `biosciences-program/docs/adr/README.md`. Binds `biosciences-mcp`, `biosciences-mcp-edge`, `psychology-mcp`, and future connector repositories by default.
-2. **Supported range**: `fastmcp>=4.0.10,<4.1`, with the reason for each bound.
-   - *Floor*: 4.0.10 is the version verified in spec 015.
-   - *Ceiling*: upstream issue #5213 proposes turning the Host guard back on by default, and 4.1 is unverified.
+2. **Supported range**: `fastmcp>=3.4.7,<3.5`, with the reason for each bound.
+   - *Floor*: 3.4.7 is the version verified in spec 015, and the first 3.x with every fix this platform depends on (Host guard default off since 3.4.4).
+   - *Ceiling*: a minor ceiling (AGE-718 convention: FastMCP's own policy allows breaking changes in minor releases). 4.x is not yet supported (section 2a).
+2a. **Not yet supported: 4.x.** Widening the range to 4.x requires recorded evidence, per spec FR-020:
+   - a preview deployment of each consumer on 4.x passing the same Host, tool-list, call, and rollback checks (quickstart §4)
+   - Claude Code, the claude.ai connector, Claude Desktop, and biosciences-temporal's client completing list and call against that preview
+   - the evidence already gathered (spec 015 research R1, R13): Python clients on `mcp` 1.26 work against a 4.0.10 server, protocol versions 2024-11-05 to 2026-07-28 are accepted, and the tool surface matches 3.4.7
+   - Known 4.x work, recorded so it isn't rediscovered: `fastmcp.tools.tool` moved to `fastmcp.tools.base` (core `tests/contract/test_serialization_unit.py`); unparameterized `PaginationEnvelope.create` sites log serializer warnings (22 in core, 2 in edge); open upstream issue #5213 proposes turning the Host guard back on by default.
 3. **Known-bad versions**, each with the incident and evidence:
 
    | Versions | Failure | Evidence |

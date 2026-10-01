@@ -12,7 +12,7 @@ The caller-visible description of one server's tools, as returned by `list_tools
 |---|---|---|
 | `name` | tool registration, or the gateway `tool_names` mapping | MUST be identical: same set, no renames (FR-001) |
 | `params[name]` | input schema `properties` | MUST be identical in name, `type`, `required`, and `default` (FR-002) |
-| `input_schema.additionalProperties` | framework | MAY change from absent to `false`. Behaviour is already rejecting (research R5). |
+| `inputSchema.additionalProperties` | framework | MAY change from absent to `false`. Behaviour is already rejecting (research R5). |
 | `params[name].description` | docstring `Args:` (3.x+) | MAY be added. This is where `Args:` guidance moves (R6). |
 | `description` | docstring leading section (3.2.4+) | MUST keep every guidance line from the baseline description, either in `description` or in a parameter description (FR-006). Section headers (`Args:`, `Returns:`, …) are not guidance lines. |
 | `output_schema` | return annotation | MAY change in structure only (`$defs`/`$ref` inlining). The described shape MUST be the same (FR-004). |
@@ -41,7 +41,8 @@ The platform decision that governs which framework versions connector repositori
 | Field | Type | Initial value (proposed) |
 |---|---|---|
 | `framework` | string | `fastmcp` |
-| `supported_range` | PEP 440 specifier | `>=4.0.10,<4.1` |
+| `supported_range` | PEP 440 specifier | `>=3.4.7,<3.5` |
+| `not_yet_supported` | list of {specifier, gate} | `>=4.0`: supported only after spec FR-020's evidence is recorded (a 4.x preview per repository; Claude Code, the claude.ai connector, Claude Desktop, and biosciences-temporal's client completing list and call against it) |
 | `known_bad` | list of {specifier, reason, evidence} | `==3.4.3`: Host guard on by default, returning 421 on Horizon (edge `d4b9502`, upstream PR #4405, fixed in 3.4.4) |
 | `usage_rules` | list of {rule, reason, evidence} | Never combine `namespace=` (or 2.x/3.x `prefix=`) with `tool_names` values that already carry the prefix. Every 3.x and 4.x version double-prefixes the names (`hgnc_hgnc_search_genes`); 2.x hid it. Evidence: AGE-182, core `8b112cf`/`e5e19a0`, PR #18, mount probe 2026-09-30. Enforced by the tool-surface contract test, not by version bounds. |
 | `consumers` | list of repositories | `biosciences-mcp`, `biosciences-mcp-edge`, `psychology-mcp` |
