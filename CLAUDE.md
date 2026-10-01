@@ -22,7 +22,9 @@ FastMCP wrappers for life sciences APIs, enabling LLM agents to query biological
 | WikiPathways | v0.1.0 | 17 | ✅ Complete |
 | ClinicalTrials.gov | v0.1.0 | 13 | ✅ Complete |
 
-**Total: 12 active servers, 920+ tests (557 unit + 363 integration + 4 e2e; the `contract` marker selects the 173-case wire-level ADR-001 tier inside those)**
+**Total: 12 active servers, 1,077 tests (706 unit + 363 integration + 4 e2e; the `contract` marker selects 311 cases inside those: 242 unit, including the 138-case tool-surface guard, and 69 wire-level integration)**
+
+**Framework:** FastMCP `>=3.4.7,<3.5` (spec 015). The range and its known-bad versions are governed by ADR-009 (`docs/adr/proposed/adr-009-v0.1.md`), and `tests/unit/test_framework_version_policy.py` enforces them. FastMCP 4.x is not yet supported (ADR-009 §2.2).
 
 ## Architecture (ADR-001 v1.4)
 
@@ -78,10 +80,10 @@ uv sync                          # Install dependencies
 uv sync --extra dev              # Install with dev dependencies
 
 # Testing (marker-based)
-uv run pytest -m unit -v                              # Unit tests (557 tests, no network)
+uv run pytest -m unit -v                              # Unit tests (706 tests, no network; CI runs this tier)
 uv run pytest -m integration -v                       # Integration tests (363 tests)
 uv run pytest -m e2e -v                               # End-to-end tests (4 tests)
-uv run pytest -m "contract and unit" -v               # ADR-001 serialisation contract (106, no network)
+uv run pytest -m "contract and unit" -v               # Serialisation contract + tool-surface guard (242, no network)
 uv run pytest -m "contract and integration" -v        # ADR-001 wire contract per server (69, network)
 uv run pytest -m "not integration" -v                 # Fast local dev
 uv run pytest -m "unit and clinicaltrials" -v         # API-specific unit tests
@@ -128,6 +130,8 @@ Spec Kit v1.0.4 (upgraded 2026-09-03, AGE-702). Commands are skills under `.clau
 ## Known Issues
 
 - **Serialisation (ADR-001 §4)**: every entity model MUST inherit `OmitNoneModel` from `models/base.py`. FastMCP never calls `model_dump()`, so `model_dump` overrides and `ConfigDict(exclude_none=True)` do not reach the wire; `tests/contract/` fails on either. `PaginationEnvelope` stays on `BaseModel` (§8 allows null `cursor`/`total_count`); `ErrorDetail` is `OmitNoneModel` so `invalid_input` is omitted when absent.
+- **Tool docstrings (FastMCP 3.2.4+)**: a tool's description keeps only the docstring's first text section. Any column-0 `Name:` line (`Returns:`, `Example:`, `Error Codes:`, `Note:`…) starts a section that is dropped from the description, and so is everything after it. Put return and error guidance in the leading prose, above `Args:`, with no section headers; `Args:` text becomes per-parameter descriptions. `tests/contract/test_tool_surface.py` fails if baseline guidance disappears.
+- **Gateway mounts (ADR-009 §2.3)**: `tool_names` carries the full public name (`hgnc_search_genes`). Never also pass `namespace=`/`prefix=`: every 3.x/4.x release double-prefixes (`hgnc_hgnc_search_genes`). A new tool must get a `tool_names` entry, or it appears unprefixed. The tool-surface guard catches both.
 - **Tool parameter constraints (ADR-001 §3)**: never put a CURIE `pattern=` on a `@mcp.tool` parameter. FastMCP validates arguments before the tool body runs and returns a pydantic string instead of the ErrorEnvelope (IUPHAR did this until AGE-695); validate in the client and return `UNRESOLVED_ENTITY`. `tests/contract/` fails on this.
 - **Cross-reference values (ADR-001 Appendix A)**: build every `cross_references` value through `normalize_xref(key, value)` in `models/cross_references.py`; never hand-prefix or strip identifiers in a client. The registry form is bare local ids except for prefixed keys (`hgnc`, `orphanet`, `ucsc`, `pubmed`, `mondo`, `efo`).
 - **ClinicalTrials.gov**: Cloudflare blocks Python httpx clients (403). Use curl for manual testing. Unit tests with mocks verify parameter logic.
@@ -151,7 +155,7 @@ Per the FastMCP documentation, only the `source` field is required. The `environ
 ### Deploying to FastMCP Cloud
 
 Deployment is managed via the **Prefect Horizon web UI** at [horizon.prefect.io](https://horizon.prefect.io).
-There is no `fastmcp deploy` or `fastmcp auth` CLI command in FastMCP 2.x — deployment is web-UI-only.
+FastMCP 3.4.7 has no `fastmcp deploy` command, so deployment is web-UI-only. (`fastmcp auth` exists in 3.x as general auth utilities; the Horizon `fastmcp login`/`whoami` commands arrive in 4.0.) Leave all `FASTMCP_HTTP_*` host settings unset: host-origin protection is off by default from 3.4.4, and turning it on can return HTTP 421 on Horizon (ADR-009 §2.3).
 
 1. Go to [horizon.prefect.io](https://horizon.prefect.io) and sign in with GitHub
 2. Create a new server deployment pointing to this repo with entrypoint:

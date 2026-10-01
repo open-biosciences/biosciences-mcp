@@ -222,7 +222,7 @@
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T046 [P] Update core `CLAUDE.md` in the core PR:
+- [X] T046 [P] Update core `CLAUDE.md` in the core PR:
   - framework versions in the deployment section: state FastMCP 3.4.7, and replace "There is no `fastmcp deploy` or `fastmcp auth` CLI command in FastMCP 2.x" with what 3.4.7's CLI actually offers (check `uv run fastmcp --help`; `fastmcp login`/`whoami` arrived in 4.0, research A). Deployment stays web-UI.
   - a Known Issues entry saying tool descriptions keep only the first docstring section, so return and error guidance goes above `Args:`, enforced by `tests/contract/test_tool_surface.py`
   - a Known Issues entry for the mount usage rule
