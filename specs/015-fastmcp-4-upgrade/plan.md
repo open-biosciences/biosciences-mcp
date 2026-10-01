@@ -50,7 +50,7 @@ Delivery order:
 - Rollback in one revert, in under 15 minutes (SC-005).
 
 **Scale/Scope**:
-- Core: 12 mounted servers, 34 tools, about 21 envelope construction sites, and 30 docstrings to restructure.
+- Core: 12 mounted servers, 34 tools, 22 envelope construction sites in 13 client files, and 30 docstrings to restructure.
 - Edge: 2 tools and 2 envelope sites.
 - Plus 1 ADR, 2 policy tests, and 2 CI workflows.
 
@@ -99,7 +99,8 @@ specs/015-fastmcp-4-upgrade/
 ```text
 biosciences-mcp/                                  # core
 ├── pyproject.toml, uv.lock                       # fastmcp>=4.0.10,<4.1 with a reason comment (FR-018)
-├── src/biosciences_mcp/servers/*.py              # 30 docstrings restructured (R6); envelope construction (R8)
+├── src/biosciences_mcp/servers/*.py              # 30 docstrings restructured across 11 server files (R6)
+├── src/biosciences_mcp/clients/*.py              # 22 PaginationEnvelope.create sites across 13 client files (R8)
 ├── tests/integration/test_gateway.py             # get_tools() → list_tools() (R7)
 ├── tests/contract/test_serialization_unit.py     # 4.x module path (R7)
 ├── tests/contract/test_tool_surface.py           # NEW: names, params, description guidance vs baseline (FR-001/002/006)

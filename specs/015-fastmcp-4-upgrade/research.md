@@ -176,15 +176,15 @@ The highest achievable outcome without a live deployment is **Conditional Go** (
 
 ## Findings outside this feature's scope
 
-These were found during research. They are not upgrade regressions, and FR-014 keeps edge's own deviations out of this feature. Each needs its own issue.
+These were found during research. They are not upgrade regressions, and FR-014 keeps edge's own deviations out of this feature. Filed in Linear on 2026-09-30. The upgrade itself is tracked by AGE-718, whose 3.4.7 target this feature supersedes (comment on AGE-718, 2026-09-30).
 
-| # | Finding | Repo | Severity | Evidence |
-|---|---|---|---|---|
-| F1 | Any ORCS HTTP error other than 429 returns the full request URL to the agent, including `accesskey=<BIOGRID_API_KEY>` | edge | **High (credential exposure)** | C §6: `server.py:44` with `biogrid_orcs.py:55-60`. Reproduced with a fake key. Present on 3.0.2 and 4.0.10. |
-| F2 | `get_orcs_essentiality` with free text returns a raw validation error, not `UNRESOLVED_ENTITY` (the parameter is typed `int`). The `get_mechanism` hint names no tool. `invalid_input` holds exception text. A missing key is reported as `UNRESOLVED_ENTITY`. | edge | Medium (contradicts edge's ADR README) | C §4 |
-| F3 | Error envelopes carry `invalid_input: null`, item fields are sent as `null` (1,409 in one ORCS response), and ORCS returns all 352 screens while reporting `page_size: 50` | edge | Medium (ADR-001 §4, §7) | C §3, §6 |
-| F4 | Edge opens an HTTP client per call with no retry or backoff. Core's base client also lacks the ADR-007 retry logic (9 per-client copies remain). | edge, core | Medium (ADR-007) | C §6 |
-| F5 | Argument names already wrong in 4 mirrored skill trees and in deepagents docstrings (`gene_id`, `ligand_id`, `cid`, `species`, `organism`, `ensembl_id` for `opentargets_get_associations`) | skills, deepagents | Medium (callers send rejected calls today) | D §1 |
-| F6 | IUPHAR returns 401 on every call in the network contract tier | core | Medium (one server unusable live, if this reflects production) | B, baseline logs |
-| F7 | The committed edge `uv.lock` at `91f6bab` no longer matched the `<3.4.3` range in `pyproject.toml` | edge | Low | C §10 |
-| F8 | Constitution principle VI names a `deploy-cloud` skill, but none exists in platform-skills or the marketplace | program | Low | plan.md Constitution Check |
+| # | Finding | Repo | Severity | Evidence | Tracked |
+|---|---|---|---|---|---|
+| F1 | Any ORCS HTTP error other than 429 returns the full request URL to the agent, including `accesskey=<BIOGRID_API_KEY>` | edge | **High (credential exposure)** | C §6: `server.py:44` with `biogrid_orcs.py:55-60`. Reproduced with a fake key. Present on 3.0.2 and 4.0.10. | AGE-733 (Urgent) |
+| F2 | `get_orcs_essentiality` with free text returns a raw validation error, not `UNRESOLVED_ENTITY` (the parameter is typed `int`). The `get_mechanism` hint names no tool. `invalid_input` holds exception text. A missing key is reported as `UNRESOLVED_ENTITY`. | edge | Medium (contradicts edge's ADR README) | C §4 | AGE-735 |
+| F3 | Error envelopes carry `invalid_input: null`, item fields are sent as `null` (1,409 in one ORCS response), and ORCS returns all 352 screens while reporting `page_size: 50` | edge | Medium (ADR-001 §4, §7) | C §3, §6 | AGE-736 |
+| F4 | Edge opens an HTTP client per call with no retry or backoff. Core's base client also lacks the ADR-007 retry logic (9 per-client copies remain). | edge, core | Medium (ADR-007) | C §6 | AGE-698 (existing) |
+| F5 | Argument names already wrong in 4 mirrored skill trees and in deepagents docstrings (`gene_id`, `ligand_id`, `cid`, `species`, `organism`, `ensembl_id` for `opentargets_get_associations`) | skills, deepagents | Medium (callers send rejected calls today) | D §1 | AGE-737 |
+| F6 | IUPHAR returns 401 on every call in the network contract tier | core | Medium (one server unusable live, if this reflects production) | B, baseline logs | AGE-734 (High; root cause confirmed 2026-09-30: GtoPdb now requires an API key) |
+| F7 | The committed edge `uv.lock` at `91f6bab` no longer matched the `<3.4.3` range in `pyproject.toml` | edge | Low | C §10 | Fixed by this feature's edge relock (no issue) |
+| F8 | Constitution principle VI names a `deploy-cloud` skill, but none exists in platform-skills or the marketplace | program | Low | plan.md Constitution Check | AGE-738 |
