@@ -42,6 +42,8 @@ async def search_proteins(
 
     Returns ranked candidates for resolution. Use this before calling get_protein.
 
+    PaginationEnvelope with protein candidates, or ErrorEnvelope on failure.
+
     Args:
         query: Search term (protein name, accession, gene symbol, or organism).
                Minimum 2 characters required.
@@ -49,9 +51,6 @@ async def search_proteins(
               Default false returns full candidates.
         cursor: Opaque cursor for pagination. Pass from previous response for next page.
         page_size: Number of results per page (1-500, default 50).
-
-    Returns:
-        PaginationEnvelope with protein candidates, or ErrorEnvelope on failure.
     """
     client = await get_client()
     return await client.search_proteins(
@@ -71,12 +70,11 @@ async def get_protein(uniprot_id: str, slim: bool = False) -> dict | ErrorEnvelo
 
     Implements User Story 2: Strict Protein Lookup (T041-T043).
 
+    Protein record with cross_references, or ErrorEnvelope on failure.
+
     Args:
         uniprot_id: UniProt CURIE in format 'UniProtKB:XXXXXX' (e.g., 'UniProtKB:P38398' for BRCA1).
         slim: If true, return only id/name/organism (~20 tokens vs ~115-300 full record).
-
-    Returns:
-        Protein record with cross_references, or ErrorEnvelope on failure.
     """
     client = await get_client()
     result = await client.get_protein(uniprot_id, slim=slim)

@@ -52,6 +52,19 @@ async def search_genes(
     Returns ranked candidates with NCBIGene CURIEs for Phase 2 strict lookup.
     Uses NCBI E-utilities esearch + esummary two-step pattern.
 
+    PaginationEnvelope with GeneSearchCandidate items containing:
+    - id: NCBIGene CURIE (e.g., "NCBIGene:7157")
+    - symbol: Gene symbol (e.g., "TP53")
+    - name: Gene name/description
+    - organism: Scientific name
+    - score: Relevance score (0.0-1.0)
+
+    Or ErrorEnvelope with recovery hints on failure.
+
+    Search for TP53: query="TP53", organism="human"
+    Search for BRCA genes: query="BRCA"
+    Paginate results: cursor=<cursor from previous response>
+
     Args:
         query: Search term (gene symbol, name, description, or natural language).
                Minimum 2 characters required.
@@ -59,21 +72,6 @@ async def search_genes(
                   Default: "human" (Homo sapiens). Pass None for all organisms.
         page_size: Number of results per page (1-100, default 50).
         cursor: Opaque cursor for pagination (from previous response).
-
-    Returns:
-        PaginationEnvelope with GeneSearchCandidate items containing:
-        - id: NCBIGene CURIE (e.g., "NCBIGene:7157")
-        - symbol: Gene symbol (e.g., "TP53")
-        - name: Gene name/description
-        - organism: Scientific name
-        - score: Relevance score (0.0-1.0)
-
-        Or ErrorEnvelope with recovery hints on failure.
-
-    Examples:
-        Search for TP53: query="TP53", organism="human"
-        Search for BRCA genes: query="BRCA"
-        Paginate results: cursor=<cursor from previous response>
     """
     client = await get_client()
     return await client.search_genes(
@@ -94,23 +92,21 @@ async def get_gene(
     Returns full Agentic Biolink entity with cross-references to HGNC, Ensembl,
     UniProt, RefSeq, and OMIM. Requires resolved CURIE from search_genes.
 
+    EntrezGene record with:
+    - id, symbol, name, organism (always present)
+    - summary, description, map_location, chromosome, aliases (full mode)
+    - cross_references: HGNC, Ensembl, UniProt, RefSeq, OMIM links
+
+    Or ErrorEnvelope with recovery hints on failure.
+
+    Get TP53: entrez_id="NCBIGene:7157"
+    Get BRCA1 slim: entrez_id="NCBIGene:672", slim=True
+
     Args:
         entrez_id: NCBIGene CURIE in format 'NCBIGene:NNNNN'
                    (e.g., 'NCBIGene:7157' for TP53, 'NCBIGene:672' for BRCA1).
         slim: If True, return minimal fields (id, symbol, name, organism)
               for token efficiency (~25 vs ~115-300 tokens).
-
-    Returns:
-        EntrezGene record with:
-        - id, symbol, name, organism (always present)
-        - summary, description, map_location, chromosome, aliases (full mode)
-        - cross_references: HGNC, Ensembl, UniProt, RefSeq, OMIM links
-
-        Or ErrorEnvelope with recovery hints on failure.
-
-    Examples:
-        Get TP53: entrez_id="NCBIGene:7157"
-        Get BRCA1 slim: entrez_id="NCBIGene:672", slim=True
     """
     client = await get_client()
     return await client.get_gene(entrez_id=entrez_id, slim=slim)
@@ -126,20 +122,18 @@ async def get_pubmed_links(
     Returns list of PubMed IDs linked to the gene. Use these IDs with a
     PubMed MCP server for full article metadata.
 
+    List of PubMed ID strings (e.g., ["39804234", "39804163"]).
+    Empty list if gene has no associated literature (not an error).
+
+    Or ErrorEnvelope with recovery hints on failure.
+
+    Get TP53 citations: entrez_id="NCBIGene:7157", limit=10
+    Get top 5 BRCA1 papers: entrez_id="NCBIGene:672", limit=5
+
     Args:
         entrez_id: NCBIGene CURIE in format 'NCBIGene:NNNNN'
                    (e.g., 'NCBIGene:7157' for TP53).
         limit: Maximum number of PubMed IDs to return (1-100, default 10).
-
-    Returns:
-        List of PubMed ID strings (e.g., ["39804234", "39804163"]).
-        Empty list if gene has no associated literature (not an error).
-
-        Or ErrorEnvelope with recovery hints on failure.
-
-    Examples:
-        Get TP53 citations: entrez_id="NCBIGene:7157", limit=10
-        Get top 5 BRCA1 papers: entrez_id="NCBIGene:672", limit=5
     """
     client = await get_client()
     return await client.get_pubmed_links(entrez_id=entrez_id, limit=limit)

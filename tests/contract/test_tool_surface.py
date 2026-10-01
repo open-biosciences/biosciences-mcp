@@ -79,7 +79,7 @@ def test_invariant_4_parameter_guidance(surface, name):
     tool = surface[name]
     tool_text = normalise(tool["description"] or "")
     missing = []
-    for param, text in args_entries(BASELINE[name]["description"]):
+    for param, text in args_entries(BASELINE[name]["description"], set(BASELINE[name]["params"])):
         param_text = normalise(tool["params"].get(param, {}).get("description", ""))
         if text not in param_text and text not in tool_text:
             missing.append(f"Args {param}: {text}")

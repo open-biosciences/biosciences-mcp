@@ -148,15 +148,28 @@ def guidance_lines(description: str) -> list[str]:
     return [normalise(line) for line in lines if line.strip()]
 
 
-def args_entries(description: str) -> list[tuple[str, str]]:
-    """(parameter, text) pairs from the Args: section."""
+def args_entries(description: str, param_names: set[str]) -> list[tuple[str, str]]:
+    """(parameter, text) pairs from the Args: section, one per non-blank line.
+
+    A line starts a new entry only when its leading name is a declared parameter;
+    any other line (for example an indented ``Example: "..."`` or ``Default: ...``)
+    continues the current parameter's entry.
+    """
     _, sections = split_sections(description)
     entries = []
     for header, body in sections:
         if header != "Args":
             continue
+        current = None
         for line in body:
+            if not line.strip():
+                continue
             match = re.match(r"\s*(\w+)\s*(?:\([^)]*\))?:\s*(.*)", line)
-            if match and match.group(2).strip():
-                entries.append((match.group(1), normalise(match.group(2))))
+            if match and match.group(1) in param_names:
+                current = match.group(1)
+                text = match.group(2)
+            else:
+                text = line
+            if current and text.strip():
+                entries.append((current, normalise(text)))
     return entries
