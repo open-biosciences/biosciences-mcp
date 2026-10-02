@@ -1,0 +1,279 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.2, pytest-9.0.2, pluggy-1.6.0 -- /home/donbr/open-biosciences/biosciences-mcp/.worktrees/implement-015-core/.venv/bin/python
+rootdir: /home/donbr/open-biosciences/biosciences-mcp/.worktrees/implement-015-core
+configfile: pyproject.toml
+plugins: anyio-4.12.1, timeout-2.4.0, asyncio-1.3.0
+timeout: 60.0s
+timeout method: thread
+timeout func_only: False
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... collected 41 items
+
+tests/integration/test_ensembl_api.py::TestSearchGenes::test_search_genes_brca1 PASSED [  2%]
+tests/integration/test_ensembl_api.py::TestSearchGenes::test_search_genes_tumor_protein SKIPPED [  4%]
+tests/integration/test_ensembl_api.py::TestSearchGenes::test_search_genes_species_filter FAILED [  7%]
+tests/integration/test_ensembl_api.py::TestSearchGenes::test_search_genes_short_query PASSED [  9%]
+tests/integration/test_ensembl_api.py::TestSearchGenes::test_search_genes_species_alias FAILED [ 12%]
+tests/integration/test_ensembl_api.py::TestSearchGenes::test_search_genes_pagination SKIPPED [ 14%]
+tests/integration/test_ensembl_api.py::TestSearchGenes::test_search_genes_no_results PASSED [ 17%]
+tests/integration/test_ensembl_api.py::TestFuzzyToFactWorkflow::test_search_then_lookup_gene FAILED [ 19%]
+tests/integration/test_ensembl_api.py::TestFuzzyToFactWorkflow::test_gene_to_transcript_workflow PASSED [ 21%]
+tests/integration/test_entrez_api.py::TestEntrezClientSearchGenes::test_search_genes_empty_results PASSED [ 24%]
+tests/integration/test_performance.py::TestPerformanceRequirements::test_search_performance_common_proteins PASSED [ 26%]
+tests/integration/test_performance.py::TestPerformanceRequirements::test_get_protein_performance FAILED [ 29%]
+tests/integration/test_performance.py::TestPerformanceRequirements::test_concurrent_search_performance PASSED [ 31%]
+tests/integration/test_performance.py::TestChEMBLPerformanceRequirements::test_search_compounds_sc001 PASSED [ 34%]
+tests/integration/test_performance.py::TestChEMBLPerformanceRequirements::test_get_compound_sc002 PASSED [ 36%]
+tests/integration/test_performance.py::TestChEMBLPerformanceRequirements::test_get_compounds_batch_sc007 PASSED [ 39%]
+tests/integration/test_performance.py::TestChEMBLPerformanceRequirements::test_batch_faster_than_sequential PASSED [ 41%]
+tests/contract/test_wire_contracts.py::test_list_tool_returns_pagination_envelope[ensembl.search_genes] FAILED [ 43%]
+tests/integration/test_competency_questions_client.py::test_cq1_target_resolvability PASSED [ 46%]
+tests/integration/test_competency_questions_client.py::test_cq2_cross_domain_mapping PASSED [ 48%]
+tests/integration/test_competency_questions_client.py::test_cq3_therapeutic_insight PASSED [ 51%]
+tests/integration/test_competency_questions_client.py::test_cq4_protein_interaction_network PASSED [ 53%]
+tests/integration/test_competency_questions_client.py::test_cq5_kras_synthetic_lethality PASSED [ 56%]
+tests/integration/test_competency_questions_client.py::test_cq6_fusion_protein_therapy FAILED [ 58%]
+tests/integration/test_competency_questions_client.py::test_cq7_pathway_mechanism_analysis PASSED [ 60%]
+tests/integration/test_competency_questions_client.py::test_cq8_clinical_trial_landscape SKIPPED [ 63%]
+tests/integration/test_competency_questions_client.py::test_cq9_paralog_dependency PASSED [ 65%]
+tests/integration/test_competency_questions_client.py::test_cq10_drug_repurposing PASSED [ 68%]
+tests/integration/test_competency_questions_client.py::test_cq11_genomic_location FAILED [ 70%]
+tests/integration/test_competency_questions_client.py::test_cq12_molecular_structure PASSED [ 73%]
+tests/integration/test_competency_questions_client.py::test_cq13_pathway_drug_discovery PASSED [ 75%]
+tests/integration/test_competency_questions_client.py::test_cq14_cell_therapy_mechanism PASSED [ 78%]
+tests/integration/test_competency_questions_client.py::test_cq15_neuro_immunology_targets PASSED [ 80%]
+tests/integration/test_competency_questions_client.py::test_cq16_advanced_mutation_targeting SKIPPED [ 82%]
+tests/integration/test_competency_questions_client.py::test_cq17_novel_alzheimers_mechanisms PASSED [ 85%]
+tests/integration/test_competency_questions_client.py::test_cq18_protein_details PASSED [ 87%]
+tests/integration/test_competency_questions_client.py::test_cq19_batch_operations PASSED [ 90%]
+tests/integration/test_competency_questions_client.py::test_cq20_pathway_components PASSED [ 92%]
+tests/integration/test_competency_questions_client.py::test_cq21_trial_details SKIPPED [ 95%]
+tests/integration/test_competency_questions_client.py::test_cq22_literature_links PASSED [ 97%]
+tests/integration/test_competency_questions_client.py::test_cq23_gene_pathway_mapping FAILED [100%]
+
+=================================== FAILURES ===================================
+_______________ TestSearchGenes.test_search_genes_species_filter _______________
+
+self = <tests.integration.test_ensembl_api.TestSearchGenes object at 0x7edbf531d5b0>
+client = <biosciences_mcp.clients.ensembl.EnsemblClient object at 0x7edbf5108910>
+
+    async def test_search_genes_species_filter(self, client: EnsemblClient):
+        """T021: Species filter restricts results to specified species."""
+        result = await client.search_genes("TP53", species="human")
+    
+>       assert isinstance(result, PaginationEnvelope)
+E       AssertionError: assert False
+E        +  where False = isinstance(ErrorEnvelope(success=False, error=ErrorDetail(code=<ErrorCode.UPSTREAM_ERROR: 'UPSTREAM_ERROR'>, message='Request to Ensembl API timed out.', recovery_hint='Retry after a short delay.', invalid_input=None)), PaginationEnvelope)
+
+tests/integration/test_ensembl_api.py:74: AssertionError
+_______________ TestSearchGenes.test_search_genes_species_alias ________________
+
+self = <tests.integration.test_ensembl_api.TestSearchGenes object at 0x7edbf5222e70>
+client = <biosciences_mcp.clients.ensembl.EnsemblClient object at 0x7edbf507b6f0>
+
+    async def test_search_genes_species_alias(self, client: EnsemblClient):
+        """Species alias 'human' resolves to 'homo_sapiens'."""
+        result = await client.search_genes("BRCA1", species="human")
+    
+>       assert isinstance(result, PaginationEnvelope)
+E       AssertionError: assert False
+E        +  where False = isinstance(ErrorEnvelope(success=False, error=ErrorDetail(code=<ErrorCode.UPSTREAM_ERROR: 'UPSTREAM_ERROR'>, message='Request to Ensembl API timed out.', recovery_hint='Retry after a short delay.', invalid_input=None)), PaginationEnvelope)
+
+tests/integration/test_ensembl_api.py:93: AssertionError
+_____________ TestFuzzyToFactWorkflow.test_search_then_lookup_gene _____________
+
+self = <tests.integration.test_ensembl_api.TestFuzzyToFactWorkflow object at 0x7edbf516de50>
+client = <biosciences_mcp.clients.ensembl.EnsemblClient object at 0x7edbf5223890>
+
+    async def test_search_then_lookup_gene(self, client: EnsemblClient):
+        """Complete Fuzzy-to-Fact workflow for genes."""
+        # Phase 1: Fuzzy search
+        search_result = await client.search_genes("TP53", species="human")
+>       assert isinstance(search_result, PaginationEnvelope)
+E       AssertionError: assert False
+E        +  where False = isinstance(ErrorEnvelope(success=False, error=ErrorDetail(code=<ErrorCode.UPSTREAM_ERROR: 'UPSTREAM_ERROR'>, message='Request to Ensembl API timed out.', recovery_hint='Retry after a short delay.', invalid_input=None)), PaginationEnvelope)
+
+tests/integration/test_ensembl_api.py:334: AssertionError
+___________ TestPerformanceRequirements.test_get_protein_performance ___________
+
+self = <tests.integration.test_performance.TestPerformanceRequirements object at 0x7edbf516e490>
+client = <biosciences_mcp.clients.uniprot.UniProtClient object at 0x7edbf5109310>
+
+    async def test_get_protein_performance(self, client: UniProtClient):
+        """Test get_protein response time for well-known proteins.
+    
+        Validates that strict CURIE lookup meets performance requirements.
+        """
+        # Well-known protein CURIEs
+        test_curies = [
+            "UniProtKB:P04637",  # TP53 (human)
+            "UniProtKB:P38398",  # BRCA1 (human)
+            "UniProtKB:P01308",  # Insulin (human)
+            "UniProtKB:P68871",  # Hemoglobin beta (human)
+            "UniProtKB:P02768",  # Albumin (human)
+        ]
+    
+        response_times = []
+    
+        for curie in test_curies:
+            start_time = time.time()
+    
+            result = await client.get_protein(curie)
+            elapsed = time.time() - start_time
+            response_times.append(elapsed)
+    
+            # Verify successful response
+            assert isinstance(result, Protein), f"CURIE '{curie}' should return Protein"
+    
+        # All get_protein calls should be fast (<2s for cold start, <1s for warm)
+        # First call may have cold start overhead, subsequent calls should be faster
+        max_time = max(response_times)
+        avg_time = sum(response_times) / len(response_times)
+    
+>       assert max_time < 2.0, (
+            f"Max get_protein time ({max_time:.2f}s) should be <2s (cold start). "
+            f"Times: {[f'{t:.2f}s' for t in response_times]}"
+        )
+E       AssertionError: Max get_protein time (2.38s) should be <2s (cold start). Times: ['2.38s', '0.30s', '0.30s', '0.43s', '0.43s']
+E       assert 2.3768069744110107 < 2.0
+
+tests/integration/test_performance.py:126: AssertionError
+_______ test_list_tool_returns_pagination_envelope[ensembl.search_genes] _______
+
+wire_call = <function wire_call.<locals>._call at 0x7edbef3c74c0>
+server_name = 'ensembl'
+case = ListCase(tool='search_genes', args={'query': 'TP53', 'page_size': 2})
+
+    @pytest.mark.parametrize("server_name,case", list_params())
+    async def test_list_tool_returns_pagination_envelope(
+        wire_call, server_name: str, case: ListCase
+    ) -> None:
+        """ADR-001 §8A: list tools wrap items in the canonical pagination envelope."""
+        result = await wire_call(server_name, case.tool, case.args)
+        assert isinstance(result.data, dict), f"not JSON: {result.text[:200]}"
+>       assert "items" in result.data and isinstance(result.data["items"], list), result.text[:300]
+E       AssertionError: {"success":false,"error":{"code":"UPSTREAM_ERROR","message":"Request to Ensembl API timed out.","recovery_hint":"Retry after a short delay."}}
+E       assert ('items' in {'error': {'code': 'UPSTREAM_ERROR', 'message': 'Request to Ensembl API timed out.', 'recovery_hint': 'Retry after a short delay.'}, 'success': False})
+E        +  where {'error': {'code': 'UPSTREAM_ERROR', 'message': 'Request to Ensembl API timed out.', 'recovery_hint': 'Retry after a short delay.'}, 'success': False} = WireResult(text='{"success":false,"error":{"code":"UPSTREAM_ERROR","message":"Request to Ensembl API timed out.","recovery_hint":"Retry after a short delay."}}', data={'success': False, 'error': {'code': 'UPSTREAM_ERROR', 'message': 'Request to Ensembl API timed out.', 'recovery_hint': 'Retry after a short delay.'}}, structured={'result': {'success': False, 'error': {'code': 'UPSTREAM_ERROR', 'message': 'Request to Ensembl API timed out.', 'recovery_hint': 'Retry after a short delay.'}}}, is_error=False).data
+
+tests/contract/test_wire_contracts.py:91: AssertionError
+_______________________ test_cq6_fusion_protein_therapy ________________________
+
+check_iuphar_available = False
+
+    @pytest.mark.asyncio
+    @pytest.mark.timeout(30)
+    async def test_cq6_fusion_protein_therapy(check_iuphar_available):
+        """CQ-6: ALK inhibitors (Crizotinib) from IUPHAR.
+    
+        MCP Tool: iuphar.search_ligands
+        """
+        client = IUPHARClient()
+        try:
+>           ligands_result = await client.search_ligands(query="Crizotinib", page_size=5)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_competency_questions_client.py:216: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/biosciences_mcp/clients/iuphar.py:337: in search_ligands
+    ligands = await self._fetch_ligands(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <biosciences_mcp.clients.iuphar.IUPHARClient object at 0x7edbef2ef770>
+name = 'Crizotinib', type_filter = None, approved_only = False
+
+    async def _fetch_ligands(
+        self,
+        name: str | None = None,
+        type_filter: str | None = None,
+        approved_only: bool = False,
+    ) -> list[dict]:
+        """Fetch ligands from GtoPdb API with optional filters.
+    
+        Args:
+            name: Fuzzy substring match on ligand name
+            type_filter: Filter by ligand classification (e.g., "Synthetic organic")
+            approved_only: Filter for approved drugs only
+    
+        Returns:
+            List of ligand dictionaries from API response
+        """
+        params = {}
+        if name:
+            params["name"] = name
+        if type_filter:
+            params["type"] = type_filter
+        if approved_only:
+            params["approved"] = "true"
+    
+        response = await self._rate_limited_get("/ligands", params=params)
+    
+        # Handle empty results
+        # Note: GtoPdb API may return 204 or 404 for no results
+        if response.status_code in (204, 404):
+            return []
+    
+        # Handle errors
+        if response.status_code != 200:
+>           raise ValueError(f"API error: {response.status_code}")
+E           ValueError: API error: 401
+
+src/biosciences_mcp/clients/iuphar.py:277: ValueError
+__________________________ test_cq11_genomic_location __________________________
+
+    @pytest.mark.asyncio
+    async def test_cq11_genomic_location():
+        """CQ-11: Genomic location of BRCA2 (Ensembl).
+    
+        MCP Tool: ensembl.search_genes, ensembl.get_gene
+        """
+        client = EnsemblClient()
+        try:
+            # Step 1: Search
+            search_result = await client.search_genes(query="BRCA2", species="human")
+            search = to_dict(search_result)
+>           assert search["items"], "No BRCA2 results"
+                   ^^^^^^^^^^^^^^^
+E           KeyError: 'items'
+
+tests/integration/test_competency_questions_client.py:329: KeyError
+________________________ test_cq23_gene_pathway_mapping ________________________
+
+    @pytest.mark.asyncio
+    async def test_cq23_gene_pathway_mapping():
+        """CQ-23: WikiPathways gene->pathway reverse lookup (BRCA1).
+    
+        MCP Tool: wikipathways.get_pathways_for_gene
+        """
+        client = WikiPathwaysClient()
+        try:
+            pathways_result = await client.get_pathways_for_gene(
+                gene_id="BRCA1",
+                organism="Homo sapiens",
+                page_size=5,
+            )
+            pathways = to_dict(pathways_result)
+    
+            assert pathways["items"], "No pathways found for BRCA1"
+>           assert pathways["pagination"]["total_count"] > 100, "Should find >100 BRCA1 pathways"
+E           AssertionError: Should find >100 BRCA1 pathways
+E           assert 20 > 100
+
+tests/integration/test_competency_questions_client.py:692: AssertionError
+- generated xml file: /tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/integration-rerun.junit.xml -
+=========================== short test summary info ============================
+FAILED tests/integration/test_ensembl_api.py::TestSearchGenes::test_search_genes_species_filter
+FAILED tests/integration/test_ensembl_api.py::TestSearchGenes::test_search_genes_species_alias
+FAILED tests/integration/test_ensembl_api.py::TestFuzzyToFactWorkflow::test_search_then_lookup_gene
+FAILED tests/integration/test_performance.py::TestPerformanceRequirements::test_get_protein_performance
+FAILED tests/contract/test_wire_contracts.py::test_list_tool_returns_pagination_envelope[ensembl.search_genes]
+FAILED tests/integration/test_competency_questions_client.py::test_cq6_fusion_protein_therapy
+FAILED tests/integration/test_competency_questions_client.py::test_cq11_genomic_location
+FAILED tests/integration/test_competency_questions_client.py::test_cq23_gene_pathway_mapping
+SKIPPED [1] tests/integration/test_ensembl_api.py:59: Ensembl API unavailable:
+SKIPPED [1] tests/integration/test_ensembl_api.py:97: Ensembl API unavailable:
+SKIPPED [1] tests/integration/test_competency_questions_client.py:247: ClinicalTrials.gov blocks Python httpx clients via Cloudflare TLS fingerprinting - see CLAUDE.md
+SKIPPED [1] tests/integration/test_competency_questions_client.py:458: ClinicalTrials.gov blocks Python httpx clients via Cloudflare TLS fingerprinting - see CLAUDE.md
+SKIPPED [1] tests/integration/test_competency_questions_client.py:614: ClinicalTrials.gov blocks Python httpx clients via Cloudflare TLS fingerprinting - see CLAUDE.md
+============= 8 failed, 28 passed, 5 skipped in 229.05s (0:03:49) ==============
+exit=1

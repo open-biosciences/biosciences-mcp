@@ -1,0 +1,833 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="29" skipped="10" tests="92" time="157.183" timestamp="2026-10-02T00:44:57.926260-07:00" hostname="lapdog"><testcase classname="tests.contract.test_wire_contracts" name="test_strict_tool_rejects_raw_string_with_error_envelope[hgnc.get_gene]" time="0.014" /><testcase classname="tests.contract.test_wire_contracts" name="test_strict_tool_rejects_raw_string_with_error_envelope[uniprot.get_protein]" time="0.008" /><testcase classname="tests.contract.test_wire_contracts" name="test_strict_tool_rejects_raw_string_with_error_envelope[chembl.get_compound]" time="0.011" /><testcase classname="tests.contract.test_wire_contracts" name="test_strict_tool_rejects_raw_string_with_error_envelope[opentargets.get_target]" time="0.013" /><testcase classname="tests.contract.test_wire_contracts" name="test_strict_tool_rejects_raw_string_with_error_envelope[string.get_interactions]" time="0.009" /><testcase classname="tests.contract.test_wire_contracts" name="test_strict_tool_rejects_raw_string_with_error_envelope[ensembl.get_gene]" time="0.010" /><testcase classname="tests.contract.test_wire_contracts" name="test_strict_tool_rejects_raw_string_with_error_envelope[entrez.get_gene]" time="0.013" /><testcase classname="tests.contract.test_wire_contracts" name="test_strict_tool_rejects_raw_string_with_error_envelope[pubchem.get_compound]" time="0.010" /><testcase classname="tests.contract.test_wire_contracts" name="test_strict_tool_rejects_raw_string_with_error_envelope[iuphar.get_ligand]" time="0.009" /><testcase classname="tests.contract.test_wire_contracts" name="test_strict_tool_rejects_raw_string_with_error_envelope[iuphar.get_target]" time="0.007" /><testcase classname="tests.contract.test_wire_contracts" name="test_strict_tool_rejects_raw_string_with_error_envelope[wikipathways.get_pathway]" time="0.009" /><testcase classname="tests.contract.test_wire_contracts" name="test_strict_tool_rejects_raw_string_with_error_envelope[clinicaltrials.get_trial]" time="0.009" /><testcase classname="tests.contract.test_wire_contracts" name="test_strict_tool_rejects_raw_string_with_error_envelope[drugbank.get_drug]" time="0.001"><skipped type="pytest.skip" message="DRUGBANK_API_KEY not set">/home/donbr/open-biosciences/biosciences-mcp/.worktrees/implement-015-core/tests/contract/conftest.py:211: DRUGBANK_API_KEY not set</skipped></testcase><testcase classname="tests.contract.test_wire_contracts" name="test_list_tool_returns_pagination_envelope[hgnc.search_genes]" time="0.941" /><testcase classname="tests.contract.test_wire_contracts" name="test_list_tool_returns_pagination_envelope[uniprot.search_proteins]" time="1.433" /><testcase classname="tests.contract.test_wire_contracts" name="test_list_tool_returns_pagination_envelope[chembl.search_compounds]" time="6.164" /><testcase classname="tests.contract.test_wire_contracts" name="test_list_tool_returns_pagination_envelope[opentargets.search_targets]" time="0.590" /><testcase classname="tests.contract.test_wire_contracts" name="test_list_tool_returns_pagination_envelope[string.search_proteins]" time="0.411" /><testcase classname="tests.contract.test_wire_contracts" name="test_list_tool_returns_pagination_envelope[biogrid.search_genes]" time="0.670" /><testcase classname="tests.contract.test_wire_contracts" name="test_list_tool_returns_pagination_envelope[ensembl.search_genes]" time="30.777"><failure message="AssertionError: {&quot;success&quot;:false,&quot;error&quot;:{&quot;code&quot;:&quot;UPSTREAM_ERROR&quot;,&quot;message&quot;:&quot;Request to Ensembl API timed out.&quot;,&quot;recovery_hint&quot;:&quot;Retry after a short delay.&quot;}}&#10;assert ('items' in {'success': False, 'error': {'code': 'UPSTREAM_ERROR', 'message': 'Request to Ensembl API timed out.', 'recovery_hint': 'Retry after a short delay.'}})&#10; +  where {'success': False, 'error': {'code': 'UPSTREAM_ERROR', 'message': 'Request to Ensembl API timed out.', 'recovery_hint': 'Retry after a short delay.'}} = WireResult(text='{&quot;success&quot;:false,&quot;error&quot;:{&quot;code&quot;:&quot;UPSTREAM_ERROR&quot;,&quot;message&quot;:&quot;Request to Ensembl API timed out.&quot;,&quot;recovery_hint&quot;:&quot;Retry after a short delay.&quot;}}', data={'success': False, 'error': {'code': 'UPSTREAM_ERROR', 'message': 'Request to Ensembl API timed out.', 'recovery_hint': 'Retry after a short delay.'}}, structured={'result': {'success': False, 'error': {'code': 'UPSTREAM_ERROR', 'message': 'Request to Ensembl API timed out.', 'recovery_hint': 'Retry after a short delay.'}}}, is_error=False).data">wire_call = &lt;function wire_call.&lt;locals&gt;._call at 0x78a01ed0ede0&gt;
+server_name = 'ensembl'
+case = ListCase(tool='search_genes', args={'query': 'TP53', 'page_size': 2})
+
+    @pytest.mark.parametrize("server_name,case", list_params())
+    async def test_list_tool_returns_pagination_envelope(
+        wire_call, server_name: str, case: ListCase
+    ) -&gt; None:
+        """ADR-001 §8A: list tools wrap items in the canonical pagination envelope."""
+        result = await wire_call(server_name, case.tool, case.args)
+        assert isinstance(result.data, dict), f"not JSON: {result.text[:200]}"
+&gt;       assert "items" in result.data and isinstance(result.data["items"], list), result.text[:300]
+E       AssertionError: {"success":false,"error":{"code":"UPSTREAM_ERROR","message":"Request to Ensembl API timed out.","recovery_hint":"Retry after a short delay."}}
+E       assert ('items' in {'success': False, 'error': {'code': 'UPSTREAM_ERROR', 'message': 'Request to Ensembl API timed out.', 'recovery_hint': 'Retry after a short delay.'}})
+E        +  where {'success': False, 'error': {'code': 'UPSTREAM_ERROR', 'message': 'Request to Ensembl API timed out.', 'recovery_hint': 'Retry after a short delay.'}} = WireResult(text='{"success":false,"error":{"code":"UPSTREAM_ERROR","message":"Request to Ensembl API timed out.","recovery_hint":"Retry after a short delay."}}', data={'success': False, 'error': {'code': 'UPSTREAM_ERROR', 'message': 'Request to Ensembl API timed out.', 'recovery_hint': 'Retry after a short delay.'}}, structured={'result': {'success': False, 'error': {'code': 'UPSTREAM_ERROR', 'message': 'Request to Ensembl API timed out.', 'recovery_hint': 'Retry after a short delay.'}}}, is_error=False).data
+
+tests/contract/test_wire_contracts.py:91: AssertionError</failure></testcase><testcase classname="tests.contract.test_wire_contracts" name="test_list_tool_returns_pagination_envelope[entrez.search_genes]" time="0.855" /><testcase classname="tests.contract.test_wire_contracts" name="test_list_tool_returns_pagination_envelope[pubchem.search_compounds]" time="0.799" /><testcase classname="tests.contract.test_wire_contracts" name="test_list_tool_returns_pagination_envelope[iuphar.search_ligands]" time="1.135"><failure message="AssertionError: not JSON: Error calling tool 'search_ligands': API error: 401&#10;assert False&#10; +  where False = isinstance(None, dict)&#10; +    where None = WireResult(text=&quot;Error calling tool 'search_ligands': API error: 401&quot;, data=None, structured=None, is_error=True).data">wire_call = &lt;function wire_call.&lt;locals&gt;._call at 0x78a01ed349a0&gt;
+server_name = 'iuphar'
+case = ListCase(tool='search_ligands', args={'query': 'morphine', 'page_size': 2})
+
+    @pytest.mark.parametrize("server_name,case", list_params())
+    async def test_list_tool_returns_pagination_envelope(
+        wire_call, server_name: str, case: ListCase
+    ) -&gt; None:
+        """ADR-001 §8A: list tools wrap items in the canonical pagination envelope."""
+        result = await wire_call(server_name, case.tool, case.args)
+&gt;       assert isinstance(result.data, dict), f"not JSON: {result.text[:200]}"
+E       AssertionError: not JSON: Error calling tool 'search_ligands': API error: 401
+E       assert False
+E        +  where False = isinstance(None, dict)
+E        +    where None = WireResult(text="Error calling tool 'search_ligands': API error: 401", data=None, structured=None, is_error=True).data
+
+tests/contract/test_wire_contracts.py:90: AssertionError</failure></testcase><testcase classname="tests.contract.test_wire_contracts" name="test_list_tool_returns_pagination_envelope[iuphar.search_targets]" time="1.127"><failure message="AssertionError: not JSON: Error calling tool 'search_targets': API error: 401&#10;assert False&#10; +  where False = isinstance(None, dict)&#10; +    where None = WireResult(text=&quot;Error calling tool 'search_targets': API error: 401&quot;, data=None, structured=None, is_error=True).data">wire_call = &lt;function wire_call.&lt;locals&gt;._call at 0x78a01ed34d60&gt;
+server_name = 'iuphar'
+case = ListCase(tool='search_targets', args={'query': 'opioid', 'page_size': 2})
+
+    @pytest.mark.parametrize("server_name,case", list_params())
+    async def test_list_tool_returns_pagination_envelope(
+        wire_call, server_name: str, case: ListCase
+    ) -&gt; None:
+        """ADR-001 §8A: list tools wrap items in the canonical pagination envelope."""
+        result = await wire_call(server_name, case.tool, case.args)
+&gt;       assert isinstance(result.data, dict), f"not JSON: {result.text[:200]}"
+E       AssertionError: not JSON: Error calling tool 'search_targets': API error: 401
+E       assert False
+E        +  where False = isinstance(None, dict)
+E        +    where None = WireResult(text="Error calling tool 'search_targets': API error: 401", data=None, structured=None, is_error=True).data
+
+tests/contract/test_wire_contracts.py:90: AssertionError</failure></testcase><testcase classname="tests.contract.test_wire_contracts" name="test_list_tool_returns_pagination_envelope[wikipathways.search_pathways]" time="0.249" /><testcase classname="tests.contract.test_wire_contracts" name="test_list_tool_returns_pagination_envelope[clinicaltrials.search_trials]" time="0.313" /><testcase classname="tests.contract.test_wire_contracts" name="test_list_tool_returns_pagination_envelope[drugbank.search_drugs]" time="0.001"><skipped type="pytest.skip" message="DRUGBANK_API_KEY not set">/home/donbr/open-biosciences/biosciences-mcp/.worktrees/implement-015-core/tests/contract/conftest.py:211: DRUGBANK_API_KEY not set</skipped></testcase><testcase classname="tests.contract.test_wire_contracts" name="test_list_items_have_no_null_values[hgnc.search_genes]" time="1.096" /><testcase classname="tests.contract.test_wire_contracts" name="test_list_items_have_no_null_values[uniprot.search_proteins]" time="0.783" /><testcase classname="tests.contract.test_wire_contracts" name="test_list_items_have_no_null_values[chembl.search_compounds]" time="0.026" /><testcase classname="tests.contract.test_wire_contracts" name="test_list_items_have_no_null_values[opentargets.search_targets]" time="0.590" /><testcase classname="tests.contract.test_wire_contracts" name="test_list_items_have_no_null_values[string.search_proteins]" time="0.483" /><testcase classname="tests.contract.test_wire_contracts" name="test_list_items_have_no_null_values[biogrid.search_genes]" time="0.572" /><testcase classname="tests.contract.test_wire_contracts" name="test_list_items_have_no_null_values[ensembl.search_genes]" time="9.146" /><testcase classname="tests.contract.test_wire_contracts" name="test_list_items_have_no_null_values[entrez.search_genes]" time="0.402" /><testcase classname="tests.contract.test_wire_contracts" name="test_list_items_have_no_null_values[pubchem.search_compounds]" time="0.353" /><testcase classname="tests.contract.test_wire_contracts" name="test_list_items_have_no_null_values[iuphar.search_ligands]" time="0.925"><failure message="AssertionError: not JSON: Error calling tool 'search_ligands': API error: 401&#10;assert False&#10; +  where False = isinstance(None, dict)&#10; +    where None = WireResult(text=&quot;Error calling tool 'search_ligands': API error: 401&quot;, data=None, structured=None, is_error=True).data">wire_call = &lt;function wire_call.&lt;locals&gt;._call at 0x78a01d5ca340&gt;
+server_name = 'iuphar'
+case = ListCase(tool='search_ligands', args={'query': 'morphine', 'page_size': 2})
+
+    @pytest.mark.parametrize("server_name,case", list_params())
+    async def test_list_items_have_no_null_values(wire_call, server_name: str, case: ListCase) -&gt; None:
+        """ADR-001 §4 null policy applies to every candidate in a list."""
+        result = await wire_call(server_name, case.tool, case.args)
+&gt;       assert isinstance(result.data, dict), f"not JSON: {result.text[:200]}"
+E       AssertionError: not JSON: Error calling tool 'search_ligands': API error: 401
+E       assert False
+E        +  where False = isinstance(None, dict)
+E        +    where None = WireResult(text="Error calling tool 'search_ligands': API error: 401", data=None, structured=None, is_error=True).data
+
+tests/contract/test_wire_contracts.py:102: AssertionError</failure></testcase><testcase classname="tests.contract.test_wire_contracts" name="test_list_items_have_no_null_values[iuphar.search_targets]" time="1.215"><failure message="AssertionError: not JSON: Error calling tool 'search_targets': API error: 401&#10;assert False&#10; +  where False = isinstance(None, dict)&#10; +    where None = WireResult(text=&quot;Error calling tool 'search_targets': API error: 401&quot;, data=None, structured=None, is_error=True).data">wire_call = &lt;function wire_call.&lt;locals&gt;._call at 0x78a01d5c8f40&gt;
+server_name = 'iuphar'
+case = ListCase(tool='search_targets', args={'query': 'opioid', 'page_size': 2})
+
+    @pytest.mark.parametrize("server_name,case", list_params())
+    async def test_list_items_have_no_null_values(wire_call, server_name: str, case: ListCase) -&gt; None:
+        """ADR-001 §4 null policy applies to every candidate in a list."""
+        result = await wire_call(server_name, case.tool, case.args)
+&gt;       assert isinstance(result.data, dict), f"not JSON: {result.text[:200]}"
+E       AssertionError: not JSON: Error calling tool 'search_targets': API error: 401
+E       assert False
+E        +  where False = isinstance(None, dict)
+E        +    where None = WireResult(text="Error calling tool 'search_targets': API error: 401", data=None, structured=None, is_error=True).data
+
+tests/contract/test_wire_contracts.py:102: AssertionError</failure></testcase><testcase classname="tests.contract.test_wire_contracts" name="test_list_items_have_no_null_values[wikipathways.search_pathways]" time="0.009" /><testcase classname="tests.contract.test_wire_contracts" name="test_list_items_have_no_null_values[clinicaltrials.search_trials]" time="0.255" /><testcase classname="tests.contract.test_wire_contracts" name="test_list_items_have_no_null_values[drugbank.search_drugs]" time="0.001"><skipped type="pytest.skip" message="DRUGBANK_API_KEY not set">/home/donbr/open-biosciences/biosciences-mcp/.worktrees/implement-015-core/tests/contract/conftest.py:211: DRUGBANK_API_KEY not set</skipped></testcase><testcase classname="tests.contract.test_wire_contracts" name="test_entity_has_no_null_values[hgnc.get_gene]" time="0.715" /><testcase classname="tests.contract.test_wire_contracts" name="test_entity_has_no_null_values[uniprot.get_protein]" time="2.106" /><testcase classname="tests.contract.test_wire_contracts" name="test_entity_has_no_null_values[chembl.get_compound]" time="9.279" /><testcase classname="tests.contract.test_wire_contracts" name="test_entity_has_no_null_values[opentargets.get_target]" time="0.517" /><testcase classname="tests.contract.test_wire_contracts" name="test_entity_has_no_null_values[string.get_interactions]" time="0.412" /><testcase classname="tests.contract.test_wire_contracts" name="test_entity_has_no_null_values[biogrid.get_interactions]" time="1.456" /><testcase classname="tests.contract.test_wire_contracts" name="test_entity_has_no_null_values[ensembl.get_gene]" time="9.424" /><testcase classname="tests.contract.test_wire_contracts" name="test_entity_has_no_null_values[entrez.get_gene]" time="5.594" /><testcase classname="tests.contract.test_wire_contracts" name="test_entity_has_no_null_values[pubchem.get_compound]" time="1.339" /><testcase classname="tests.contract.test_wire_contracts" name="test_entity_has_no_null_values[iuphar.get_ligand]" time="0.848"><failure message="AssertionError: not JSON: Error calling tool 'get_ligand': API error: 401&#10;assert False&#10; +  where False = isinstance(None, dict)&#10; +    where None = WireResult(text=&quot;Error calling tool 'get_ligand': API error: 401&quot;, data=None, structured=None, is_error=True).data">wire_call = &lt;function wire_call.&lt;locals&gt;._call at 0x78a01d08f9c0&gt;
+server_name = 'iuphar'
+case = StrictCase(tool='get_ligand', arg='iuphar_id', curie='IUPHAR:2713', raw='morphine', extra={}, has_cross_references=True)
+
+    @pytest.mark.parametrize("server_name,case", strict_params())
+    async def test_entity_has_no_null_values(wire_call, server_name: str, case: StrictCase) -&gt; None:
+        """ADR-001 §4 / Constitution Forbidden Patterns: omit keys, never emit null."""
+        result = await wire_call(server_name, case.tool, {case.arg: case.curie, **case.extra})
+&gt;       assert isinstance(result.data, dict), f"not JSON: {result.text[:200]}"
+E       AssertionError: not JSON: Error calling tool 'get_ligand': API error: 401
+E       assert False
+E        +  where False = isinstance(None, dict)
+E        +    where None = WireResult(text="Error calling tool 'get_ligand': API error: 401", data=None, structured=None, is_error=True).data
+
+tests/contract/test_wire_contracts.py:111: AssertionError</failure></testcase><testcase classname="tests.contract.test_wire_contracts" name="test_entity_has_no_null_values[iuphar.get_target]" time="1.224"><failure message="AssertionError: not JSON: Error calling tool 'get_target': API error: 401&#10;assert False&#10; +  where False = isinstance(None, dict)&#10; +    where None = WireResult(text=&quot;Error calling tool 'get_target': API error: 401&quot;, data=None, structured=None, is_error=True).data">wire_call = &lt;function wire_call.&lt;locals&gt;._call at 0x78a01d08ed40&gt;
+server_name = 'iuphar'
+case = StrictCase(tool='get_target', arg='iuphar_id', curie='IUPHAR:319', raw='opioid', extra={}, has_cross_references=True)
+
+    @pytest.mark.parametrize("server_name,case", strict_params())
+    async def test_entity_has_no_null_values(wire_call, server_name: str, case: StrictCase) -&gt; None:
+        """ADR-001 §4 / Constitution Forbidden Patterns: omit keys, never emit null."""
+        result = await wire_call(server_name, case.tool, {case.arg: case.curie, **case.extra})
+&gt;       assert isinstance(result.data, dict), f"not JSON: {result.text[:200]}"
+E       AssertionError: not JSON: Error calling tool 'get_target': API error: 401
+E       assert False
+E        +  where False = isinstance(None, dict)
+E        +    where None = WireResult(text="Error calling tool 'get_target': API error: 401", data=None, structured=None, is_error=True).data
+
+tests/contract/test_wire_contracts.py:111: AssertionError</failure></testcase><testcase classname="tests.contract.test_wire_contracts" name="test_entity_has_no_null_values[wikipathways.get_pathway]" time="0.430" /><testcase classname="tests.contract.test_wire_contracts" name="test_entity_has_no_null_values[clinicaltrials.get_trial]" time="0.210" /><testcase classname="tests.contract.test_wire_contracts" name="test_entity_has_no_null_values[drugbank.get_drug]" time="0.001"><skipped type="pytest.skip" message="DRUGBANK_API_KEY not set">/home/donbr/open-biosciences/biosciences-mcp/.worktrees/implement-015-core/tests/contract/conftest.py:211: DRUGBANK_API_KEY not set</skipped></testcase><testcase classname="tests.contract.test_wire_contracts" name="test_entity_cross_references_conform_to_registry[hgnc.get_gene]" time="0.335" /><testcase classname="tests.contract.test_wire_contracts" name="test_entity_cross_references_conform_to_registry[uniprot.get_protein]" time="0.929" /><testcase classname="tests.contract.test_wire_contracts" name="test_entity_cross_references_conform_to_registry[chembl.get_compound]" time="0.122" /><testcase classname="tests.contract.test_wire_contracts" name="test_entity_cross_references_conform_to_registry[opentargets.get_target]" time="0.226" /><testcase classname="tests.contract.test_wire_contracts" name="test_entity_cross_references_conform_to_registry[string.get_interactions]" time="0.274" /><testcase classname="tests.contract.test_wire_contracts" name="test_entity_cross_references_conform_to_registry[biogrid.get_interactions]" time="1.209" /><testcase classname="tests.contract.test_wire_contracts" name="test_entity_cross_references_conform_to_registry[ensembl.get_gene]" time="6.669" /><testcase classname="tests.contract.test_wire_contracts" name="test_entity_cross_references_conform_to_registry[entrez.get_gene]" time="3.250" /><testcase classname="tests.contract.test_wire_contracts" name="test_entity_cross_references_conform_to_registry[pubchem.get_compound]" time="1.021" /><testcase classname="tests.contract.test_wire_contracts" name="test_entity_cross_references_conform_to_registry[iuphar.get_ligand]" time="0.877"><failure message="AssertionError: not JSON: Error calling tool 'get_ligand': API error: 401&#10;assert False&#10; +  where False = isinstance(None, dict)&#10; +    where None = WireResult(text=&quot;Error calling tool 'get_ligand': API error: 401&quot;, data=None, structured=None, is_error=True).data">wire_call = &lt;function wire_call.&lt;locals&gt;._call at 0x78a01d08ea20&gt;
+server_name = 'iuphar'
+case = StrictCase(tool='get_ligand', arg='iuphar_id', curie='IUPHAR:2713', raw='morphine', extra={}, has_cross_references=True)
+
+    @pytest.mark.parametrize("server_name,case", strict_params())
+    async def test_entity_cross_references_conform_to_registry(
+        wire_call, server_name: str, case: StrictCase
+    ) -&gt; None:
+        """ADR-001 §4 mandate + Appendix A: keys, formats, and cardinality."""
+        if not case.has_cross_references:
+            pytest.skip("tool does not return an entity with cross_references")
+        result = await wire_call(server_name, case.tool, {case.arg: case.curie, **case.extra})
+&gt;       assert isinstance(result.data, dict), f"not JSON: {result.text[:200]}"
+E       AssertionError: not JSON: Error calling tool 'get_ligand': API error: 401
+E       assert False
+E        +  where False = isinstance(None, dict)
+E        +    where None = WireResult(text="Error calling tool 'get_ligand': API error: 401", data=None, structured=None, is_error=True).data
+
+tests/contract/test_wire_contracts.py:125: AssertionError</failure></testcase><testcase classname="tests.contract.test_wire_contracts" name="test_entity_cross_references_conform_to_registry[iuphar.get_target]" time="1.240"><failure message="AssertionError: not JSON: Error calling tool 'get_target': API error: 401&#10;assert False&#10; +  where False = isinstance(None, dict)&#10; +    where None = WireResult(text=&quot;Error calling tool 'get_target': API error: 401&quot;, data=None, structured=None, is_error=True).data">wire_call = &lt;function wire_call.&lt;locals&gt;._call at 0x78a01d08e0c0&gt;
+server_name = 'iuphar'
+case = StrictCase(tool='get_target', arg='iuphar_id', curie='IUPHAR:319', raw='opioid', extra={}, has_cross_references=True)
+
+    @pytest.mark.parametrize("server_name,case", strict_params())
+    async def test_entity_cross_references_conform_to_registry(
+        wire_call, server_name: str, case: StrictCase
+    ) -&gt; None:
+        """ADR-001 §4 mandate + Appendix A: keys, formats, and cardinality."""
+        if not case.has_cross_references:
+            pytest.skip("tool does not return an entity with cross_references")
+        result = await wire_call(server_name, case.tool, {case.arg: case.curie, **case.extra})
+&gt;       assert isinstance(result.data, dict), f"not JSON: {result.text[:200]}"
+E       AssertionError: not JSON: Error calling tool 'get_target': API error: 401
+E       assert False
+E        +  where False = isinstance(None, dict)
+E        +    where None = WireResult(text="Error calling tool 'get_target': API error: 401", data=None, structured=None, is_error=True).data
+
+tests/contract/test_wire_contracts.py:125: AssertionError</failure></testcase><testcase classname="tests.contract.test_wire_contracts" name="test_entity_cross_references_conform_to_registry[wikipathways.get_pathway]" time="0.005"><skipped type="pytest.xfail" message="deferred to ADR-001 v1.5 (AGE-700): pathway membership lists under entrez/ensembl_gene and symbols under hgnc need a registry decision, not a client fix" /></testcase><testcase classname="tests.contract.test_wire_contracts" name="test_entity_cross_references_conform_to_registry[clinicaltrials.get_trial]" time="0.351"><skipped type="pytest.xfail" message="deferred to ADR-001 v1.5 (AGE-700): clinicaltrials_gov, mesh_conditions, mesh_interventions are not registry keys (pubmed is fixed)" /></testcase><testcase classname="tests.contract.test_wire_contracts" name="test_entity_cross_references_conform_to_registry[drugbank.get_drug]" time="0.002"><skipped type="pytest.skip" message="DRUGBANK_API_KEY not set">/home/donbr/open-biosciences/biosciences-mcp/.worktrees/implement-015-core/tests/contract/conftest.py:211: DRUGBANK_API_KEY not set</skipped></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq1_target_resolvability" time="1.050"><failure message="KeyError: 'items'">@pytest.mark.asyncio
+    async def test_cq1_target_resolvability():
+        """CQ-1: Resolve TP53 (canonical symbol) to HGNC:11998.
+    
+        MCP Tool: hgnc_search_genes
+        Note: Alias "p53" fails (known issue), use canonical symbol "TP53".
+        """
+        tool = await mcp.get_tool("hgnc_search_genes")
+        result = await tool.fn(query="TP53", page_size=5)
+        data = to_dict(result)
+    
+&gt;       assert data["items"], "No results returned for TP53"
+               ^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:93: KeyError</failure></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq2_cross_domain_mapping" time="0.781"><failure message="KeyError: 'id'">@pytest.mark.asyncio
+    async def test_cq2_cross_domain_mapping():
+        """CQ-2: Map HGNC:1100 (BRCA1) to UniProt ID P38398.
+    
+        MCP Tool: hgnc_get_gene
+        """
+        tool = await mcp.get_tool("hgnc_get_gene")
+        result = await tool.fn(hgnc_id="HGNC:1100")
+        data = to_dict(result)
+    
+&gt;       assert data["id"] == "HGNC:1100", "Gene ID mismatch"
+               ^^^^^^^^^^
+E       KeyError: 'id'
+
+tests/integration/test_competency_questions_mcp.py:109: KeyError</failure></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq3_therapeutic_insight" time="0.569"><failure message="KeyError: 'items'">@pytest.mark.asyncio
+    async def test_cq3_therapeutic_insight():
+        """CQ-3: Find approved drugs for EGFR (Gefitinib).
+    
+        MCP Tools: opentargets_search_targets, chembl_search_compounds, chembl_get_compound
+        """
+        ot_search = await mcp.get_tool("opentargets_search_targets")
+        chembl_search = await mcp.get_tool("chembl_search_compounds")
+        chembl_get = await mcp.get_tool("chembl_get_compound")
+    
+        # Step 1: Find EGFR target
+        targets_result = await ot_search.fn(query="EGFR", page_size=5)
+        targets = to_dict(targets_result)
+&gt;       assert targets["items"], "No EGFR targets found"
+               ^^^^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:129: KeyError</failure></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq4_protein_interaction_network" time="0.313"><failure message="KeyError: 'items'">@pytest.mark.asyncio
+    async def test_cq4_protein_interaction_network():
+        """CQ-4: Top physical interaction partners of TP53 (STRING).
+    
+        MCP Tool: string_search_proteins
+        """
+        tool = await mcp.get_tool("string_search_proteins")
+        proteins_result = await tool.fn(query="TP53", species=9606, limit=5)
+        proteins = to_dict(proteins_result)
+&gt;       assert proteins["items"], "No TP53 results from STRING"
+               ^^^^^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:155: KeyError</failure></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq5_kras_synthetic_lethality" time="0.564"><failure message="KeyError: 'items'">@pytest.mark.asyncio
+    @pytest.mark.skipif(
+        not os.getenv("BIOGRID_API_KEY"),
+        reason="BIOGRID_API_KEY not set",
+    )
+    async def test_cq5_kras_synthetic_lethality():
+        """CQ-5: KRAS interactors from BioGRID.
+    
+        MCP Tools: biogrid_search_genes, biogrid_get_interactions
+        """
+        search_tool = await mcp.get_tool("biogrid_search_genes")
+        interactions_tool = await mcp.get_tool("biogrid_get_interactions")
+    
+        # Step 1: Validate KRAS gene
+        validation_result = await search_tool.fn(query="KRAS")
+        validation = to_dict(validation_result)
+&gt;       assert validation["items"], "KRAS not found"
+               ^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:178: KeyError</failure></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq6_fusion_protein_therapy" time="1.767"><failure message="fastmcp.exceptions.ToolError: Error calling tool 'search_ligands': API error: 401">self = FastMCP('IUPHAR/GtoPdb'), name = 'search_ligands'
+arguments = {'query': 'Crizotinib', 'page_size': 5}, version = None
+run_middleware = False, task_meta = None
+
+    async def call_tool(
+        self,
+        name: str,
+        arguments: dict[str, Any] | None = None,
+        *,
+        version: VersionSpec | None = None,
+        run_middleware: bool = True,
+        task_meta: TaskMeta | None = None,
+    ) -&gt; ToolResult | mcp.types.CreateTaskResult:
+        """Call a tool by name.
+    
+        This is the public API for executing tools. By default, middleware is applied.
+    
+        Args:
+            name: The tool name
+            arguments: Tool arguments (optional)
+            version: Specific version to call. If None, calls highest version.
+            run_middleware: If True (default), apply the middleware chain.
+                Set to False when called from middleware to avoid re-applying.
+            task_meta: If provided, execute as a background task and return
+                CreateTaskResult. If None (default), execute synchronously and
+                return ToolResult.
+    
+        Returns:
+            ToolResult when task_meta is None.
+            CreateTaskResult when task_meta is provided.
+    
+        Raises:
+            NotFoundError: If tool not found or disabled
+            ToolError: If tool execution fails
+            ValidationError: If arguments fail validation
+        """
+        # Note: fn_key enrichment happens here after finding the tool.
+        # For mounted servers, the parent's provider sets fn_key to the
+        # namespaced key before delegating, ensuring correct Docket routing.
+    
+        from fastmcp.server.providers.addressing import (
+            parse_hashed_backend_name,
+        )
+    
+        # Two routing paths:
+        #   1. Hashed-name path — backend tools that opted into
+        #      app-callable visibility. Recognized by their
+        #      `&lt;hash&gt;_&lt;local_name&gt;` format and resolved via the
+        #      reverse-hash map. Address is known eagerly.
+        #   2. Display-name path — everything else. Goes through normal
+        #      `get_tool` aggregation/transforms. Address is determined
+        #      after resolution by walking the registry.
+        async with fastmcp.server.context.Context(fastmcp=self) as ctx:
+            if run_middleware:
+                mw_context = MiddlewareContext[CallToolRequestParams](
+                    message=mcp.types.CallToolRequestParams(
+                        name=name,
+                        arguments=arguments or {},
+                        _meta=_version_request_meta(version),  # type: ignore[unknown-argument]  # pydantic alias
+                    ),
+                    source="client",
+                    type="request",
+                    method="tools/call",
+                    fastmcp_context=ctx,
+                )
+                return await self._run_middleware(
+                    context=mw_context,
+                    call_next=lambda context: self.call_tool(
+                        context.message.name,
+                        context.message.arguments or {},
+                        version=version,
+                        run_middleware=False,
+                        task_meta=task_meta,
+                    ),
+                )
+    
+            # Core logic: find and execute tool
+            with server_span(
+                f"tools/call {name}",
+                "tools/call",
+                self.name,
+                "tool",
+                name,
+                tool_name=name,
+            ) as span:
+                # Try normal display-name resolution first.
+                tool: Tool | None = await self.get_tool(name, version=version)
+    
+                # If that fails, try hashed-name dispatch. This walks
+                # the provider tree recursively (same pattern as the old
+                # get_app_tool) looking for a tool whose stored hash
+                # matches the parsed prefix.
+                if tool is None:
+                    hashed = parse_hashed_backend_name(name)
+                    if hashed is not None:
+                        digest, local_name = hashed
+                        tool = await self.get_tool_by_hash(digest, local_name)
+                        if tool is not None:
+                            # Auth still applies on the bypass path.
+                            skip_auth, token = _get_auth_context()
+                            if not skip_auth and tool.auth is not None:
+                                try:
+                                    auth_ctx = AuthContext(token=token, component=tool)
+                                    if not await run_auth_checks(tool.auth, auth_ctx):
+                                        raise NotFoundError(f"Unknown tool: {name!r}")
+                                except AuthorizationError:
+                                    raise NotFoundError(
+                                        f"Unknown tool: {name!r}"
+                                    ) from None
+    
+                if tool is None:
+                    raise NotFoundError(f"Unknown tool: {name!r}")
+                span.set_attributes(tool.get_span_attributes())
+                if task_meta is not None and task_meta.fn_key is None:
+                    task_meta = replace(task_meta, fn_key=tool.key)
+                try:
+&gt;                   return await tool._run(arguments or {}, task_meta=task_meta)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/server.py:1312: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/base.py:421: in _run
+    return await self.run(arguments)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py:418: in run
+    result = await self._execute(type_adapter, exec_is_async, arguments)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py:465: in _execute
+    result = await result
+             ^^^^^^^^^^^^
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py:88: in wrapper
+    return await fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/servers/iuphar.py:125: in search_ligands
+    return await client.search_ligands(
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/clients/iuphar.py:337: in search_ligands
+    ligands = await self._fetch_ligands(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;biosciences_mcp.clients.iuphar.IUPHARClient object at 0x78a01da9e540&gt;
+name = 'Crizotinib', type_filter = None, approved_only = False
+
+    async def _fetch_ligands(
+        self,
+        name: str | None = None,
+        type_filter: str | None = None,
+        approved_only: bool = False,
+    ) -&gt; list[dict]:
+        """Fetch ligands from GtoPdb API with optional filters.
+    
+        Args:
+            name: Fuzzy substring match on ligand name
+            type_filter: Filter by ligand classification (e.g., "Synthetic organic")
+            approved_only: Filter for approved drugs only
+    
+        Returns:
+            List of ligand dictionaries from API response
+        """
+        params = {}
+        if name:
+            params["name"] = name
+        if type_filter:
+            params["type"] = type_filter
+        if approved_only:
+            params["approved"] = "true"
+    
+        response = await self._rate_limited_get("/ligands", params=params)
+    
+        # Handle empty results
+        # Note: GtoPdb API may return 204 or 404 for no results
+        if response.status_code in (204, 404):
+            return []
+    
+        # Handle errors
+        if response.status_code != 200:
+&gt;           raise ValueError(f"API error: {response.status_code}")
+E           ValueError: API error: 401
+
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/clients/iuphar.py:277: ValueError
+
+The above exception was the direct cause of the following exception:
+
+check_iuphar_available = False
+
+    @pytest.mark.asyncio
+    @pytest.mark.timeout(30)
+    async def test_cq6_fusion_protein_therapy(check_iuphar_available):
+        """CQ-6: ALK inhibitors (Crizotinib) from IUPHAR.
+    
+        MCP Tool: iuphar_search_ligands
+        """
+        tool = await mcp.get_tool("iuphar_search_ligands")
+&gt;       ligands_result = await tool.fn(query="Crizotinib", page_size=5)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_competency_questions_mcp.py:197: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/tool_transform.py:764: in _forward
+    return await parent_tool.run(parent_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/providers/fastmcp_provider.py:133: in run
+    result = await self._server.call_tool(
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/server.py:1261: in call_tool
+    return await self._run_middleware(
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/server.py:525: in _run_middleware
+    return await chain(context)
+           ^^^^^^^^^^^^^^^^^^^^
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/server.py:522: in wrapped
+    return await mw(context, call_next)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/middleware/middleware.py:101: in __call__
+    return await handler_chain(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/middleware/middleware.py:83: in wrapper
+    return await handler(context, call_next=call_next)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/middleware/middleware.py:145: in on_message
+    return await call_next(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/middleware/middleware.py:83: in wrapper
+    return await handler(context, call_next=call_next)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/middleware/middleware.py:152: in on_request
+    return await call_next(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/middleware/middleware.py:83: in wrapper
+    return await handler(context, call_next=call_next)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/middleware/middleware.py:173: in on_call_tool
+    return await call_next(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = FastMCP('IUPHAR/GtoPdb'), name = 'search_ligands'
+arguments = {'query': 'Crizotinib', 'page_size': 5}, version = None
+run_middleware = False, task_meta = None
+
+    async def call_tool(
+        self,
+        name: str,
+        arguments: dict[str, Any] | None = None,
+        *,
+        version: VersionSpec | None = None,
+        run_middleware: bool = True,
+        task_meta: TaskMeta | None = None,
+    ) -&gt; ToolResult | mcp.types.CreateTaskResult:
+        """Call a tool by name.
+    
+        This is the public API for executing tools. By default, middleware is applied.
+    
+        Args:
+            name: The tool name
+            arguments: Tool arguments (optional)
+            version: Specific version to call. If None, calls highest version.
+            run_middleware: If True (default), apply the middleware chain.
+                Set to False when called from middleware to avoid re-applying.
+            task_meta: If provided, execute as a background task and return
+                CreateTaskResult. If None (default), execute synchronously and
+                return ToolResult.
+    
+        Returns:
+            ToolResult when task_meta is None.
+            CreateTaskResult when task_meta is provided.
+    
+        Raises:
+            NotFoundError: If tool not found or disabled
+            ToolError: If tool execution fails
+            ValidationError: If arguments fail validation
+        """
+        # Note: fn_key enrichment happens here after finding the tool.
+        # For mounted servers, the parent's provider sets fn_key to the
+        # namespaced key before delegating, ensuring correct Docket routing.
+    
+        from fastmcp.server.providers.addressing import (
+            parse_hashed_backend_name,
+        )
+    
+        # Two routing paths:
+        #   1. Hashed-name path — backend tools that opted into
+        #      app-callable visibility. Recognized by their
+        #      `&lt;hash&gt;_&lt;local_name&gt;` format and resolved via the
+        #      reverse-hash map. Address is known eagerly.
+        #   2. Display-name path — everything else. Goes through normal
+        #      `get_tool` aggregation/transforms. Address is determined
+        #      after resolution by walking the registry.
+        async with fastmcp.server.context.Context(fastmcp=self) as ctx:
+            if run_middleware:
+                mw_context = MiddlewareContext[CallToolRequestParams](
+                    message=mcp.types.CallToolRequestParams(
+                        name=name,
+                        arguments=arguments or {},
+                        _meta=_version_request_meta(version),  # type: ignore[unknown-argument]  # pydantic alias
+                    ),
+                    source="client",
+                    type="request",
+                    method="tools/call",
+                    fastmcp_context=ctx,
+                )
+                return await self._run_middleware(
+                    context=mw_context,
+                    call_next=lambda context: self.call_tool(
+                        context.message.name,
+                        context.message.arguments or {},
+                        version=version,
+                        run_middleware=False,
+                        task_meta=task_meta,
+                    ),
+                )
+    
+            # Core logic: find and execute tool
+            with server_span(
+                f"tools/call {name}",
+                "tools/call",
+                self.name,
+                "tool",
+                name,
+                tool_name=name,
+            ) as span:
+                # Try normal display-name resolution first.
+                tool: Tool | None = await self.get_tool(name, version=version)
+    
+                # If that fails, try hashed-name dispatch. This walks
+                # the provider tree recursively (same pattern as the old
+                # get_app_tool) looking for a tool whose stored hash
+                # matches the parsed prefix.
+                if tool is None:
+                    hashed = parse_hashed_backend_name(name)
+                    if hashed is not None:
+                        digest, local_name = hashed
+                        tool = await self.get_tool_by_hash(digest, local_name)
+                        if tool is not None:
+                            # Auth still applies on the bypass path.
+                            skip_auth, token = _get_auth_context()
+                            if not skip_auth and tool.auth is not None:
+                                try:
+                                    auth_ctx = AuthContext(token=token, component=tool)
+                                    if not await run_auth_checks(tool.auth, auth_ctx):
+                                        raise NotFoundError(f"Unknown tool: {name!r}")
+                                except AuthorizationError:
+                                    raise NotFoundError(
+                                        f"Unknown tool: {name!r}"
+                                    ) from None
+    
+                if tool is None:
+                    raise NotFoundError(f"Unknown tool: {name!r}")
+                span.set_attributes(tool.get_span_attributes())
+                if task_meta is not None and task_meta.fn_key is None:
+                    task_meta = replace(task_meta, fn_key=tool.key)
+                try:
+                    return await tool._run(arguments or {}, task_meta=task_meta)
+                except ValidationError as e:
+                    # Argument-validation failure (a bad call). FunctionTool
+                    # converts pydantic's call-validation error into fastmcp's
+                    # ValidationError (see #4128) so it can be filtered as a
+                    # client error. Log the underlying detail without a URL or
+                    # traceback, matching the previous pydantic-error logging.
+                    cause = e.__cause__
+                    detail = (
+                        cause.errors(include_url=False)
+                        if isinstance(cause, PydanticValidationError)
+                        else str(e)
+                    )
+                    logger.warning("Invalid arguments for tool %r: %s", name, detail)
+                    raise
+                except FastMCPError as e:
+                    logger.log(
+                        e.log_level, f"Error calling tool {name!r}", exc_info=False
+                    )
+                    raise
+                except PydanticValidationError as e:
+                    # A pydantic error that is NOT an argument-validation failure
+                    # (e.g. raised by a non-FunctionTool's own validation). Kept
+                    # for backward compatibility.
+                    logger.warning(
+                        "Invalid arguments for tool %r: %s",
+                        name,
+                        e.errors(include_url=False),
+                    )
+                    raise
+                except Exception as e:
+                    logger.exception(f"Error calling tool {name!r}")
+                    # Handle actionable errors that should reach the LLM
+                    # even when masking is enabled
+                    if isinstance(e, httpx.HTTPStatusError):
+                        if e.response.status_code == 429:
+                            raise ToolError(
+                                "Rate limited by upstream API, please retry later"
+                            ) from e
+                    if isinstance(e, httpx.TimeoutException):
+                        raise ToolError(
+                            "Upstream request timed out, please retry"
+                        ) from e
+                    # Standard masking logic
+                    if self._mask_error_details:
+                        raise ToolError(f"Error calling tool {name!r}") from e
+&gt;                   raise ToolError(f"Error calling tool {name!r}: {e}") from e
+E                   fastmcp.exceptions.ToolError: Error calling tool 'search_ligands': API error: 401
+
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/server.py:1358: ToolError</failure></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq7_pathway_mechanism_analysis" time="0.257"><failure message="KeyError: 'items'">@pytest.mark.asyncio
+    async def test_cq7_pathway_mechanism_analysis():
+        """CQ-7: TP53 Apoptosis pathways from WikiPathways.
+    
+        MCP Tool: wikipathways_search_pathways
+        """
+        tool = await mcp.get_tool("wikipathways_search_pathways")
+        pathways_result = await tool.fn(query="TP53", page_size=5)
+        pathways = to_dict(pathways_result)
+    
+&gt;       assert pathways["items"], "No TP53 pathways found"
+               ^^^^^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:217: KeyError</failure></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq8_clinical_trial_landscape" time="0.002"><skipped type="pytest.skip" message="ClinicalTrials.gov blocks Python httpx clients via Cloudflare TLS fingerprinting">/home/donbr/open-biosciences/biosciences-mcp/.worktrees/implement-015-core/tests/integration/test_competency_questions_mcp.py:222: ClinicalTrials.gov blocks Python httpx clients via Cloudflare TLS fingerprinting</skipped></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq9_paralog_dependency" time="0.404"><failure message="KeyError: 'query_gene'">@pytest.mark.asyncio
+    @pytest.mark.skipif(
+        not os.getenv("BIOGRID_API_KEY"),
+        reason="BIOGRID_API_KEY not set",
+    )
+    async def test_cq9_paralog_dependency():
+        """CQ-9: ARID1A interactions (chromatin remodeling complex).
+    
+        MCP Tool: biogrid_get_interactions
+        """
+        tool = await mcp.get_tool("biogrid_get_interactions")
+        interactions_result = await tool.fn(gene_symbol="ARID1A", max_results=50)
+        interactions = to_dict(interactions_result)
+    
+&gt;       assert interactions["query_gene"] == "ARID1A", "Query gene mismatch"
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'query_gene'
+
+tests/integration/test_competency_questions_mcp.py:258: KeyError</failure></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq10_drug_repurposing" time="0.813"><failure message="KeyError: 'items'">@pytest.mark.asyncio
+    async def test_cq10_drug_repurposing():
+        """CQ-10: PARP1 inhibitors (Olaparib).
+    
+        MCP Tool: chembl_search_compounds
+        """
+        tool = await mcp.get_tool("chembl_search_compounds")
+        compounds_result = await tool.fn(query="Olaparib", page_size=5)
+        compounds = to_dict(compounds_result)
+    
+&gt;       assert compounds["items"], "No Olaparib results"
+               ^^^^^^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:273: KeyError</failure></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq11_genomic_location" time="30.549"><failure message="KeyError: 'items'">@pytest.mark.asyncio
+    async def test_cq11_genomic_location():
+        """CQ-11: Genomic location of BRCA2 (Ensembl).
+    
+        MCP Tools: ensembl_search_genes, ensembl_get_gene
+        """
+        search_tool = await mcp.get_tool("ensembl_search_genes")
+        get_tool = await mcp.get_tool("ensembl_get_gene")
+    
+        # Step 1: Search
+        search_result = await search_tool.fn(query="BRCA2", species="human")
+        search = to_dict(search_result)
+&gt;       assert search["items"], "No BRCA2 results"
+               ^^^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:290: KeyError</failure></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq12_molecular_structure" time="0.484"><failure message="KeyError: 'items'">@pytest.mark.asyncio
+    async def test_cq12_molecular_structure():
+        """CQ-12: Molecular formula of Caffeine (PubChem).
+    
+        MCP Tools: pubchem_search_compounds, pubchem_get_compound
+        """
+        search_tool = await mcp.get_tool("pubchem_search_compounds")
+        get_tool = await mcp.get_tool("pubchem_get_compound")
+    
+        # Step 1: Search
+        search_result = await search_tool.fn(query="caffeine", page_size=5)
+        search = to_dict(search_result)
+&gt;       assert search["items"], "No Caffeine results"
+               ^^^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:314: KeyError</failure></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq13_pathway_drug_discovery" time="0.215"><failure message="KeyError: 'items'">@pytest.mark.asyncio
+    async def test_cq13_pathway_drug_discovery():
+        """CQ-13: Pathway-Based Drug Discovery (WikiPathways + ChEMBL)."""
+        wp_search = await mcp.get_tool("wikipathways_search_pathways")
+        wp_comps = await mcp.get_tool("wikipathways_get_pathway_components")
+        chembl_search = await mcp.get_tool("chembl_search_compounds")
+    
+        # Step 1: Find Apoptosis pathway
+        search_result = await wp_search.fn(query="Apoptosis", organism="Homo sapiens")
+        search = to_dict(search_result)
+&gt;       apoptosis_pathway = next((p for p in search["items"] if "Apoptosis" in p["title"]), None)
+                                             ^^^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:336: KeyError</failure></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq14_cell_therapy_mechanism" time="0.717"><failure message="KeyError: 'items'">@pytest.mark.asyncio
+    async def test_cq14_cell_therapy_mechanism():
+        """CQ-14: Tabelecleucel (cell therapy) from ChEMBL.
+    
+        MCP Tool: chembl_search_compounds
+        """
+        tool = await mcp.get_tool("chembl_search_compounds")
+        compounds_result = await tool.fn(query="Tabelecleucel", page_size=5)
+        compounds = to_dict(compounds_result)
+    
+&gt;       assert compounds["items"], "No Tabelecleucel results"
+               ^^^^^^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:369: KeyError</failure></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq15_neuro_immunology_targets" time="0.930"><failure message="KeyError: 'items'">@pytest.mark.asyncio
+    async def test_cq15_neuro_immunology_targets():
+        """CQ-15: Tolebrutinib (BTK inhibitor for MS).
+    
+        MCP Tool: chembl_search_compounds
+        """
+        tool = await mcp.get_tool("chembl_search_compounds")
+        compounds_result = await tool.fn(query="Tolebrutinib", page_size=5)
+        compounds = to_dict(compounds_result)
+    
+&gt;       assert compounds["items"], "No Tolebrutinib results"
+               ^^^^^^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:384: KeyError</failure></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq16_advanced_mutation_targeting" time="0.000"><skipped type="pytest.skip" message="ClinicalTrials.gov blocks Python httpx clients via Cloudflare TLS fingerprinting">/home/donbr/open-biosciences/biosciences-mcp/.worktrees/implement-015-core/tests/integration/test_competency_questions_mcp.py:389: ClinicalTrials.gov blocks Python httpx clients via Cloudflare TLS fingerprinting</skipped></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq17_novel_alzheimers_mechanisms" time="0.705"><failure message="KeyError: 'items'">@pytest.mark.asyncio
+    async def test_cq17_novel_alzheimers_mechanisms():
+        """CQ-17: Mirodenafil (PDE5 inhibitor).
+    
+        MCP Tool: chembl_search_compounds
+        """
+        tool = await mcp.get_tool("chembl_search_compounds")
+        compounds_result = await tool.fn(query="Mirodenafil", page_size=5)
+        compounds = to_dict(compounds_result)
+    
+&gt;       assert compounds["items"], "No Mirodenafil results"
+               ^^^^^^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:419: KeyError</failure></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq18_protein_details" time="1.449"><failure message="KeyError: 'id'">@pytest.mark.asyncio
+    async def test_cq18_protein_details():
+        """CQ-18: UniProt strict lookup with complete cross-references (BRCA1).
+    
+        MCP Tool: uniprot_get_protein
+        """
+        tool = await mcp.get_tool("uniprot_get_protein")
+        protein_result = await tool.fn(uniprot_id="UniProtKB:P38398", slim=False)
+        protein = to_dict(protein_result)
+    
+&gt;       assert protein["id"] == "UniProtKB:P38398", "Protein ID mismatch"
+               ^^^^^^^^^^^^^
+E       KeyError: 'id'
+
+tests/integration/test_competency_questions_mcp.py:434: KeyError</failure></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq19_batch_operations" time="1.034"><failure message="TypeError: 'ToolResult' object is not subscriptable">@pytest.mark.asyncio
+    async def test_cq19_batch_operations():
+        """CQ-19: ChEMBL batch compound lookup.
+    
+        MCP Tool: chembl_get_compounds_batch
+        """
+        tool = await mcp.get_tool("chembl_get_compounds_batch")
+        compounds_result = await tool.fn(
+            chembl_ids=["CHEMBL:25", "CHEMBL:939", "CHEMBL:521686", "CHEMBL:1946170", "CHEMBL:2105717"],
+            slim=True,
+        )
+        compounds = (
+            [to_dict(c) for c in compounds_result]
+&gt;           if hasattr(compounds_result[0], "model_dump")
+                       ^^^^^^^^^^^^^^^^^^^
+            else compounds_result
+        )
+E       TypeError: 'ToolResult' object is not subscriptable
+
+tests/integration/test_competency_questions_mcp.py:461: TypeError</failure></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq20_pathway_components" time="0.664"><failure message="KeyError: 'id'">@pytest.mark.asyncio
+    async def test_cq20_pathway_components():
+        """CQ-20: WikiPathways component extraction (TP53 network).
+    
+        MCP Tools: wikipathways_get_pathway, wikipathways_get_pathway_components
+        """
+        get_pathway = await mcp.get_tool("wikipathways_get_pathway")
+        get_comps = await mcp.get_tool("wikipathways_get_pathway_components")
+    
+        # Step 1: Get pathway metadata
+        pathway_result = await get_pathway.fn(pathway_id="WP:WP1742")
+        pathway = to_dict(pathway_result)
+&gt;       assert pathway["id"] == "WP:WP1742", "Pathway ID mismatch"
+               ^^^^^^^^^^^^^
+E       KeyError: 'id'
+
+tests/integration/test_competency_questions_mcp.py:482: KeyError</failure></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq21_trial_details" time="0.000"><skipped type="pytest.skip" message="ClinicalTrials.gov blocks Python httpx clients via Cloudflare TLS fingerprinting">/home/donbr/open-biosciences/biosciences-mcp/.worktrees/implement-015-core/tests/integration/test_competency_questions_mcp.py:500: ClinicalTrials.gov blocks Python httpx clients via Cloudflare TLS fingerprinting</skipped></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq22_literature_links" time="0.987"><failure message="AssertionError: Should return list of PubMed IDs&#10;assert False&#10; +  where False = isinstance(ToolResult(content=[TextContent(type='text', text='[&quot;20060114&quot;,&quot;27852141&quot;,&quot;20071787&quot;,&quot;20068186&quot;,&quot;20066118&quot;]', annotations=None, meta=None)], structured_content={'result': ['20060114', '27852141', '20071787', '20068186', '20066118']}, meta={'fastmcp': {'wrap_result': True}}, is_error=False), list)">@pytest.mark.asyncio
+    async def test_cq22_literature_links():
+        """CQ-22: Entrez PubMed links for TP53 (NCBIGene:7157).
+    
+        MCP Tool: entrez_get_pubmed_links
+        """
+        tool = await mcp.get_tool("entrez_get_pubmed_links")
+        pubmed_ids = await tool.fn(entrez_id="NCBIGene:7157", limit=5)
+    
+&gt;       assert isinstance(pubmed_ids, list), "Should return list of PubMed IDs"
+E       AssertionError: Should return list of PubMed IDs
+E       assert False
+E        +  where False = isinstance(ToolResult(content=[TextContent(type='text', text='["20060114","27852141","20071787","20068186","20066118"]', annotations=None, meta=None)], structured_content={'result': ['20060114', '27852141', '20071787', '20068186', '20066118']}, meta={'fastmcp': {'wrap_result': True}}, is_error=False), list)
+
+tests/integration/test_competency_questions_mcp.py:526: AssertionError</failure></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq23_gene_pathway_mapping" time="0.442"><failure message="KeyError: 'items'">@pytest.mark.asyncio
+    async def test_cq23_gene_pathway_mapping():
+        """CQ-23: WikiPathways gene-&gt;pathway reverse lookup (BRCA1).
+    
+        MCP Tool: wikipathways_get_pathways_for_gene
+        """
+        tool = await mcp.get_tool("wikipathways_get_pathways_for_gene")
+        pathways_result = await tool.fn(
+            gene_id="BRCA1",
+            organism="Homo sapiens",
+            page_size=5,
+        )
+        pathways = to_dict(pathways_result)
+    
+&gt;       assert pathways["items"], "No pathways found for BRCA1"
+               ^^^^^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:546: KeyError</failure></testcase></testsuite></testsuites>

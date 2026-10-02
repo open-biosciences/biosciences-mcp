@@ -4,7 +4,7 @@
 - **Branch**: `implement/015-fastmcp-4-upgrade-core`
 - **Head Commit**: `f1c80d1`
 - **Preview Endpoint**: `https://biosciences-mcp-implement-015-fastmcp-4-upgrade-core.fastmcp.app/mcp`
-- **Framework Versions**: `fastmcp` 3.4.7, `mcp` 1.26.0
+- **Framework Versions**: `fastmcp` 3.4.7. `uv.lock` pins `mcp` 1.26.0, but Horizon ignores the lockfile and resolves from `pyproject.toml` (research R3/R10): the `02ca1d0` build log shows `mcp` 1.30.0, `pydantic` 2.13.5, `uvicorn` 0.54.0 on Python 3.12.13 (see §2)
 - **Date Tested**: 2026-10-01
 - **Feature Specification**: [spec.md](../spec.md) | **Tasks**: [tasks.md](../tasks.md) (T021–T026)
 
@@ -99,16 +99,29 @@ A simultaneous dual-endpoint invocation was performed comparing production (`htt
 
 ---
 
-## 2. Check 4.7 & Deployment Rollback (T025): NOT RUN
+## 2. Check 4.7 & Deployment Rollback (T025): WAIVED BY OWNER
 
-- The timed rollback (redeploy the preview from the pre-upgrade `main` commit, and time it until check 4.2 passes on 2.14.5) has **not been performed**. SC-005's under-15-minute target is unmeasured.
-- Planned recovery path: revert the PR #20 merge commit and redeploy from Horizon.
+- **Waiver**: approved by the repository owner (donbr) on 2026-10-02. The timed rollback drill was not run. Horizon redeploys automatically on every push to the deployed branch, so the drill would mainly re-measure Horizon's build time, which the push below already measured.
+- **Proxy measurement (SC-005)**: an unplanned push of `02ca1d0` (evidence commit, docs only) to the PR branch triggered an automatic preview rebuild. Horizon build log:
+
+  | Event | Time (UTC) |
+  |---|---|
+  | `02ca1d0` committed and pushed | 2026-10-02 05:38:55 (push in the same command) |
+  | First build log line (`Installing mcp-build-tools...`) | 05:39:37 |
+  | `=== FINAL STATUS: BUILD SUCCEEDED ===`, image published | 05:40:06 |
+
+  Build: 29 s. Push to published image: about 70 s. The log does not show the rollout to the live endpoint or the commit SHA; the commit is attributed by timing (`8b9195f` was pushed later, at 05:41:23, and triggers its own build).
+- **Unmeasured**: rollout from published image to live endpoint, and the human steps (open and merge the revert PR, possibly from a phone).
+- **Rollback path**: `git revert -m 1 <PR #20 merge commit>` on `main`, merged by merge commit, then the production redeploy. Whether production (`biosciences-mcp`) redeploys automatically on a push to `main` is **unconfirmed**; if it does not, redeploy from the Horizon console.
+- **Caveat: a rollback re-resolves, it does not restore.** Horizon runs `uv pip install --system ./.` against the `pyproject.toml` ranges and ignores `uv.lock`. Reverting PR #20 resolves `fastmcp>=2.14.1,<3.0` and its transitive dependencies fresh, so the rolled-back image may not match today's production image byte for byte.
+- **Resolved set observed in the `02ca1d0` build** (vs `uv.lock`): `fastmcp` 3.4.7 (3.4.7), `mcp` 1.30.0 (1.26.0), `pydantic` 2.13.5 (2.12.5), `uvicorn` 0.54.0 (0.41.0), `starlette` 1.7.0 (1.7.0), `httpx` 0.28.1 (0.28.1), Python 3.12.13 (local runs: 3.13.2). All within the spec's allowed ranges (quickstart §1: `mcp` 1.x).
+- **Head moved after validation**: the preview now runs `8b9195f`. `git diff f1c80d1 8b9195f` touches only `specs/015-fastmcp-4-upgrade/` (this file, `tasks.md`, `HANDOFF.md`); no runtime file changed. On 2026-10-02 the redeployed preview listed 34 tools, identical to `contracts/tool-surface-baseline-core.json`.
 
 ---
 
 ## 3. Decision (T026): PENDING OWNER
 
 - **Recommendation**: Go. Checks 4.1–4.5 and 4.8 pass, and the production-vs-preview comparison shows identical payloads.
-- **Open before the decision**: check 4.7 (T025), or an explicit waiver of it by the owner.
+- **Open before the decision**: check 4.7 (T025) was waived by the owner on 2026-10-02 (§2). The local pre-release run (`core-3.4.7-prerelease/README.md`) found **16 new failures in `tests/integration/test_competency_questions_mcp.py`**. They are test-harness only: the file calls `get_tool(...).fn(...)`, which returns a `ToolResult` on 3.4.7, while the wire path is unchanged. AGE-718's "no new integration failures" criterion is unmet until the file is ported to `fastmcp.Client`, or the owner accepts the failures explicitly.
 - **Decider / date**: to be recorded by the repository owner. A validating agent recorded "Go" on 2026-10-01; that was withdrawn because FR-011 requires the decider's own recorded decision.
 - **Verification note (2026-10-01)**: the check 4.3 arguments were validated against `contracts/tool-surface-baseline-core.json` (12/12 declared parameters), and the preview head equals the branch head (`f1c80d1`).
