@@ -43,9 +43,9 @@
 **Purpose**: Prerequisite fix and isolated workspaces
 
 - [x] T001 Gateway mounts use `tool_names` only; `prefix=`/`as_proxy=` removed in `src/biosciences_mcp/servers/gateway.py` (PR #18, `a319044`). Implemented and reviewed (`/pr-review 18`: no blocking findings); the merge is T002. Verified: identical 34-tool list on 2.14.5, and the same 34 names on 3.4.7 and 4.0.10. On 2.14.5 unprefixed names now reach the last-mounted server until the pin moves (PR #18 description). Principle V waiver in plan.md Complexity Tracking.
-- [ ] T002 Get PR #18 reviewed (`/pr-review 18`) and merged to `main` by merge commit. Then remove `.worktrees/fix-gateway-mount-tool-names` and its local branch (ADR-PRG-001 §3.4).
-- [ ] T003 Open the spec PR from `feature/015-fastmcp-4-upgrade` to `main` (spec, plan, research, contracts, tasks, process record), review it with `/pr-review`, and merge it by merge commit. CLAUDE.md starts implementation branches only after the spec is merged, and T006 reads `specs/015-fastmcp-4-upgrade/contracts/tool-surface-baseline-core.json` from `main`.
-- [ ] T004 Create the core worktree `.worktrees/implement-015-core` on a new branch `implement/015-fastmcp-4-upgrade-core` from `origin/main` (after T002 and T003). Run `uv sync --extra dev`, and record `fastmcp`/`mcp` versions (quickstart §1; expect 2.14.5 / 1.26.0).
+- [X] T002 Get PR #18 reviewed (`/pr-review 18`) and merged to `main` by merge commit. Then remove `.worktrees/fix-gateway-mount-tool-names` and its local branch (ADR-PRG-001 §3.4).
+- [X] T003 Open the spec PR from `feature/015-fastmcp-4-upgrade` to `main` (spec, plan, research, contracts, tasks, process record), review it with `/pr-review`, and merge it by merge commit. CLAUDE.md starts implementation branches only after the spec is merged, and T006 reads `specs/015-fastmcp-4-upgrade/contracts/tool-surface-baseline-core.json` from `main`.
+- [X] T004 Create the core worktree `.worktrees/implement-015-core` on a new branch `implement/015-fastmcp-4-upgrade-core` from `origin/main` (after T002 and T003). Run `uv sync --extra dev`, and record `fastmcp`/`mcp` versions (quickstart §1; expect 2.14.5 / 1.26.0).
 - [ ] T005 [P] Create the edge worktree `edge:.worktrees/implement-015-edge` on a new branch `implement/015-fastmcp-4-upgrade-edge` from edge `origin/main` (after T003, so the baseline it copies is on core `main`). Add `.worktrees/` to `edge:.gitignore` as the branch's first commit; edge lacks the entry that ADR-PRG-001 assumes is org-wide.
 
 ---
@@ -56,7 +56,7 @@
 
 **⚠️ CRITICAL**: T006 must be committed and green on 2.14.5 before T009 raises the pin.
 
-- [ ] T006 Write `tests/contract/test_tool_surface.py` (markers `contract`, `unit`; no network). Load `biosciences_mcp.servers.gateway.mcp` in process with `fastmcp.Client`, call `list_tools`, and compare against `specs/015-fastmcp-4-upgrade/contracts/tool-surface-baseline-core.json` (path resolved from the repository root), implementing all six invariants in `contracts/tool-surface-invariants.md`. Project `list_tools` with the functions from `specs/015-fastmcp-4-upgrade/research/surface-tools/project_surface.py`, copied into a test helper, so test and baseline can't drift.
+- [X] T006 Write `tests/contract/test_tool_surface.py` (markers `contract`, `unit`; no network). Load `biosciences_mcp.servers.gateway.mcp` in process with `fastmcp.Client`, call `list_tools`, and compare against `specs/015-fastmcp-4-upgrade/contracts/tool-surface-baseline-core.json` (path resolved from the repository root), implementing all six invariants in `contracts/tool-surface-invariants.md`. Project `list_tools` with the functions from `specs/015-fastmcp-4-upgrade/research/surface-tools/project_surface.py`, copied into a test helper, so test and baseline can't drift.
   1. The name set is equal.
   2. Each parameter's name, `type`, `required`, `default`, and `constraints` are equal.
   3. Every guidance line of the baseline description appears in the current tool description or in one of its parameter descriptions. Every column-0 `Name:` header line is ignored.
@@ -67,7 +67,7 @@
   Add the self-test from the invariants contract: a scratch change that removes `x-fastmcp-wrap-result`, edits one IUPHAR `Field(description=…)`, or changes one constraint must fail.
 
   Read schema fields version-tolerantly (`inputSchema`, else `input_schema`) so the same test runs on 2.14.5, 3.4.7, and a later 4.x. On failure, the test names the tool and the missing line.
-- [ ] T007 Run `uv run pytest tests/contract/test_tool_surface.py -v` on 2.14.5. It must pass for all 34 tools. Commit T006 alone, message citing FR-001, FR-002, FR-006, and AGE-718 Step 1.
+- [X] T007 Run `uv run pytest tests/contract/test_tool_surface.py -v` on 2.14.5. It must pass for all 34 tools. Commit T006 alone, message citing FR-001, FR-002, FR-006, and AGE-718 Step 1.
 
 **Checkpoint**: The guard is in place on the current version; the pin can now move.
 
@@ -85,39 +85,39 @@
 
 ### Tests for User Story 1
 
-- [ ] T008 [US1] Record the 2.14.5 baseline in the core worktree before the pin change. Run quickstart §2's four commands and save the outputs under `specs/015-fastmcp-4-upgrade/evidence/core-2.14.5/` (unit, contract-unit, gateway, contract-integration logs). This is the comparison set for FR-012. Expected on 2026-09-30: 11 contract-integration failures, all Ensembl 500 or IUPHAR 401 (IUPHAR is tracked separately as AGE-734).
+- [X] T008 [US1] Record the 2.14.5 baseline in the core worktree before the pin change. Run quickstart §2's four commands and save the outputs under `specs/015-fastmcp-4-upgrade/evidence/core-2.14.5/` (unit, contract-unit, gateway, contract-integration logs). This is the comparison set for FR-012. Expected on 2026-09-30: 11 contract-integration failures, all Ensembl 500 or IUPHAR 401 (IUPHAR is tracked separately as AGE-734).
 
 ### Implementation for User Story 1
 
-- [ ] T009 [US1] Raise the pin in `pyproject.toml` to `"fastmcp>=3.4.7,<3.5",`. Add a reason comment on the preceding line: floor = version verified in spec 015; ceiling = minor ceiling, with 4.x not yet supported under ADR-009 (FR-018, FR-020). Run `uv lock` and `uv sync --extra dev`. Record the resolved `fastmcp` and `mcp` versions (expect 3.4.7 and `mcp` 1.x; `mcp` must stay below 2.0).
-- [ ] T010 [P] [US1] In `tests/integration/test_gateway.py`, replace `await mcp.get_tools()` (removed in 3.x) with `await mcp.list_tools()`. Keep the dict/list handling and all assertions unchanged.
-- [ ] T011 [P] [US1] Restructure the tool docstrings in `src/biosciences_mcp/servers/hgnc.py` (`search_genes`, `get_gene`) and `src/biosciences_mcp/servers/uniprot.py` (`search_proteins`, `get_protein`).
+- [X] T009 [US1] Raise the pin in `pyproject.toml` to `"fastmcp>=3.4.7,<3.5",`. Add a reason comment on the preceding line: floor = version verified in spec 015; ceiling = minor ceiling, with 4.x not yet supported under ADR-009 (FR-018, FR-020). Run `uv lock` and `uv sync --extra dev`. Record the resolved `fastmcp` and `mcp` versions (expect 3.4.7 and `mcp` 1.x; `mcp` must stay below 2.0).
+- [X] T010 [P] [US1] In `tests/integration/test_gateway.py`, replace `await mcp.get_tools()` (removed in 3.x) with `await mcp.list_tools()`. Keep the dict/list handling and all assertions unchanged.
+- [X] T011 [P] [US1] Restructure the tool docstrings in `src/biosciences_mcp/servers/hgnc.py` (`search_genes`, `get_gene`) and `src/biosciences_mcp/servers/uniprot.py` (`search_proteins`, `get_protein`).
   - Move every line of the `Returns:`, `Examples:`, `Error Codes:`, `Note:`, and response-shape blocks into the leading prose section, above `Args:`, **unchanged**. Delete only the section header lines themselves: every column-0 `Name:` line except `Args:` (in the baseline: `Returns:`, `Example:`, `Examples:`, `Error Codes:`, `Errors:`, `Note:`, `Use cases:`, `Workflow:`). Keeping any of them makes 3.4.7 drop that line and everything after it (simulated 2026-10-01: 24 lines lost when `Example:` was kept; 0 with all headers deleted). Don't add bullets, merge lines, or reword: invariant 3 matches each line after whitespace normalisation only.
   - Leave `Args:` in place.
-- [ ] T012 [P] [US1] Same restructuring as T011 in `src/biosciences_mcp/servers/chembl.py` (`search_compounds`, `get_compound`, `get_compounds_batch`) and `src/biosciences_mcp/servers/opentargets.py` (`search_targets`, `get_target`, `get_associations`).
-- [ ] T013 [P] [US1] Same restructuring as T011 in `src/biosciences_mcp/servers/string.py` (`search_proteins`, `get_interactions`, `get_network_image_url`) and `src/biosciences_mcp/servers/biogrid.py` (`search_genes`, `get_interactions`).
-- [ ] T014 [P] [US1] Same restructuring as T011 in `src/biosciences_mcp/servers/ensembl.py` (`search_genes`, `get_gene`, `get_transcript`) and `src/biosciences_mcp/servers/entrez.py` (`search_genes`, `get_gene`, `get_pubmed_links`).
-- [ ] T015 [P] [US1] Same restructuring as T011 in `src/biosciences_mcp/servers/pubchem.py` (`search_compounds`, `get_compound`), `src/biosciences_mcp/servers/wikipathways.py` (`search_pathways`, `get_pathway`, `get_pathways_for_gene`, `get_pathway_components`), and `src/biosciences_mcp/servers/clinicaltrials.py` (`search_trials`, `get_trial`, `get_trial_locations`). That completes 30 tools across T011 to T015. The 4 IUPHAR tools have no `Args:` section and need no change.
-- [ ] T016 [US1] Run `uv run pytest tests/contract/test_tool_surface.py -v` on 3.4.7. It must pass for all 34 tools, with invariant 3 proving no guidance was lost (FR-006). Fix any reported missing line in its server file and rerun.
-- [ ] T017 [US1] Run quickstart §2 on 3.4.7 and save the outputs under `specs/015-fastmcp-4-upgrade/evidence/core-3.4.7/`. Confirm:
+- [X] T012 [P] [US1] Same restructuring as T011 in `src/biosciences_mcp/servers/chembl.py` (`search_compounds`, `get_compound`, `get_compounds_batch`) and `src/biosciences_mcp/servers/opentargets.py` (`search_targets`, `get_target`, `get_associations`).
+- [X] T013 [P] [US1] Same restructuring as T011 in `src/biosciences_mcp/servers/string.py` (`search_proteins`, `get_interactions`, `get_network_image_url`) and `src/biosciences_mcp/servers/biogrid.py` (`search_genes`, `get_interactions`).
+- [X] T014 [P] [US1] Same restructuring as T011 in `src/biosciences_mcp/servers/ensembl.py` (`search_genes`, `get_gene`, `get_transcript`) and `src/biosciences_mcp/servers/entrez.py` (`search_genes`, `get_gene`, `get_pubmed_links`).
+- [X] T015 [P] [US1] Same restructuring as T011 in `src/biosciences_mcp/servers/pubchem.py` (`search_compounds`, `get_compound`), `src/biosciences_mcp/servers/wikipathways.py` (`search_pathways`, `get_pathway`, `get_pathways_for_gene`, `get_pathway_components`), and `src/biosciences_mcp/servers/clinicaltrials.py` (`search_trials`, `get_trial`, `get_trial_locations`). That completes 30 tools across T011 to T015. The 4 IUPHAR tools have no `Args:` section and need no change.
+- [X] T016 [US1] Run `uv run pytest tests/contract/test_tool_surface.py -v` on 3.4.7. It must pass for all 34 tools, with invariant 3 proving no guidance was lost (FR-006). Fix any reported missing line in its server file and rerun.
+- [X] T017 [US1] Run quickstart §2 on 3.4.7 and save the outputs under `specs/015-fastmcp-4-upgrade/evidence/core-3.4.7/`. Confirm:
   - unit and contract+unit all pass
   - `test_gateway.py` passes
   - contract-integration failures are a subset of T008's, with persistent upstream failures rerun once after 10 seconds per FR-012
   - `grep -c PydanticSerializationUnexpectedValue` on the logs returns 0 (none were seen at 3.4.7 in research; they're a 4.x issue)
   - the server log shows the new 3.4.7 traceback noise for rejected gateway calls only as expected (research R5); record it, don't fix it
-- [ ] T018 [US1] Core wire capture through the gateway (FR-003, FR-004, FR-005; data model "Representative call set"). Write `specs/015-fastmcp-4-upgrade/research/core-capture/core_capture.py`, modelled on `research/edge-capture/edge_capture.py`. It calls `biosciences_mcp.servers.gateway.mcp` in process through `fastmcp.Client.call_tool_mcp` and records `content`, `structuredContent`, `isError`, and `meta`. Cases, all network-free:
+- [X] T018 [US1] Core wire capture through the gateway (FR-003, FR-004, FR-005; data model "Representative call set"). Write `specs/015-fastmcp-4-upgrade/research/core-capture/core_capture.py`, modelled on `research/edge-capture/edge_capture.py`. It calls `biosciences_mcp.servers.gateway.mcp` in process through `fastmcp.Client.call_tool_mcp` and records `content`, `structuredContent`, `isError`, and `meta`. Cases, all network-free:
   - every strict lookup tool with free text (13 on 2026-10-01)
   - `hgnc_get_gene` with an undeclared argument, a missing argument, and a wrong type
   - a simulated upstream 500 and 429 for each httpx-based server, via a patched transport (record ChEMBL's SDK path as not simulated)
 
   Run it on 2.14.5 and 3.4.7 in the same session: 2.14.5 via `PYTHONPATH=src uv run --no-project --with fastmcp==2.14.5 …` from this worktree, and 3.4.7 in the worktree environment. Diff the two. Every difference must be a row of the allowed-changes table (result `_meta`, gateway validation text). Save the diff summary to `specs/015-fastmcp-4-upgrade/evidence/core-3.4.7/wire-diff.md`.
-- [ ] T019 [US1] Verify the telemetry. biosciences-otel-stack's `fastmcp-gateway` service hard-codes `build.context: ../biosciences-mcp` (the primary checkout, on `main`), so build from the worktree with an override. Write `<scratch>/compose.015.yml` with `services: {fastmcp-gateway: {build: {context: /home/donbr/open-biosciences/biosciences-mcp/.worktrees/implement-015-core}, image: biosciences-mcp-gateway:otel-015}}`. From `biosciences-otel-stack/`, run `docker compose -f docker-compose.yml -f <scratch>/compose.015.yml --profile mcp up -d --build`. Confirm the container's version with `docker compose -f docker-compose.yml -f <scratch>/compose.015.yml run --rm fastmcp-gateway python -c "import importlib.metadata as m; print(m.version('fastmcp'))"` (expect 3.4.7). Then call three tools and confirm in Phoenix:
+- [X] T019 [US1] Verify the telemetry. biosciences-otel-stack's `fastmcp-gateway` service hard-codes `build.context: ../biosciences-mcp` (the primary checkout, on `main`), so build from the worktree with an override. Write `<scratch>/compose.015.yml` with `services: {fastmcp-gateway: {build: {context: /home/donbr/open-biosciences/biosciences-mcp/.worktrees/implement-015-core}, image: biosciences-mcp-gateway:otel-015}}`. From `biosciences-otel-stack/`, run `docker compose -f docker-compose.yml -f <scratch>/compose.015.yml --profile mcp up -d --build`. Confirm the container's version with `docker compose -f docker-compose.yml -f <scratch>/compose.015.yml run --rm fastmcp-gateway python -c "import importlib.metadata as m; print(m.version('fastmcp'))"` (expect 3.4.7). Then call three tools and confirm in Phoenix:
   - tool-level spans appear (`gen_ai.tool.name`, `fastmcp.server.name`; these arrived in 3.x): this is AGE-718's acceptance criterion
   - the `opentelemetry-instrument` wrapper still starts (FR-019)
   - with no collector running, the server still serves `list_tools` (graceful degradation)
 
   Record the in-container fastmcp version, the span names, and a screenshot path in `specs/015-fastmcp-4-upgrade/evidence/core-3.4.7/telemetry.md`.
-- [ ] T020 [US1] Write the core PR's "User-visible contract" section from the allowed-changes table in `contracts/tool-surface-invariants.md`, with the observed counts from T016 and T017, and its effect on biosciences-deepagents, biosciences-temporal, and Claude Code plugin users (FR-007). Include the gateway validation-message change (research R5).
+- [X] T020 [US1] Write the core PR's "User-visible contract" section from the allowed-changes table in `contracts/tool-surface-invariants.md`, with the observed counts from T016 and T017, and its effect on biosciences-deepagents, biosciences-temporal, and Claude Code plugin users (FR-007). Include the gateway validation-message change (research R5).
 
 **Checkpoint**: The core upgrade is complete and verified locally. Open the core PR.
 
@@ -129,10 +129,10 @@
 
 **Independent Test**: Quickstart §4 checks 4.1 to 4.5 and 4.7 pass against the preview URL, and check 4.8 (temporal, local) passes against the upgrade worktree.
 
-- [ ] T021 [US2] Create a Horizon preview deployment from `implement/015-fastmcp-4-upgrade-core`. Use entrypoint `src/biosciences_mcp/servers/gateway.py:mcp` and the same secrets as production (`BIOGRID_API_KEY`, `NCBI_API_KEY`), under a non-production server name. Leave every `FASTMCP_HTTP_*` variable unset (research R2). This needs Horizon web UI access, so it's a repository-owner action.
-- [ ] T022 [US2] Run quickstart §4 checks 4.1 (Host accepted), 4.2 (34 names equal to the baseline keys), 4.3 (one success call per server; upstream failures per FR-012, IUPHAR expected to fail until AGE-734), and 4.4 (`hgnc_get_gene` free text returns `UNRESOLVED_ENTITY`) against the preview URL. Record the results in `specs/015-fastmcp-4-upgrade/evidence/core-preview.md`.
-- [ ] T023 [US2] Run quickstart check 4.5 (a raw sessionless JSON-RPC `tools/call`, as `biosciences-deepagents` `apps/api/shared/mcp.py:69-143` sends it) against the preview URL, and record the result. "400 Missing session ID" means No-Go until Horizon's session mode is resolved (research R12).
-- [ ] T024 [US2] Run quickstart check 4.8 (biosciences-temporal, SC-003). Temporal launches core's gateway over stdio from the sibling checkout (`src/biosciences_temporal/agents/base.py:20-61`, `GATEWAY_SERVER = "src/biosciences_mcp/servers/gateway.py"`), so it moves to 3.4.7 as soon as that checkout updates after merge. With `BIOSCIENCES_MCP_PATH=/home/donbr/open-biosciences/biosciences-mcp/.worktrees/implement-015-core`, use temporal's `create_mcp_client()` to list tools (expect 34) and call `hgnc_search_genes` and `hgnc_get_gene`. Then run one temporal agent workflow end to end if its LLM key is configured. Record the results in `specs/015-fastmcp-4-upgrade/evidence/core-preview.md`. A failure is a No-Go input for T026.
+- [X] T021 [US2] Create a Horizon preview deployment from `implement/015-fastmcp-4-upgrade-core`. Use entrypoint `src/biosciences_mcp/servers/gateway.py:mcp` and the same secrets as production (`BIOGRID_API_KEY`, `NCBI_API_KEY`), under a non-production server name. Leave every `FASTMCP_HTTP_*` variable unset (research R2). This needs Horizon web UI access, so it's a repository-owner action.
+- [X] T022 [US2] Run quickstart §4 checks 4.1 (Host accepted), 4.2 (34 names equal to the baseline keys), 4.3 (one success call per server; upstream failures per FR-012, IUPHAR expected to fail until AGE-734), and 4.4 (`hgnc_get_gene` free text returns `UNRESOLVED_ENTITY`) against the preview URL. Record the results in `specs/015-fastmcp-4-upgrade/evidence/core-preview.md`.
+- [X] T023 [US2] Run quickstart check 4.5 (a raw sessionless JSON-RPC `tools/call`, as `biosciences-deepagents` `apps/api/shared/mcp.py:69-143` sends it) against the preview URL, and record the result. "400 Missing session ID" means No-Go until Horizon's session mode is resolved (research R12).
+- [X] T024 [US2] Run quickstart check 4.8 (biosciences-temporal, SC-003). Temporal launches core's gateway over stdio from the sibling checkout (`src/biosciences_temporal/agents/base.py:20-61`, `GATEWAY_SERVER = "src/biosciences_mcp/servers/gateway.py"`), so it moves to 3.4.7 as soon as that checkout updates after merge. With `BIOSCIENCES_MCP_PATH=/home/donbr/open-biosciences/biosciences-mcp/.worktrees/implement-015-core`, use temporal's `create_mcp_client()` to list tools (expect 34) and call `hgnc_search_genes` and `hgnc_get_gene`. Then run one temporal agent workflow end to end if its LLM key is configured. Record the results in `specs/015-fastmcp-4-upgrade/evidence/core-preview.md`. A failure is a No-Go input for T026.
 - [ ] T025 [US2] Run quickstart check 4.7: redeploy the preview from the pre-upgrade `main` commit, and time it until check 4.2 passes on 2.14.5. Record the time against SC-005 (under 15 minutes). Then redeploy the upgrade head.
 - [ ] T026 [US2] Record the decision (Go or No-Go, date, decider) in `specs/015-fastmcp-4-upgrade/evidence/core-preview.md` and in the core PR description (FR-011). A No-Go stops here: leave the pin on the branch, and file the blocker.
 - [ ] T027 [US2] On Go: merge the core PR by merge commit and redeploy production. Run quickstart §5 (checks 4.1, 4.2, and 4.5 against `https://biosciences-mcp.fastmcp.app/mcp`, plus `FASTMCP_CLOUD_ENDPOINT=https://biosciences-mcp.fastmcp.app/mcp uv run pytest -m e2e -v`), and record the results. Delete the preview deployment.
@@ -189,7 +189,7 @@
 
 **Placement**: T037 to T041 ship in the **core PR**, after T009. T042 and T043 ship in the **edge PR**, after T029.
 
-- [ ] T037 [US4] Write `docs/adr/proposed/adr-009-v0.1.md` (core). Create `docs/adr/proposed/`, and fill in every section required by `contracts/version-policy.md`:
+- [X] T037 [US4] Write `docs/adr/proposed/adr-009-v0.1.md` (core). Create `docs/adr/proposed/`, and fill in every section required by `contracts/version-policy.md`:
   - scope and consumers
   - the supported range with the reason for each bound
   - the known-bad table (`==3.4.3`)
@@ -201,16 +201,16 @@
   - section 5a: each consumer's status at acceptance (psychology-mcp's interim divergence and its expiry)
 
   Adopt AGE-718's pin convention (`>=X.Y.Z,<X.(Y+1)`, exact known-good floor, minor ceiling) as the rule for dependency bounds. Record biosciences-memory (`fastmcp>=2.13.3,<3`) as an open question: in scope or not.
-- [ ] T038 [US4] Write `tests/unit/test_framework_version_policy.py` (core; marker `unit`; no network) per `contracts/version-policy.md` "Policy test contract":
+- [X] T038 [US4] Write `tests/unit/test_framework_version_policy.py` (core; marker `unit`; no network) per `contracts/version-policy.md` "Policy test contract":
   - constants `SUPPORTED = ">=3.4.7,<3.5"` and `KNOWN_BAD`, with a comment citing ADR-009 v0.1. Because the range excludes 4.x, a 4.x lock fails check 2 with a message naming FR-020's gate.
   - check 1: the `pyproject.toml` specifier is within the range and excludes known-bad versions
   - check 2: the `uv.lock` version
   - check 3: the reason comment on the upper bound
 
   Failure messages name ADR-009 and the incident. Use `packaging.specifiers`, and add `packaging` to the dev extras if it isn't already available. Cite ADR-009 by its file version in a comment (`v0.1` until acceptance; T045 updates it).
-- [ ] T039 [US4] Add a self-check test in the same file (SC-007). It writes known-bad copies to `tmp_path` and asserts each check fails with the ADR-009 message: a `uv.lock` locking `fastmcp` 3.4.3 (check 2), a `pyproject.toml` whose specifier admits 3.4.3 or 4.x (check 1), and a `pyproject.toml` whose upper bound has **no reason comment** (check 3, which doesn't depend on the version).
-- [ ] T040 [P] [US4] Create `.github/workflows/ci.yml` (core): on `pull_request` and `push` to `main`, set up uv on Python 3.12, run `uv sync --extra dev`, then `uv run pytest -m unit -q`. Unit only: no secrets, no network.
-- [ ] T041 [US4] Run quickstart §3 by hand in the core worktree (set `fastmcp==3.4.3` in a scratch copy and run the policy test), and record the expected failure output in `specs/015-fastmcp-4-upgrade/evidence/core-3.4.7/policy-selfcheck.md`.
+- [X] T039 [US4] Add a self-check test in the same file (SC-007). It writes known-bad copies to `tmp_path` and asserts each check fails with the ADR-009 message: a `uv.lock` locking `fastmcp` 3.4.3 (check 2), a `pyproject.toml` whose specifier admits 3.4.3 or 4.x (check 1), and a `pyproject.toml` whose upper bound has **no reason comment** (check 3, which doesn't depend on the version).
+- [X] T040 [P] [US4] Create `.github/workflows/ci.yml` (core): on `pull_request` and `push` to `main`, set up uv on Python 3.12, run `uv sync --extra dev`, then `uv run pytest -m unit -q`. Unit only: no secrets, no network.
+- [X] T041 [US4] Run quickstart §3 by hand in the core worktree (set `fastmcp==3.4.3` in a scratch copy and run the policy test), and record the expected failure output in `specs/015-fastmcp-4-upgrade/evidence/core-3.4.7/policy-selfcheck.md`.
 - [ ] T042 [P] [US4] Write `edge:tests/unit/test_framework_version_policy.py` (a copy of T038 and T039 with edge paths; the constants are a local copy per FR-013, with a comment citing ADR-009 v0.1 and the core path), and `edge:.github/workflows/ci.yml` (as T040).
 - [ ] T043 [US4] Run quickstart §3 in the edge worktree, and record the result in `specs/015-fastmcp-4-upgrade/evidence/edge-3.4.7.md`.
 - [ ] T044 [P] [US4] File a Linear issue (project "Open-Biosciences Platform v1.1 — dogfooding + Synapse alignment"): psychology-mcp adopts ADR-009. It means raising `fastmcp>=2.14.1,<3.0` (locked 2.14.7) to the ADR-009 range, adding the policy test and the tool-surface test, and doing a preview deployment. As part of the same issue, record the interim divergence row in psychology-mcp's `docs/adr/README.md` (ADR-009 section 5a), expiring when this issue closes. Link it to AGE-718.
@@ -222,14 +222,14 @@
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T046 [P] Update core `CLAUDE.md` in the core PR:
+- [X] T046 [P] Update core `CLAUDE.md` in the core PR:
   - framework versions in the deployment section: state FastMCP 3.4.7, and replace "There is no `fastmcp deploy` or `fastmcp auth` CLI command in FastMCP 2.x" with what 3.4.7's CLI actually offers (check `uv run fastmcp --help`; `fastmcp login`/`whoami` arrived in 4.0, research A). Deployment stays web-UI.
   - a Known Issues entry saying tool descriptions keep only the first docstring section, so return and error guidance goes above `Args:`, enforced by `tests/contract/test_tool_surface.py`
   - a Known Issues entry for the mount usage rule
   - the new test counts from T017
 - [ ] T047 Append rows to `docs/speckit-process-record.md`, each in the PR that carries the artifact: `/speckit-tasks` (this file), `/speckit-implement` (core PR, edge PR), and `/speckit-converge` (T048).
-- [ ] T048 Run `/speckit-converge` with `SPECIFY_FEATURE_DIRECTORY=specs/015-fastmcp-4-upgrade` after the core PR's code is complete. It appends a Convergence phase to this file. Re-grade any constitution-derived CRITICAL item against accepted-ADR precedence before acting on it (CLAUDE.md, Spec Kit). Converge sees only core's code, so record edge's evidence (T031, T032, T036, T043) by hand in the edge PR.
-- [ ] T049 [P] When the core PR opens, link it from AGE-718 and set AGE-718 to In Progress. Its 3.4.7 target and title already match. Link the edge PR when it opens.
+- [X] T048 Run `/speckit-converge` with `SPECIFY_FEATURE_DIRECTORY=specs/015-fastmcp-4-upgrade` after the core PR's code is complete. It appends a Convergence phase to this file. Re-grade any constitution-derived CRITICAL item against accepted-ADR precedence before acting on it (CLAUDE.md, Spec Kit). Converge sees only core's code, so record edge's evidence (T031, T032, T036, T043) by hand in the edge PR.
+- [X] T049 [P] When the core PR opens, link it from AGE-718 and set AGE-718 to In Progress. Its 3.4.7 target and title already match. Link the edge PR when it opens.
 - [ ] T050 Clean up per ADR-PRG-001 §3.4 after each merge: remove `.worktrees/implement-015-core`, `edge:.worktrees/implement-015-edge`, and the research scratch worktrees `.worktrees/scratch-015-core` and `_audits/fastmcp-4-2026-09-30/worktrees/edge` (each holds only unpushed research commits), plus the feature worktree `.worktrees/feature-015-fastmcp-4-upgrade` once the spec PR merges. Delete the matching local branches.
 - [ ] T051 Set `spec.md` **Status** to Implemented once T045 is done, and close AGE-718.
 - [ ] T052 [P] File the 4.x follow-up in Linear (project "Open-Biosciences Platform v1.1 — dogfooding + Synapse alignment", related to AGE-718): "Widen ADR-009 to FastMCP 4.x", gated by spec 015 FR-020. Carry the recorded 4.x work: the `fastmcp.tools.tool` → `fastmcp.tools.base` import in `tests/contract/test_serialization_unit.py`; `PaginationEnvelope[Item].create` at 22 core sites (13 client files) and 2 edge sites (`server.py:56`, `:97`) to clear 4.x serializer warnings; `mcp` 2.x; upstream issue #5213. Also carry the edge `title` annotations that 4.0.10 adds (allowed-changes table note), and rebasing `tests/contract/test_serialization_unit.py` onto 4.x's return-annotation `TypeAdapter` path (version-policy section 2a). Attach research R1, R8, and R13.
@@ -303,3 +303,10 @@ Phase 1 → Phase 2 → US1 gives a core branch on FastMCP 3.4.7 that is provabl
 ### Out of scope here (tracked elsewhere)
 
 AGE-733 (edge key leak: fix before or alongside the edge PR, never inside it), AGE-734 (IUPHAR API key), AGE-735 and AGE-736 (edge compliance), AGE-737 (argument-name drift), AGE-738 (deploy-cloud skill), and AGE-698 (ADR-007 base client).
+
+---
+
+## Phase 8: Convergence
+
+- [X] T054 Restructure the `search_drugs` and `get_drug` docstrings in `src/biosciences_mcp/servers/drugbank.py` like T011 (move `Returns:` text above `Args:`, delete only the header line), and note in `contracts/tool-surface-invariants.md` that DrugBank is not on the gateway and so is outside the tool-surface baseline, per FR-006 (partial)
+- [X] T055 Measure on fastmcp 3.4.7 which column-0 `Name:` lines start a docstring section that is dropped (known Google section titles versus arbitrary `Success response structure:`-style lines). Then correct the rule stated in `CLAUDE.md` Known Issues ("Tool docstrings"), `contracts/tool-surface-invariants.md` invariant 3, and `research.md` R6. If any restructured docstring in `src/biosciences_mcp/servers/` keeps a column-0 line that 3.4.7 or 4.0.10 treats as a section start, re-indent it and re-run `tests/contract/test_tool_surface.py`. Per plan R6 / T046 (contradicts)

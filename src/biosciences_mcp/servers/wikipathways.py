@@ -45,6 +45,8 @@ async def search_pathways(
 
     Returns ranked candidates for resolution. Use this before calling get_pathway.
 
+    PaginationEnvelope with PathwaySearchCandidate items, or ErrorEnvelope on failure.
+
     Args:
         query: Search term (pathway name, description, gene, or natural language query).
                Minimum 2 characters required.
@@ -54,9 +56,6 @@ async def search_pathways(
               Default false returns full candidates.
         cursor: Opaque cursor for pagination. Pass from previous response for next page.
         page_size: Number of results per page (1-100, default 50).
-
-    Returns:
-        PaginationEnvelope with PathwaySearchCandidate items, or ErrorEnvelope on failure.
     """
     client = await get_client()
 
@@ -79,11 +78,10 @@ async def get_pathway(pathway_id: str) -> dict | ErrorEnvelope:
     Returns full pathway details with cross-references.
     Requires resolved CURIE from search_pathways.
 
+    Pathway record with cross_references, or ErrorEnvelope on failure.
+
     Args:
         pathway_id: WikiPathways CURIE in format 'WP:WPNNNNN' (e.g., 'WP:WP4868' for ACE2 pathway).
-
-    Returns:
-        Pathway record with cross_references, or ErrorEnvelope on failure.
     """
     client = await get_client()
 
@@ -109,6 +107,8 @@ async def get_pathways_for_gene(
     Returns ranked pathway candidates containing the specified gene.
     Useful for reverse lookup: gene → pathways.
 
+    PaginationEnvelope with PathwaySearchCandidate items, or ErrorEnvelope on failure.
+
     Args:
         gene_id: Gene identifier (symbol like "BRCA1", Entrez ID like "672",
                  or Ensembl ID like "ENSG00000012048").
@@ -117,9 +117,6 @@ async def get_pathways_for_gene(
                   Default: "Homo sapiens". Pass None for all organisms.
         cursor: Opaque cursor for pagination. Pass from previous response for next page.
         page_size: Number of results per page (1-100, default 50).
-
-    Returns:
-        PaginationEnvelope with PathwaySearchCandidate items, or ErrorEnvelope on failure.
     """
     client = await get_client()
 
@@ -142,12 +139,11 @@ async def get_pathway_components(pathway_id: str) -> dict | ErrorEnvelope:
     Returns genes, proteins, metabolites, and interactions from the pathway.
     Requires resolved CURIE from search_pathways or get_pathways_for_gene.
 
+    PathwayComponents with genes, proteins, metabolites, interactions or ErrorEnvelope on failure.
+    Note: Empty component lists are omitted from response (ADR-001 §4 omit-if-null pattern).
+
     Args:
         pathway_id: WikiPathways CURIE in format 'WP:WPNNNNN' (e.g., 'WP:WP534' for Glycolysis).
-
-    Returns:
-        PathwayComponents with genes, proteins, metabolites, interactions or ErrorEnvelope on failure.
-        Note: Empty component lists are omitted from response (ADR-001 §4 omit-if-null pattern).
     """
     client = await get_client()
 

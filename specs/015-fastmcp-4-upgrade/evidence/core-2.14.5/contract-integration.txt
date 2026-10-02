@@ -1,0 +1,487 @@
+............s.........FF..s.........FF..s.........FF..s......F..FFxxs    [100%]
+=================================== FAILURES ===================================
+______ test_list_tool_returns_pagination_envelope[iuphar.search_ligands] _______
+
+wire_call = <function wire_call.<locals>._call at 0x7430fac97ba0>
+server_name = 'iuphar'
+case = ListCase(tool='search_ligands', args={'query': 'morphine', 'page_size': 2})
+
+    @pytest.mark.parametrize("server_name,case", list_params())
+    async def test_list_tool_returns_pagination_envelope(
+        wire_call, server_name: str, case: ListCase
+    ) -> None:
+        """ADR-001 §8A: list tools wrap items in the canonical pagination envelope."""
+        result = await wire_call(server_name, case.tool, case.args)
+>       assert isinstance(result.data, dict), f"not JSON: {result.text[:200]}"
+E       AssertionError: not JSON: Error calling tool 'search_ligands': API error: 401
+E       assert False
+E        +  where False = isinstance(None, dict)
+E        +    where None = WireResult(text="Error calling tool 'search_ligands': API error: 401", data=None, structured=None, is_error=True).data
+
+tests/contract/test_wire_contracts.py:90: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[10/01/26 01:25:49] Error calling tool 'search_ligands'                         
+                    ╭─────────── Traceback (most recent call last) ────────────╮
+                    │ ~/open-biosciences/biosciences-mcp/.worktrees/ │
+                    │ implement-015-core/.venv/lib/python3.13/site-packages/fa │
+                    │ stmcp/tools/tool_manager.py:160 in call_tool             │
+                    │                                                          │
+                    │ ~/open-biosciences/biosciences-mcp/.worktrees/ │
+                    │ implement-015-core/.venv/lib/python3.13/site-packages/fa │
+                    │ stmcp/tools/tool.py:383 in run                           │
+                    │                                                          │
+                    │                 ... 1 frames hidden ...                  │
+                    │                                                          │
+                    │ ~/open-biosciences/biosciences-mcp/.worktrees/ │
+                    │ implement-015-core/src/biosciences_mcp/clients/iuphar.py │
+                    │ :337 in search_ligands                                   │
+                    │                                                          │
+                    │   334 │   │   page_size = min(page_size, 100)            │
+                    │   335 │   │                                              │
+                    │   336 │   │   # Fetch all matching ligands               │
+                    │ ❱ 337 │   │   ligands = await self._fetch_ligands(       │
+                    │   338 │   │   │   name=query, type_filter=type_filter, a │
+                    │   339 │   │   )                                          │
+                    │   340                                                    │
+                    │                                                          │
+                    │ ~/open-biosciences/biosciences-mcp/.worktrees/ │
+                    │ implement-015-core/src/biosciences_mcp/clients/iuphar.py │
+                    │ :277 in _fetch_ligands                                   │
+                    │                                                          │
+                    │   274 │   │                                              │
+                    │   275 │   │   # Handle errors                            │
+                    │   276 │   │   if response.status_code != 200:            │
+                    │ ❱ 277 │   │   │   raise ValueError(f"API error: {respons │
+                    │   278 │   │                                              │
+                    │   279 │   │   return response.json()                     │
+                    │   280                                                    │
+                    ╰──────────────────────────────────────────────────────────╯
+                    ValueError: API error: 401                                  
+______ test_list_tool_returns_pagination_envelope[iuphar.search_targets] _______
+
+wire_call = <function wire_call.<locals>._call at 0x7430f9b27740>
+server_name = 'iuphar'
+case = ListCase(tool='search_targets', args={'query': 'opioid', 'page_size': 2})
+
+    @pytest.mark.parametrize("server_name,case", list_params())
+    async def test_list_tool_returns_pagination_envelope(
+        wire_call, server_name: str, case: ListCase
+    ) -> None:
+        """ADR-001 §8A: list tools wrap items in the canonical pagination envelope."""
+        result = await wire_call(server_name, case.tool, case.args)
+>       assert isinstance(result.data, dict), f"not JSON: {result.text[:200]}"
+E       AssertionError: not JSON: Error calling tool 'search_targets': API error: 401
+E       assert False
+E        +  where False = isinstance(None, dict)
+E        +    where None = WireResult(text="Error calling tool 'search_targets': API error: 401", data=None, structured=None, is_error=True).data
+
+tests/contract/test_wire_contracts.py:90: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[10/01/26 01:25:50] Error calling tool 'search_targets'                         
+                    ╭─────────── Traceback (most recent call last) ────────────╮
+                    │ ~/open-biosciences/biosciences-mcp/.worktrees/ │
+                    │ implement-015-core/.venv/lib/python3.13/site-packages/fa │
+                    │ stmcp/tools/tool_manager.py:160 in call_tool             │
+                    │                                                          │
+                    │ ~/open-biosciences/biosciences-mcp/.worktrees/ │
+                    │ implement-015-core/.venv/lib/python3.13/site-packages/fa │
+                    │ stmcp/tools/tool.py:383 in run                           │
+                    │                                                          │
+                    │                 ... 1 frames hidden ...                  │
+                    │                                                          │
+                    │ ~/open-biosciences/biosciences-mcp/.worktrees/ │
+                    │ implement-015-core/src/biosciences_mcp/clients/iuphar.py │
+                    │ :557 in search_targets                                   │
+                    │                                                          │
+                    │   554 │   │   page_size = min(page_size, 100)            │
+                    │   555 │   │                                              │
+                    │   556 │   │   # Fetch all matching targets               │
+                    │ ❱ 557 │   │   targets = await self._fetch_targets(name=q │
+                    │   558 │   │                                              │
+                    │   559 │   │   # Client-side pagination                   │
+                    │   560 │   │   offset = self._decode_cursor(cursor) if cu │
+                    │                                                          │
+                    │ ~/open-biosciences/biosciences-mcp/.worktrees/ │
+                    │ implement-015-core/src/biosciences_mcp/clients/iuphar.py │
+                    │ :522 in _fetch_targets                                   │
+                    │                                                          │
+                    │   519 │   │                                              │
+                    │   520 │   │   # Handle other errors                      │
+                    │   521 │   │   if response.status_code != 200:            │
+                    │ ❱ 522 │   │   │   raise ValueError(f"API error: {respons │
+                    │   523 │   │                                              │
+                    │   524 │   │   return response.json()                     │
+                    │   525                                                    │
+                    ╰──────────────────────────────────────────────────────────╯
+                    ValueError: API error: 401                                  
+__________ test_list_items_have_no_null_values[iuphar.search_ligands] __________
+
+wire_call = <function wire_call.<locals>._call at 0x7430f936a480>
+server_name = 'iuphar'
+case = ListCase(tool='search_ligands', args={'query': 'morphine', 'page_size': 2})
+
+    @pytest.mark.parametrize("server_name,case", list_params())
+    async def test_list_items_have_no_null_values(wire_call, server_name: str, case: ListCase) -> None:
+        """ADR-001 §4 null policy applies to every candidate in a list."""
+        result = await wire_call(server_name, case.tool, case.args)
+>       assert isinstance(result.data, dict), f"not JSON: {result.text[:200]}"
+E       AssertionError: not JSON: Error calling tool 'search_ligands': API error: 401
+E       assert False
+E        +  where False = isinstance(None, dict)
+E        +    where None = WireResult(text="Error calling tool 'search_ligands': API error: 401", data=None, structured=None, is_error=True).data
+
+tests/contract/test_wire_contracts.py:102: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[10/01/26 01:26:02] Error calling tool 'search_ligands'                         
+                    ╭─────────── Traceback (most recent call last) ────────────╮
+                    │ ~/open-biosciences/biosciences-mcp/.worktrees/ │
+                    │ implement-015-core/.venv/lib/python3.13/site-packages/fa │
+                    │ stmcp/tools/tool_manager.py:160 in call_tool             │
+                    │                                                          │
+                    │ ~/open-biosciences/biosciences-mcp/.worktrees/ │
+                    │ implement-015-core/.venv/lib/python3.13/site-packages/fa │
+                    │ stmcp/tools/tool.py:383 in run                           │
+                    │                                                          │
+                    │                 ... 1 frames hidden ...                  │
+                    │                                                          │
+                    │ ~/open-biosciences/biosciences-mcp/.worktrees/ │
+                    │ implement-015-core/src/biosciences_mcp/clients/iuphar.py │
+                    │ :337 in search_ligands                                   │
+                    │                                                          │
+                    │   334 │   │   page_size = min(page_size, 100)            │
+                    │   335 │   │                                              │
+                    │   336 │   │   # Fetch all matching ligands               │
+                    │ ❱ 337 │   │   ligands = await self._fetch_ligands(       │
+                    │   338 │   │   │   name=query, type_filter=type_filter, a │
+                    │   339 │   │   )                                          │
+                    │   340                                                    │
+                    │                                                          │
+                    │ ~/open-biosciences/biosciences-mcp/.worktrees/ │
+                    │ implement-015-core/src/biosciences_mcp/clients/iuphar.py │
+                    │ :277 in _fetch_ligands                                   │
+                    │                                                          │
+                    │   274 │   │                                              │
+                    │   275 │   │   # Handle errors                            │
+                    │   276 │   │   if response.status_code != 200:            │
+                    │ ❱ 277 │   │   │   raise ValueError(f"API error: {respons │
+                    │   278 │   │                                              │
+                    │   279 │   │   return response.json()                     │
+                    │   280                                                    │
+                    ╰──────────────────────────────────────────────────────────╯
+                    ValueError: API error: 401                                  
+__________ test_list_items_have_no_null_values[iuphar.search_targets] __________
+
+wire_call = <function wire_call.<locals>._call at 0x7430f936a660>
+server_name = 'iuphar'
+case = ListCase(tool='search_targets', args={'query': 'opioid', 'page_size': 2})
+
+    @pytest.mark.parametrize("server_name,case", list_params())
+    async def test_list_items_have_no_null_values(wire_call, server_name: str, case: ListCase) -> None:
+        """ADR-001 §4 null policy applies to every candidate in a list."""
+        result = await wire_call(server_name, case.tool, case.args)
+>       assert isinstance(result.data, dict), f"not JSON: {result.text[:200]}"
+E       AssertionError: not JSON: Error calling tool 'search_targets': API error: 401
+E       assert False
+E        +  where False = isinstance(None, dict)
+E        +    where None = WireResult(text="Error calling tool 'search_targets': API error: 401", data=None, structured=None, is_error=True).data
+
+tests/contract/test_wire_contracts.py:102: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[10/01/26 01:26:04] Error calling tool 'search_targets'                         
+                    ╭─────────── Traceback (most recent call last) ────────────╮
+                    │ ~/open-biosciences/biosciences-mcp/.worktrees/ │
+                    │ implement-015-core/.venv/lib/python3.13/site-packages/fa │
+                    │ stmcp/tools/tool_manager.py:160 in call_tool             │
+                    │                                                          │
+                    │ ~/open-biosciences/biosciences-mcp/.worktrees/ │
+                    │ implement-015-core/.venv/lib/python3.13/site-packages/fa │
+                    │ stmcp/tools/tool.py:383 in run                           │
+                    │                                                          │
+                    │                 ... 1 frames hidden ...                  │
+                    │                                                          │
+                    │ ~/open-biosciences/biosciences-mcp/.worktrees/ │
+                    │ implement-015-core/src/biosciences_mcp/clients/iuphar.py │
+                    │ :557 in search_targets                                   │
+                    │                                                          │
+                    │   554 │   │   page_size = min(page_size, 100)            │
+                    │   555 │   │                                              │
+                    │   556 │   │   # Fetch all matching targets               │
+                    │ ❱ 557 │   │   targets = await self._fetch_targets(name=q │
+                    │   558 │   │                                              │
+                    │   559 │   │   # Client-side pagination                   │
+                    │   560 │   │   offset = self._decode_cursor(cursor) if cu │
+                    │                                                          │
+                    │ ~/open-biosciences/biosciences-mcp/.worktrees/ │
+                    │ implement-015-core/src/biosciences_mcp/clients/iuphar.py │
+                    │ :522 in _fetch_targets                                   │
+                    │                                                          │
+                    │   519 │   │                                              │
+                    │   520 │   │   # Handle other errors                      │
+                    │   521 │   │   if response.status_code != 200:            │
+                    │ ❱ 522 │   │   │   raise ValueError(f"API error: {respons │
+                    │   523 │   │                                              │
+                    │   524 │   │   return response.json()                     │
+                    │   525                                                    │
+                    ╰──────────────────────────────────────────────────────────╯
+                    ValueError: API error: 401                                  
+______________ test_entity_has_no_null_values[iuphar.get_ligand] _______________
+
+wire_call = <function wire_call.<locals>._call at 0x7430fac96e80>
+server_name = 'iuphar'
+case = StrictCase(tool='get_ligand', arg='iuphar_id', curie='IUPHAR:2713', raw='morphine', extra={}, has_cross_references=True)
+
+    @pytest.mark.parametrize("server_name,case", strict_params())
+    async def test_entity_has_no_null_values(wire_call, server_name: str, case: StrictCase) -> None:
+        """ADR-001 §4 / Constitution Forbidden Patterns: omit keys, never emit null."""
+        result = await wire_call(server_name, case.tool, {case.arg: case.curie, **case.extra})
+>       assert isinstance(result.data, dict), f"not JSON: {result.text[:200]}"
+E       AssertionError: not JSON: Error calling tool 'get_ligand': API error: 401
+E       assert False
+E        +  where False = isinstance(None, dict)
+E        +    where None = WireResult(text="Error calling tool 'get_ligand': API error: 401", data=None, structured=None, is_error=True).data
+
+tests/contract/test_wire_contracts.py:111: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[10/01/26 01:26:37] Error calling tool 'get_ligand'                             
+                    ╭─────────── Traceback (most recent call last) ────────────╮
+                    │ ~/open-biosciences/biosciences-mcp/.worktrees/ │
+                    │ implement-015-core/.venv/lib/python3.13/site-packages/fa │
+                    │ stmcp/tools/tool_manager.py:160 in call_tool             │
+                    │                                                          │
+                    │ ~/open-biosciences/biosciences-mcp/.worktrees/ │
+                    │ implement-015-core/.venv/lib/python3.13/site-packages/fa │
+                    │ stmcp/tools/tool.py:383 in run                           │
+                    │                                                          │
+                    │                 ... 1 frames hidden ...                  │
+                    │                                                          │
+                    │ ~/open-biosciences/biosciences-mcp/.worktrees/ │
+                    │ implement-015-core/src/biosciences_mcp/clients/iuphar.py │
+                    │ :445 in get_ligand                                       │
+                    │                                                          │
+                    │   442 │   │                                              │
+                    │   443 │   │   # Fetch ligand detail and cross-references │
+                    │   444 │   │   try:                                       │
+                    │ ❱ 445 │   │   │   ligand_data = await self._fetch_ligand │
+                    │   446 │   │   │   db_links = await self._fetch_ligand_db │
+                    │   447 │   │   │   synonyms = await self._fetch_ligand_sy │
+                    │   448 │   │   except ValueError as e:                    │
+                    │                                                          │
+                    │ ~/open-biosciences/biosciences-mcp/.worktrees/ │
+                    │ implement-015-core/src/biosciences_mcp/clients/iuphar.py │
+                    │ :390 in _fetch_ligand_detail                             │
+                    │                                                          │
+                    │   387 │   │   │   raise ValueError(f"Ligand not found: { │
+                    │   388 │   │                                              │
+                    │   389 │   │   if response.status_code != 200:            │
+                    │ ❱ 390 │   │   │   raise ValueError(f"API error: {respons │
+                    │   391 │   │                                              │
+                    │   392 │   │   return response.json()                     │
+                    │   393                                                    │
+                    ╰──────────────────────────────────────────────────────────╯
+                    ValueError: API error: 401                                  
+______________ test_entity_has_no_null_values[iuphar.get_target] _______________
+
+wire_call = <function wire_call.<locals>._call at 0x7430f980bba0>
+server_name = 'iuphar'
+case = StrictCase(tool='get_target', arg='iuphar_id', curie='IUPHAR:319', raw='opioid', extra={}, has_cross_references=True)
+
+    @pytest.mark.parametrize("server_name,case", strict_params())
+    async def test_entity_has_no_null_values(wire_call, server_name: str, case: StrictCase) -> None:
+        """ADR-001 §4 / Constitution Forbidden Patterns: omit keys, never emit null."""
+        result = await wire_call(server_name, case.tool, {case.arg: case.curie, **case.extra})
+>       assert isinstance(result.data, dict), f"not JSON: {result.text[:200]}"
+E       AssertionError: not JSON: Error calling tool 'get_target': API error: 401
+E       assert False
+E        +  where False = isinstance(None, dict)
+E        +    where None = WireResult(text="Error calling tool 'get_target': API error: 401", data=None, structured=None, is_error=True).data
+
+tests/contract/test_wire_contracts.py:111: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[10/01/26 01:26:38] Error calling tool 'get_target'                             
+                    ╭─────────── Traceback (most recent call last) ────────────╮
+                    │ ~/open-biosciences/biosciences-mcp/.worktrees/ │
+                    │ implement-015-core/.venv/lib/python3.13/site-packages/fa │
+                    │ stmcp/tools/tool_manager.py:160 in call_tool             │
+                    │                                                          │
+                    │ ~/open-biosciences/biosciences-mcp/.worktrees/ │
+                    │ implement-015-core/.venv/lib/python3.13/site-packages/fa │
+                    │ stmcp/tools/tool.py:383 in run                           │
+                    │                                                          │
+                    │                 ... 1 frames hidden ...                  │
+                    │                                                          │
+                    │ ~/open-biosciences/biosciences-mcp/.worktrees/ │
+                    │ implement-015-core/src/biosciences_mcp/clients/iuphar.py │
+                    │ :671 in get_target                                       │
+                    │                                                          │
+                    │   668 │   │                                              │
+                    │   669 │   │   # Fetch target detail and cross-references │
+                    │   670 │   │   try:                                       │
+                    │ ❱ 671 │   │   │   target_data = await self._fetch_target │
+                    │   672 │   │   │   db_links = await self._fetch_target_db │
+                    │   673 │   │   except ValueError as e:                    │
+                    │   674 │   │   │   if "not found" in str(e):              │
+                    │                                                          │
+                    │ ~/open-biosciences/biosciences-mcp/.worktrees/ │
+                    │ implement-015-core/src/biosciences_mcp/clients/iuphar.py │
+                    │ :616 in _fetch_target_detail                             │
+                    │                                                          │
+                    │   613 │   │   │   raise ValueError(f"Target not found: { │
+                    │   614 │   │                                              │
+                    │   615 │   │   if response.status_code != 200:            │
+                    │ ❱ 616 │   │   │   raise ValueError(f"API error: {respons │
+                    │   617 │   │                                              │
+                    │   618 │   │   return response.json()                     │
+                    │   619                                                    │
+                    ╰──────────────────────────────────────────────────────────╯
+                    ValueError: API error: 401                                  
+______ test_entity_cross_references_conform_to_registry[ensembl.get_gene] ______
+
+wire_call = <function wire_call.<locals>._call at 0x7430e7f1f380>
+server_name = 'ensembl'
+case = StrictCase(tool='get_gene', arg='ensembl_id', curie='ENSG00000141510', raw='TP53', extra={}, has_cross_references=True)
+
+    @pytest.mark.parametrize("server_name,case", strict_params())
+    async def test_entity_cross_references_conform_to_registry(
+        wire_call, server_name: str, case: StrictCase
+    ) -> None:
+        """ADR-001 §4 mandate + Appendix A: keys, formats, and cardinality."""
+        if not case.has_cross_references:
+            pytest.skip("tool does not return an entity with cross_references")
+        result = await wire_call(server_name, case.tool, {case.arg: case.curie, **case.extra})
+        assert isinstance(result.data, dict), f"not JSON: {result.text[:200]}"
+>       assert "error" not in result.data, f"canonical CURIE errored: {result.text[:300]}"
+E       AssertionError: canonical CURIE errored: {"success":false,"error":{"code":"UPSTREAM_ERROR","message":"Ensembl API returned error 500.","recovery_hint":"Ensembl service may be temporarily unavailable. Retry after a few seconds."}}
+E       assert 'error' not in {'error': {'code': 'UPSTREAM_ERROR', 'message': 'Ensembl API returned error 500.', 'recovery_hint': 'Ensembl service may be temporarily unavailable. Retry after a few seconds.'}, 'success': False}
+E        +  where {'error': {'code': 'UPSTREAM_ERROR', 'message': 'Ensembl API returned error 500.', 'recovery_hint': 'Ensembl service may be temporarily unavailable. Retry after a few seconds.'}, 'success': False} = WireResult(text='{"success":false,"error":{"code":"UPSTREAM_ERROR","message":"Ensembl API returned error 500.","recove...00.', 'recovery_hint': 'Ensembl service may be temporarily unavailable. Retry after a few seconds.'}}}, is_error=False).data
+
+tests/contract/test_wire_contracts.py:126: AssertionError
+_____ test_entity_cross_references_conform_to_registry[iuphar.get_ligand] ______
+
+wire_call = <function wire_call.<locals>._call at 0x7430f939f9c0>
+server_name = 'iuphar'
+case = StrictCase(tool='get_ligand', arg='iuphar_id', curie='IUPHAR:2713', raw='morphine', extra={}, has_cross_references=True)
+
+    @pytest.mark.parametrize("server_name,case", strict_params())
+    async def test_entity_cross_references_conform_to_registry(
+        wire_call, server_name: str, case: StrictCase
+    ) -> None:
+        """ADR-001 §4 mandate + Appendix A: keys, formats, and cardinality."""
+        if not case.has_cross_references:
+            pytest.skip("tool does not return an entity with cross_references")
+        result = await wire_call(server_name, case.tool, {case.arg: case.curie, **case.extra})
+>       assert isinstance(result.data, dict), f"not JSON: {result.text[:200]}"
+E       AssertionError: not JSON: Error calling tool 'get_ligand': API error: 401
+E       assert False
+E        +  where False = isinstance(None, dict)
+E        +    where None = WireResult(text="Error calling tool 'get_ligand': API error: 401", data=None, structured=None, is_error=True).data
+
+tests/contract/test_wire_contracts.py:125: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[10/01/26 01:26:49] Error calling tool 'get_ligand'                             
+                    ╭─────────── Traceback (most recent call last) ────────────╮
+                    │ ~/open-biosciences/biosciences-mcp/.worktrees/ │
+                    │ implement-015-core/.venv/lib/python3.13/site-packages/fa │
+                    │ stmcp/tools/tool_manager.py:160 in call_tool             │
+                    │                                                          │
+                    │ ~/open-biosciences/biosciences-mcp/.worktrees/ │
+                    │ implement-015-core/.venv/lib/python3.13/site-packages/fa │
+                    │ stmcp/tools/tool.py:383 in run                           │
+                    │                                                          │
+                    │                 ... 1 frames hidden ...                  │
+                    │                                                          │
+                    │ ~/open-biosciences/biosciences-mcp/.worktrees/ │
+                    │ implement-015-core/src/biosciences_mcp/clients/iuphar.py │
+                    │ :445 in get_ligand                                       │
+                    │                                                          │
+                    │   442 │   │                                              │
+                    │   443 │   │   # Fetch ligand detail and cross-references │
+                    │   444 │   │   try:                                       │
+                    │ ❱ 445 │   │   │   ligand_data = await self._fetch_ligand │
+                    │   446 │   │   │   db_links = await self._fetch_ligand_db │
+                    │   447 │   │   │   synonyms = await self._fetch_ligand_sy │
+                    │   448 │   │   except ValueError as e:                    │
+                    │                                                          │
+                    │ ~/open-biosciences/biosciences-mcp/.worktrees/ │
+                    │ implement-015-core/src/biosciences_mcp/clients/iuphar.py │
+                    │ :390 in _fetch_ligand_detail                             │
+                    │                                                          │
+                    │   387 │   │   │   raise ValueError(f"Ligand not found: { │
+                    │   388 │   │                                              │
+                    │   389 │   │   if response.status_code != 200:            │
+                    │ ❱ 390 │   │   │   raise ValueError(f"API error: {respons │
+                    │   391 │   │                                              │
+                    │   392 │   │   return response.json()                     │
+                    │   393                                                    │
+                    ╰──────────────────────────────────────────────────────────╯
+                    ValueError: API error: 401                                  
+_____ test_entity_cross_references_conform_to_registry[iuphar.get_target] ______
+
+wire_call = <function wire_call.<locals>._call at 0x7430f939fa60>
+server_name = 'iuphar'
+case = StrictCase(tool='get_target', arg='iuphar_id', curie='IUPHAR:319', raw='opioid', extra={}, has_cross_references=True)
+
+    @pytest.mark.parametrize("server_name,case", strict_params())
+    async def test_entity_cross_references_conform_to_registry(
+        wire_call, server_name: str, case: StrictCase
+    ) -> None:
+        """ADR-001 §4 mandate + Appendix A: keys, formats, and cardinality."""
+        if not case.has_cross_references:
+            pytest.skip("tool does not return an entity with cross_references")
+        result = await wire_call(server_name, case.tool, {case.arg: case.curie, **case.extra})
+>       assert isinstance(result.data, dict), f"not JSON: {result.text[:200]}"
+E       AssertionError: not JSON: Error calling tool 'get_target': API error: 401
+E       assert False
+E        +  where False = isinstance(None, dict)
+E        +    where None = WireResult(text="Error calling tool 'get_target': API error: 401", data=None, structured=None, is_error=True).data
+
+tests/contract/test_wire_contracts.py:125: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[10/01/26 01:26:50] Error calling tool 'get_target'                             
+                    ╭─────────── Traceback (most recent call last) ────────────╮
+                    │ ~/open-biosciences/biosciences-mcp/.worktrees/ │
+                    │ implement-015-core/.venv/lib/python3.13/site-packages/fa │
+                    │ stmcp/tools/tool_manager.py:160 in call_tool             │
+                    │                                                          │
+                    │ ~/open-biosciences/biosciences-mcp/.worktrees/ │
+                    │ implement-015-core/.venv/lib/python3.13/site-packages/fa │
+                    │ stmcp/tools/tool.py:383 in run                           │
+                    │                                                          │
+                    │                 ... 1 frames hidden ...                  │
+                    │                                                          │
+                    │ ~/open-biosciences/biosciences-mcp/.worktrees/ │
+                    │ implement-015-core/src/biosciences_mcp/clients/iuphar.py │
+                    │ :671 in get_target                                       │
+                    │                                                          │
+                    │   668 │   │                                              │
+                    │   669 │   │   # Fetch target detail and cross-references │
+                    │   670 │   │   try:                                       │
+                    │ ❱ 671 │   │   │   target_data = await self._fetch_target │
+                    │   672 │   │   │   db_links = await self._fetch_target_db │
+                    │   673 │   │   except ValueError as e:                    │
+                    │   674 │   │   │   if "not found" in str(e):              │
+                    │                                                          │
+                    │ ~/open-biosciences/biosciences-mcp/.worktrees/ │
+                    │ implement-015-core/src/biosciences_mcp/clients/iuphar.py │
+                    │ :616 in _fetch_target_detail                             │
+                    │                                                          │
+                    │   613 │   │   │   raise ValueError(f"Target not found: { │
+                    │   614 │   │                                              │
+                    │   615 │   │   if response.status_code != 200:            │
+                    │ ❱ 616 │   │   │   raise ValueError(f"API error: {respons │
+                    │   617 │   │                                              │
+                    │   618 │   │   return response.json()                     │
+                    │   619                                                    │
+                    ╰──────────────────────────────────────────────────────────╯
+                    ValueError: API error: 401                                  
+=========================== short test summary info ============================
+FAILED tests/contract/test_wire_contracts.py::test_list_tool_returns_pagination_envelope[iuphar.search_ligands]
+FAILED tests/contract/test_wire_contracts.py::test_list_tool_returns_pagination_envelope[iuphar.search_targets]
+FAILED tests/contract/test_wire_contracts.py::test_list_items_have_no_null_values[iuphar.search_ligands]
+FAILED tests/contract/test_wire_contracts.py::test_list_items_have_no_null_values[iuphar.search_targets]
+FAILED tests/contract/test_wire_contracts.py::test_entity_has_no_null_values[iuphar.get_ligand]
+FAILED tests/contract/test_wire_contracts.py::test_entity_has_no_null_values[iuphar.get_target]
+FAILED tests/contract/test_wire_contracts.py::test_entity_cross_references_conform_to_registry[ensembl.get_gene]
+FAILED tests/contract/test_wire_contracts.py::test_entity_cross_references_conform_to_registry[iuphar.get_ligand]
+FAILED tests/contract/test_wire_contracts.py::test_entity_cross_references_conform_to_registry[iuphar.get_target]
+9 failed, 53 passed, 5 skipped, 1002 deselected, 2 xfailed in 101.13s (0:01:41)
+exit=1

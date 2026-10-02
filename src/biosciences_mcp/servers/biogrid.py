@@ -40,25 +40,22 @@ async def search_genes(
     the interaction count. Use the confirmed symbol in get_interactions for
     strict lookup.
 
+    PaginationEnvelope with confirmed gene and interaction_count, or ErrorEnvelope
+
+    >>> search_genes("TP53")  # Confirmed in BioGRID with interaction count
+    >>> search_genes("brca1")  # Normalized to "BRCA1", confirmed via API
+    >>> search_genes("ZZZZZ99")  # ENTITY_NOT_FOUND: gene not in BioGRID
+
+    - AMBIGUOUS_QUERY: Query too short or invalid format
+    - ENTITY_NOT_FOUND: Gene not found in BioGRID database
+    - UPSTREAM_ERROR: BioGRID API error (invalid key, timeout, etc.)
+    - RATE_LIMITED: Rate limit exceeded (2 req/sec)
+
     Args:
         query: Gene symbol to search (e.g., "TP53", "brca1")
         organism: NCBI Taxonomy ID (default: 9606 for Homo sapiens)
         slim: Token budgeting (Constitution Principle IV). No behavior change
             since search candidates are already minimal (~30 tokens).
-
-    Returns:
-        PaginationEnvelope with confirmed gene and interaction_count, or ErrorEnvelope
-
-    Examples:
-        >>> search_genes("TP53")  # Confirmed in BioGRID with interaction count
-        >>> search_genes("brca1")  # Normalized to "BRCA1", confirmed via API
-        >>> search_genes("ZZZZZ99")  # ENTITY_NOT_FOUND: gene not in BioGRID
-
-    Error Codes:
-        - AMBIGUOUS_QUERY: Query too short or invalid format
-        - ENTITY_NOT_FOUND: Gene not found in BioGRID database
-        - UPSTREAM_ERROR: BioGRID API error (invalid key, timeout, etc.)
-        - RATE_LIMITED: Rate limit exceeded (2 req/sec)
     """
     client = get_client()
     return await client.search_genes(query, organism, slim=slim)
@@ -77,6 +74,21 @@ async def get_interactions(
     Retrieves experimentally validated interactions from BioGRID with evidence types.
     Requires a validated gene symbol from search_genes tool.
 
+    InteractionResult (full), slim dict, or ErrorEnvelope on error
+
+    >>> get_interactions("TP53")  # Full interaction records
+    >>> get_interactions("TP53", slim=True)  # Minimal fields for token budgeting
+    >>> get_interactions("MDM2", max_results=100)  # Limit results
+
+    - AMBIGUOUS_QUERY: Invalid gene symbol format
+    - ENTITY_NOT_FOUND: No interactions found for gene
+    - UPSTREAM_ERROR: BioGRID API error (invalid key, timeout, etc.)
+    - RATE_LIMITED: Rate limit exceeded (2 req/sec)
+
+    Full mode includes experimental_system (e.g., "Affinity Capture-Western"),
+    experimental_system_type ("physical" or "genetic"), PubMed ID, and throughput.
+    Slim mode returns only symbol_b and experimental_system_type per interaction.
+
     Args:
         gene_symbol: Validated gene symbol (uppercase, e.g., "TP53")
         organism: NCBI Taxonomy ID (default: 9606 for Homo sapiens)
@@ -85,25 +97,6 @@ async def get_interactions(
         slim: Token budgeting (Constitution Principle IV). When True, returns
             minimal fields (~15 tokens/interaction): symbol_b and
             experimental_system_type only, plus counts. Default: False.
-
-    Returns:
-        InteractionResult (full), slim dict, or ErrorEnvelope on error
-
-    Examples:
-        >>> get_interactions("TP53")  # Full interaction records
-        >>> get_interactions("TP53", slim=True)  # Minimal fields for token budgeting
-        >>> get_interactions("MDM2", max_results=100)  # Limit results
-
-    Error Codes:
-        - AMBIGUOUS_QUERY: Invalid gene symbol format
-        - ENTITY_NOT_FOUND: No interactions found for gene
-        - UPSTREAM_ERROR: BioGRID API error (invalid key, timeout, etc.)
-        - RATE_LIMITED: Rate limit exceeded (2 req/sec)
-
-    Note:
-        Full mode includes experimental_system (e.g., "Affinity Capture-Western"),
-        experimental_system_type ("physical" or "genetic"), PubMed ID, and throughput.
-        Slim mode returns only symbol_b and experimental_system_type per interaction.
     """
     client = get_client()
     return await client.get_interactions(

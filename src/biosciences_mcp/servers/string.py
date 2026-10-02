@@ -47,6 +47,12 @@ async def search_proteins(
 
     Returns ranked candidates for resolution. Use this before calling get_interactions.
 
+    PaginationEnvelope with InteractionSearchCandidate items, or ErrorEnvelope on failure.
+
+    # Search for TP53 in human
+    result = await search_proteins("TP53", species=9606)
+    # Top candidate: STRING:9606.ENSP00000269305
+
     Args:
         query: Search term (gene symbol, protein name, or identifier).
                Minimum 2 characters required.
@@ -54,14 +60,6 @@ async def search_proteins(
                  Common species: 9606 (human), 10090 (mouse), 10116 (rat).
         limit: Number of results per page (1-100, default 10).
         cursor: Opaque cursor for pagination. Pass from previous response for next page.
-
-    Returns:
-        PaginationEnvelope with InteractionSearchCandidate items, or ErrorEnvelope on failure.
-
-    Example:
-        # Search for TP53 in human
-        result = await search_proteins("TP53", species=9606)
-        # Top candidate: STRING:9606.ENSP00000269305
     """
     client = await get_client()
     return await client.search_proteins(
@@ -83,6 +81,16 @@ async def get_interactions(
     Returns the interaction network with evidence scores for each edge.
     Requires resolved CURIE from search_proteins.
 
+    InteractionNetwork with interactions and evidence scores, or ErrorEnvelope on failure.
+
+    # Get high-confidence interactions for TP53
+    result = await get_interactions(
+        "STRING:9606.ENSP00000269305",
+        required_score=700,
+        limit=10
+    )
+    # Returns MDM2, ATM, BRCA1 interactions with evidence breakdown
+
     Args:
         string_id: STRING CURIE in format 'STRING:<taxid>.ENSP<id>'
                    (e.g., 'STRING:9606.ENSP00000269305' for TP53).
@@ -91,18 +99,6 @@ async def get_interactions(
                         700 = high confidence.
                         900 = highest confidence.
         limit: Maximum number of interactions to return.
-
-    Returns:
-        InteractionNetwork with interactions and evidence scores, or ErrorEnvelope on failure.
-
-    Example:
-        # Get high-confidence interactions for TP53
-        result = await get_interactions(
-            "STRING:9606.ENSP00000269305",
-            required_score=700,
-            limit=10
-        )
-        # Returns MDM2, ATM, BRCA1 interactions with evidence breakdown
     """
     client = await get_client()
     return await client.get_interactions(
@@ -124,6 +120,11 @@ def get_network_image_url(
     Returns a URL that can be used to display the protein interaction network.
     The URL points to a high-resolution PNG image.
 
+    URL string for the network visualization image.
+
+    url = get_network_image_url("TP53", species=9606, add_nodes=10)
+    # Returns: https://string-db.org/api/highres_image/network?identifiers=TP53&species=9606&add_nodes=10
+
     Args:
         identifiers: Gene symbol(s) or STRING ID(s), separated by newlines.
                      Example: "TP53" or "TP53\\nMDM2\\nBRCA1"
@@ -133,13 +134,6 @@ def get_network_image_url(
                         - 'confidence': Edge thickness shows confidence score (default)
                         - 'evidence': Edge color shows evidence type
                         - 'actions': Edge color shows effect type
-
-    Returns:
-        URL string for the network visualization image.
-
-    Example:
-        url = get_network_image_url("TP53", species=9606, add_nodes=10)
-        # Returns: https://string-db.org/api/highres_image/network?identifiers=TP53&species=9606&add_nodes=10
     """
     # Use synchronous URL construction (no client needed)
     base_url = "https://string-db.org/api"

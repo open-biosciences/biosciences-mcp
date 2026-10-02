@@ -52,6 +52,8 @@ async def search_compounds(
 
     Returns ranked candidates for resolution. Use this before calling get_compound.
 
+    PaginationEnvelope with CompoundSearchCandidate items, or ErrorEnvelope on failure.
+
     Args:
         query: Search term (compound name, synonym, or natural language query).
                Minimum 2 characters required.
@@ -59,9 +61,6 @@ async def search_compounds(
               Default false returns full candidates.
         cursor: Opaque cursor for pagination. Pass from previous response for next page.
         page_size: Number of results per page (1-100, default 50).
-
-    Returns:
-        PaginationEnvelope with CompoundSearchCandidate items, or ErrorEnvelope on failure.
     """
     client = await get_client()
     return await client.search_compounds(
@@ -79,12 +78,11 @@ async def get_compound(chembl_id: str, slim: bool = False) -> dict[str, Any] | E
     Returns full Agentic Biolink entity with cross-references.
     Requires resolved CURIE from search_compounds.
 
+    Compound record with cross_references, or ErrorEnvelope on failure.
+
     Args:
         chembl_id: ChEMBL CURIE in format 'CHEMBL:NNNNN' (e.g., 'CHEMBL:25', 'CHEMBL:1201583').
         slim: If true, return minimal fields for token efficiency.
-
-    Returns:
-        Compound record with cross_references, or ErrorEnvelope on failure.
     """
     client = await get_client()
     return await client.get_compound(chembl_id=chembl_id, slim=slim)
@@ -98,12 +96,11 @@ async def get_compounds_batch(
 
     Use this for bulk operations instead of calling get_compound repeatedly.
 
+    List of Compound records, or ErrorEnvelope on failure.
+
     Args:
         chembl_ids: List of ChEMBL CURIEs (e.g., ['CHEMBL:25', 'CHEMBL:941']).
         slim: If true (default), return minimal fields to reduce tokens.
-
-    Returns:
-        List of Compound records, or ErrorEnvelope on failure.
     """
     client = await get_client()
     return await client.get_compounds_batch(chembl_ids=chembl_ids, slim=slim)

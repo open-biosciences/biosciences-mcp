@@ -117,6 +117,46 @@ async def search_trials(
     Searches ClinicalTrials.gov database using natural language queries with optional filters.
     Returns ranked trial candidates with NCT CURIEs for strict lookup.
 
+    PaginationEnvelope with TrialSearchCandidate items, or ErrorEnvelope on failure.
+
+    Success response structure:
+    {
+        "items": [
+            {
+                "id": "NCT:00461032",
+                "title": "Bevacizumab and Erlotinib in Treating Patients...",
+                "brief_summary": "This phase II trial is studying...",
+                "phase": "PHASE2",
+                "status": "COMPLETED",
+                "conditions": ["Breast Cancer", "Metastatic Breast Cancer"],
+                "interventions": ["Bevacizumab", "Erlotinib Hydrochloride"]
+            },
+            ...
+        ],
+        "pagination": {
+            "cursor": "eyJraW5kIjo..." or null,
+            "total_count": 1543,
+            "page_size": 50
+        }
+    }
+
+    Error responses include recovery hints for autonomous agents.
+
+    >>> # Simple search
+    >>> results = await search_trials("diabetes")
+
+    >>> # Filtered search
+    >>> results = await search_trials(
+    ...     query="immunotherapy",
+    ...     condition="lung cancer",
+    ...     phase="PHASE3",
+    ...     status="RECRUITING"
+    ... )
+
+    >>> # Pagination
+    >>> page1 = await search_trials("cancer", page_size=20)
+    >>> page2 = await search_trials("cancer", cursor=page1["pagination"]["cursor"])
+
     Args:
         query: Natural language search term (e.g., "breast cancer immunotherapy").
                Searches across conditions, interventions, titles, and descriptions.
@@ -138,48 +178,6 @@ async def search_trials(
                 Pass to retrieve next page of results.
         page_size: Number of results per page (1-200, default 50).
                    Larger pages use more tokens but fewer API calls.
-
-    Returns:
-        PaginationEnvelope with TrialSearchCandidate items, or ErrorEnvelope on failure.
-
-        Success response structure:
-        {
-            "items": [
-                {
-                    "id": "NCT:00461032",
-                    "title": "Bevacizumab and Erlotinib in Treating Patients...",
-                    "brief_summary": "This phase II trial is studying...",
-                    "phase": "PHASE2",
-                    "status": "COMPLETED",
-                    "conditions": ["Breast Cancer", "Metastatic Breast Cancer"],
-                    "interventions": ["Bevacizumab", "Erlotinib Hydrochloride"]
-                },
-                ...
-            ],
-            "pagination": {
-                "cursor": "eyJraW5kIjo..." or null,
-                "total_count": 1543,
-                "page_size": 50
-            }
-        }
-
-        Error responses include recovery hints for autonomous agents.
-
-    Examples:
-        >>> # Simple search
-        >>> results = await search_trials("diabetes")
-
-        >>> # Filtered search
-        >>> results = await search_trials(
-        ...     query="immunotherapy",
-        ...     condition="lung cancer",
-        ...     phase="PHASE3",
-        ...     status="RECRUITING"
-        ... )
-
-        >>> # Pagination
-        >>> page1 = await search_trials("cancer", page_size=20)
-        >>> page2 = await search_trials("cancer", cursor=page1["pagination"]["cursor"])
     """
     client = await get_client()
     return await client.search_trials(
@@ -202,42 +200,40 @@ async def get_trial(nct_id: str) -> Trial | ErrorEnvelope:
     Retrieves full clinical trial data with detailed protocol information.
     Requires resolved NCT CURIE from search_trials (Fuzzy-to-Fact protocol).
 
+    Trial record with full protocol details (~5K-10K tokens), or ErrorEnvelope on failure.
+
+    Success response includes:
+    - Protocol: study_type, allocation, intervention_model, masking, primary_purpose
+    - Eligibility: criteria_text, age range, sex, healthy_volunteers
+    - Outcomes: primary and secondary endpoints with timeframes
+    - Sponsors: lead sponsor and collaborators
+    - Administrative: phase, status, enrollment, dates
+    - Cross-references: PubMed, registry links, MeSH IDs
+
+    Error responses:
+    - UNRESOLVED_ENTITY: Raw string passed instead of NCT CURIE
+      → Recovery: Call search_trials first
+    - INVALID_INPUT: Malformed NCT CURIE (wrong format)
+      → Recovery: Verify format is NCT:NNNNNNNN with 8 digits
+    - ENTITY_NOT_FOUND: Valid CURIE but trial doesn't exist
+      → Recovery: Verify NCT ID or search again
+    - UPSTREAM_ERROR: API failure
+      → Recovery: Retry later
+
+    >>> # Correct usage (Fuzzy-to-Fact workflow)
+    >>> results = await search_trials("bevacizumab breast cancer")
+    >>> trial = await get_trial(results["items"][0]["id"])  # "NCT:00461032"
+
+    >>> # WRONG: Passing raw query string
+    >>> trial = await get_trial("breast cancer")  # Returns UNRESOLVED_ENTITY error
+
+    >>> # WRONG: Malformed CURIE
+    >>> trial = await get_trial("NCT:123")  # Returns INVALID_INPUT error
+
     Args:
         nct_id: NCT CURIE in format 'NCT:NNNNNNNN' (e.g., 'NCT:00461032').
                 Must be exactly 8 digits after the colon.
                 Obtain from search_trials results - do NOT pass raw query strings.
-
-    Returns:
-        Trial record with full protocol details (~5K-10K tokens), or ErrorEnvelope on failure.
-
-        Success response includes:
-        - Protocol: study_type, allocation, intervention_model, masking, primary_purpose
-        - Eligibility: criteria_text, age range, sex, healthy_volunteers
-        - Outcomes: primary and secondary endpoints with timeframes
-        - Sponsors: lead sponsor and collaborators
-        - Administrative: phase, status, enrollment, dates
-        - Cross-references: PubMed, registry links, MeSH IDs
-
-        Error responses:
-        - UNRESOLVED_ENTITY: Raw string passed instead of NCT CURIE
-          → Recovery: Call search_trials first
-        - INVALID_INPUT: Malformed NCT CURIE (wrong format)
-          → Recovery: Verify format is NCT:NNNNNNNN with 8 digits
-        - ENTITY_NOT_FOUND: Valid CURIE but trial doesn't exist
-          → Recovery: Verify NCT ID or search again
-        - UPSTREAM_ERROR: API failure
-          → Recovery: Retry later
-
-    Examples:
-        >>> # Correct usage (Fuzzy-to-Fact workflow)
-        >>> results = await search_trials("bevacizumab breast cancer")
-        >>> trial = await get_trial(results["items"][0]["id"])  # "NCT:00461032"
-
-        >>> # WRONG: Passing raw query string
-        >>> trial = await get_trial("breast cancer")  # Returns UNRESOLVED_ENTITY error
-
-        >>> # WRONG: Malformed CURIE
-        >>> trial = await get_trial("NCT:123")  # Returns INVALID_INPUT error
     """
     client = await get_client()
     return await client.get_trial(nct_id=nct_id)
@@ -250,46 +246,44 @@ async def get_trial_locations(nct_id: str) -> list[TrialLocation] | ErrorEnvelop
     Retrieves geographic facility data for a clinical trial including addresses,
     contact details, and recruitment status for each site.
 
+    List of TrialLocation objects (~50-100 tokens per location), or ErrorEnvelope on failure.
+
+    Success response structure:
+    [
+        {
+            "facility_name": "Dana-Farber Cancer Institute",
+            "city": "Boston",
+            "state": "Massachusetts",  # Omitted for non-US/Canada
+            "country": "United States",
+            "zip": "02215",
+            "contact_name": "Dr. Jane Smith",  # May be null
+            "contact_phone": "617-555-0123",   # May be null
+            "contact_email": "trials@dfci.harvard.edu",  # May be null
+            "recruitment_status": "RECRUITING"
+        },
+        ...
+    ]
+
+    Empty list: Trial has no facilities (e.g., remote/virtual trial)
+
+    Error responses:
+    - UNRESOLVED_ENTITY: Raw string passed instead of NCT CURIE
+    - INVALID_INPUT: Malformed NCT CURIE
+    - ENTITY_NOT_FOUND: Trial doesn't exist
+    - UPSTREAM_ERROR: API failure
+
+    >>> # Get locations for a multi-site trial
+    >>> results = await search_trials("cancer", location="Boston")
+    >>> locations = await get_trial_locations(results["items"][0]["id"])
+    >>> recruiting_sites = [loc for loc in locations if loc["recruitment_status"] == "RECRUITING"]
+
+    >>> # Filter by geographic region
+    >>> ma_sites = [loc for loc in locations if loc.get("state") == "Massachusetts"]
+
     Args:
         nct_id: NCT CURIE in format 'NCT:NNNNNNNN' (e.g., 'NCT:04123456').
                 Must be exactly 8 digits after the colon.
                 Obtain from search_trials results.
-
-    Returns:
-        List of TrialLocation objects (~50-100 tokens per location), or ErrorEnvelope on failure.
-
-        Success response structure:
-        [
-            {
-                "facility_name": "Dana-Farber Cancer Institute",
-                "city": "Boston",
-                "state": "Massachusetts",  # Omitted for non-US/Canada
-                "country": "United States",
-                "zip": "02215",
-                "contact_name": "Dr. Jane Smith",  # May be null
-                "contact_phone": "617-555-0123",   # May be null
-                "contact_email": "trials@dfci.harvard.edu",  # May be null
-                "recruitment_status": "RECRUITING"
-            },
-            ...
-        ]
-
-        Empty list: Trial has no facilities (e.g., remote/virtual trial)
-
-        Error responses:
-        - UNRESOLVED_ENTITY: Raw string passed instead of NCT CURIE
-        - INVALID_INPUT: Malformed NCT CURIE
-        - ENTITY_NOT_FOUND: Trial doesn't exist
-        - UPSTREAM_ERROR: API failure
-
-    Examples:
-        >>> # Get locations for a multi-site trial
-        >>> results = await search_trials("cancer", location="Boston")
-        >>> locations = await get_trial_locations(results["items"][0]["id"])
-        >>> recruiting_sites = [loc for loc in locations if loc["recruitment_status"] == "RECRUITING"]
-
-        >>> # Filter by geographic region
-        >>> ma_sites = [loc for loc in locations if loc.get("state") == "Massachusetts"]
     """
     client = await get_client()
     return await client.get_trial_locations(nct_id=nct_id)
