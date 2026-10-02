@@ -83,4 +83,4 @@ Versions and timestamps: `versions.txt`. Logs are `.txt` because `*.log` is giti
 | **API total** | | **185** | **52** | **0** | **33** | **1** |
 | **MCP total** | | **53** | **29** | **0** | **8** | **2** |
 
-Failures:
+Per-test failure IDs: see the triage above and the JUnit XML files in this folder.

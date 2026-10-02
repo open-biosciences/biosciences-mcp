@@ -101,7 +101,7 @@ A simultaneous dual-endpoint invocation was performed comparing production (`htt
 
 ## 2. Check 4.7 & Deployment Rollback (T025): WAIVED BY OWNER
 
-- **Waiver**: approved by the repository owner (donbr) on 2026-10-02. The timed rollback drill was not run. Horizon redeploys automatically on every push to the deployed branch, so the drill would mainly re-measure Horizon's build time, which the push below already measured.
+- **Waiver**: approved by the repository owner on 2026-10-02. The timed rollback drill was not run. Horizon redeploys automatically on every push to the deployed branch, so the drill would mainly re-measure Horizon's build time, which the push below already measured.
 - **Proxy measurement (SC-005)**: an unplanned push of `02ca1d0` (evidence commit, docs only) to the PR branch triggered an automatic preview rebuild. Horizon build log:
 
   | Event | Time (UTC) |
