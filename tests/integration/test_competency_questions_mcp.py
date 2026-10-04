@@ -1,8 +1,9 @@
 """Automated validation suite for all 23 competency questions using the MCP Gateway.
 
 This module validates that the MCP Gateway correctly exposes and routes tools for
-all 23 competency questions. It invokes the tools via the `mcp.get_tool(...).fn(...)`
-interface to verify the integration of the tool definitions within the FastMCP app.
+all 23 competency questions. It calls each tool through `fastmcp.Client` against the
+in-process gateway, as an MCP client does, and asserts on the JSON payload the client
+receives (spec 015: `get_tool(...).fn(...)` returns a `ToolResult` on FastMCP 3.x).
 
 Performance Targets:
     - Single tool call: <2s (SC-001)
@@ -35,9 +36,12 @@ MCP Tool Coverage:
     - CQ-23: wikipathways_get_pathways_for_gene
 """
 
+import json
 import os
+from typing import Any
 
 import pytest
+from fastmcp import Client
 
 from biosciences_mcp.servers import (
     biogrid,
@@ -55,6 +59,24 @@ from biosciences_mcp.servers import (
 )
 from biosciences_mcp.servers.gateway import mcp
 from tests.utils import to_dict
+
+
+class GatewayTool:
+    """A gateway tool called the way an MCP client calls it."""
+
+    def __init__(self, name: str) -> None:
+        self.name = name
+
+    async def call(self, **arguments: Any) -> Any:
+        async with Client(mcp) as client:
+            result = await client.call_tool(self.name, arguments)
+        text = getattr(result.content[0], "text", "") if result.content else ""
+        return json.loads(text)
+
+
+def gateway_tool(name: str) -> GatewayTool:
+    return GatewayTool(name)
+
 
 pytestmark = pytest.mark.integration
 
@@ -86,8 +108,8 @@ async def test_cq1_target_resolvability():
     MCP Tool: hgnc_search_genes
     Note: Alias "p53" fails (known issue), use canonical symbol "TP53".
     """
-    tool = await mcp.get_tool("hgnc_search_genes")
-    result = await tool.fn(query="TP53", page_size=5)
+    tool = gateway_tool("hgnc_search_genes")
+    result = await tool.call(query="TP53", page_size=5)
     data = to_dict(result)
 
     assert data["items"], "No results returned for TP53"
@@ -102,8 +124,8 @@ async def test_cq2_cross_domain_mapping():
 
     MCP Tool: hgnc_get_gene
     """
-    tool = await mcp.get_tool("hgnc_get_gene")
-    result = await tool.fn(hgnc_id="HGNC:1100")
+    tool = gateway_tool("hgnc_get_gene")
+    result = await tool.call(hgnc_id="HGNC:1100")
     data = to_dict(result)
 
     assert data["id"] == "HGNC:1100", "Gene ID mismatch"
@@ -119,24 +141,24 @@ async def test_cq3_therapeutic_insight():
 
     MCP Tools: opentargets_search_targets, chembl_search_compounds, chembl_get_compound
     """
-    ot_search = await mcp.get_tool("opentargets_search_targets")
-    chembl_search = await mcp.get_tool("chembl_search_compounds")
-    chembl_get = await mcp.get_tool("chembl_get_compound")
+    ot_search = gateway_tool("opentargets_search_targets")
+    chembl_search = gateway_tool("chembl_search_compounds")
+    chembl_get = gateway_tool("chembl_get_compound")
 
     # Step 1: Find EGFR target
-    targets_result = await ot_search.fn(query="EGFR", page_size=5)
+    targets_result = await ot_search.call(query="EGFR", page_size=5)
     targets = to_dict(targets_result)
     assert targets["items"], "No EGFR targets found"
     assert targets["items"][0]["id"] == "ENSG00000146648", "EGFR not found"
 
     # Step 2: Search Gefitinib
-    compounds_result = await chembl_search.fn(query="Gefitinib", page_size=5)
+    compounds_result = await chembl_search.call(query="Gefitinib", page_size=5)
     compounds = to_dict(compounds_result)
     assert compounds["items"], "No Gefitinib results"
     assert compounds["items"][0]["id"] == "CHEMBL:939", "Gefitinib ID mismatch"
 
     # Step 3: Get compound details
-    gefitinib_result = await chembl_get.fn(chembl_id="CHEMBL:939")
+    gefitinib_result = await chembl_get.call(chembl_id="CHEMBL:939")
     gefitinib = to_dict(gefitinib_result)
     assert gefitinib["id"] == "CHEMBL:939", "Compound ID mismatch"
     assert gefitinib["max_phase"] == 4, "Gefitinib should be approved (phase 4)"
@@ -149,8 +171,8 @@ async def test_cq4_protein_interaction_network():
 
     MCP Tool: string_search_proteins
     """
-    tool = await mcp.get_tool("string_search_proteins")
-    proteins_result = await tool.fn(query="TP53", species=9606, limit=5)
+    tool = gateway_tool("string_search_proteins")
+    proteins_result = await tool.call(query="TP53", species=9606, limit=5)
     proteins = to_dict(proteins_result)
     assert proteins["items"], "No TP53 results from STRING"
     assert proteins["items"][0]["id"] == "STRING:9606.ENSP00000269305", "TP53 STRING ID mismatch"
@@ -169,17 +191,17 @@ async def test_cq5_kras_synthetic_lethality():
 
     MCP Tools: biogrid_search_genes, biogrid_get_interactions
     """
-    search_tool = await mcp.get_tool("biogrid_search_genes")
-    interactions_tool = await mcp.get_tool("biogrid_get_interactions")
+    search_tool = gateway_tool("biogrid_search_genes")
+    interactions_tool = gateway_tool("biogrid_get_interactions")
 
     # Step 1: Validate KRAS gene
-    validation_result = await search_tool.fn(query="KRAS")
+    validation_result = await search_tool.call(query="KRAS")
     validation = to_dict(validation_result)
     assert validation["items"], "KRAS not found"
     assert validation["items"][0]["symbol"] == "KRAS", "Symbol mismatch"
 
     # Step 2: Get interactions
-    interactions_result = await interactions_tool.fn(gene_symbol="KRAS", max_results=5)
+    interactions_result = await interactions_tool.call(gene_symbol="KRAS", max_results=5)
     interactions = to_dict(interactions_result)
     assert interactions["query_gene"] == "KRAS", "Query gene mismatch"
     assert "interactions" in interactions, "Missing interactions"
@@ -193,8 +215,8 @@ async def test_cq6_fusion_protein_therapy(check_iuphar_available):
 
     MCP Tool: iuphar_search_ligands
     """
-    tool = await mcp.get_tool("iuphar_search_ligands")
-    ligands_result = await tool.fn(query="Crizotinib", page_size=5)
+    tool = gateway_tool("iuphar_search_ligands")
+    ligands_result = await tool.call(query="Crizotinib", page_size=5)
     ligands = to_dict(ligands_result)
 
     assert ligands["items"], "No Crizotinib results"
@@ -210,8 +232,8 @@ async def test_cq7_pathway_mechanism_analysis():
 
     MCP Tool: wikipathways_search_pathways
     """
-    tool = await mcp.get_tool("wikipathways_search_pathways")
-    pathways_result = await tool.fn(query="TP53", page_size=5)
+    tool = gateway_tool("wikipathways_search_pathways")
+    pathways_result = await tool.call(query="TP53", page_size=5)
     pathways = to_dict(pathways_result)
 
     assert pathways["items"], "No TP53 pathways found"
@@ -228,8 +250,8 @@ async def test_cq8_clinical_trial_landscape():
 
     MCP Tool: clinicaltrials_search_trials
     """
-    tool = await mcp.get_tool("clinicaltrials_search_trials")
-    trials_result = await tool.fn(
+    tool = gateway_tool("clinicaltrials_search_trials")
+    trials_result = await tool.call(
         query="ALK-positive NSCLC",
         phase="PHASE3",
         page_size=5,
@@ -251,8 +273,8 @@ async def test_cq9_paralog_dependency():
 
     MCP Tool: biogrid_get_interactions
     """
-    tool = await mcp.get_tool("biogrid_get_interactions")
-    interactions_result = await tool.fn(gene_symbol="ARID1A", max_results=50)
+    tool = gateway_tool("biogrid_get_interactions")
+    interactions_result = await tool.call(gene_symbol="ARID1A", max_results=50)
     interactions = to_dict(interactions_result)
 
     assert interactions["query_gene"] == "ARID1A", "Query gene mismatch"
@@ -266,8 +288,8 @@ async def test_cq10_drug_repurposing():
 
     MCP Tool: chembl_search_compounds
     """
-    tool = await mcp.get_tool("chembl_search_compounds")
-    compounds_result = await tool.fn(query="Olaparib", page_size=5)
+    tool = gateway_tool("chembl_search_compounds")
+    compounds_result = await tool.call(query="Olaparib", page_size=5)
     compounds = to_dict(compounds_result)
 
     assert compounds["items"], "No Olaparib results"
@@ -281,18 +303,18 @@ async def test_cq11_genomic_location():
 
     MCP Tools: ensembl_search_genes, ensembl_get_gene
     """
-    search_tool = await mcp.get_tool("ensembl_search_genes")
-    get_tool = await mcp.get_tool("ensembl_get_gene")
+    search_tool = gateway_tool("ensembl_search_genes")
+    get_tool = gateway_tool("ensembl_get_gene")
 
     # Step 1: Search
-    search_result = await search_tool.fn(query="BRCA2", species="human")
+    search_result = await search_tool.call(query="BRCA2", species="human")
     search = to_dict(search_result)
     assert search["items"], "No BRCA2 results"
     ensembl_id = search["items"][0]["id"]
     assert ensembl_id.startswith("ENSG"), "Invalid Ensembl ID"
 
     # Step 2: Get details
-    gene_result = await get_tool.fn(ensembl_id=ensembl_id)
+    gene_result = await get_tool.call(ensembl_id=ensembl_id)
     gene = to_dict(gene_result)
     assert gene["symbol"] == "BRCA2", "Symbol mismatch"
     assert gene["chromosome"] == "13", "Chromosome mismatch"
@@ -305,18 +327,18 @@ async def test_cq12_molecular_structure():
 
     MCP Tools: pubchem_search_compounds, pubchem_get_compound
     """
-    search_tool = await mcp.get_tool("pubchem_search_compounds")
-    get_tool = await mcp.get_tool("pubchem_get_compound")
+    search_tool = gateway_tool("pubchem_search_compounds")
+    get_tool = gateway_tool("pubchem_get_compound")
 
     # Step 1: Search
-    search_result = await search_tool.fn(query="caffeine", page_size=5)
+    search_result = await search_tool.call(query="caffeine", page_size=5)
     search = to_dict(search_result)
     assert search["items"], "No Caffeine results"
     pubchem_id = search["items"][0]["id"]
     assert pubchem_id.startswith("PubChem:CID"), "Invalid PubChem ID"
 
     # Step 2: Get details
-    compound_result = await get_tool.fn(pubchem_id=pubchem_id)
+    compound_result = await get_tool.call(pubchem_id=pubchem_id)
     compound = to_dict(compound_result)
     assert compound["name"].lower() == "caffeine", "Name mismatch"
     assert compound["molecular_formula"] == "C8H10N4O2", "Formula mismatch"
@@ -326,12 +348,12 @@ async def test_cq12_molecular_structure():
 @pytest.mark.asyncio
 async def test_cq13_pathway_drug_discovery():
     """CQ-13: Pathway-Based Drug Discovery (WikiPathways + ChEMBL)."""
-    wp_search = await mcp.get_tool("wikipathways_search_pathways")
-    wp_comps = await mcp.get_tool("wikipathways_get_pathway_components")
-    chembl_search = await mcp.get_tool("chembl_search_compounds")
+    wp_search = gateway_tool("wikipathways_search_pathways")
+    wp_comps = gateway_tool("wikipathways_get_pathway_components")
+    chembl_search = gateway_tool("chembl_search_compounds")
 
     # Step 1: Find Apoptosis pathway
-    search_result = await wp_search.fn(query="Apoptosis", organism="Homo sapiens")
+    search_result = await wp_search.call(query="Apoptosis", organism="Homo sapiens")
     search = to_dict(search_result)
     apoptosis_pathway = next((p for p in search["items"] if "Apoptosis" in p["title"]), None)
     assert apoptosis_pathway, "Apoptosis pathway not found"
@@ -339,7 +361,7 @@ async def test_cq13_pathway_drug_discovery():
 
     # Step 2: Confirm BCL2 in components
     if "WP254" in wp_id:
-        comps_result = await wp_comps.fn(pathway_id=wp_id)
+        comps_result = await wp_comps.call(pathway_id=wp_id)
         comps = to_dict(comps_result)
         gene_labels = {g.get("label", "") for g in comps.get("genes", [])}
         protein_labels = {p.get("label", "") for p in comps.get("proteins", [])}
@@ -348,7 +370,7 @@ async def test_cq13_pathway_drug_discovery():
         assert any("BCL2" in label for label in all_labels), f"BCL2 not found in pathway {wp_id}"
 
     # Step 3: Find Venetoclax in ChEMBL
-    compound_result = await chembl_search.fn(query="Venetoclax")
+    compound_result = await chembl_search.call(query="Venetoclax")
     compounds = to_dict(compound_result)
     assert compounds["items"], "Venetoclax not found"
     top_hit = compounds["items"][0]
@@ -362,8 +384,8 @@ async def test_cq14_cell_therapy_mechanism():
 
     MCP Tool: chembl_search_compounds
     """
-    tool = await mcp.get_tool("chembl_search_compounds")
-    compounds_result = await tool.fn(query="Tabelecleucel", page_size=5)
+    tool = gateway_tool("chembl_search_compounds")
+    compounds_result = await tool.call(query="Tabelecleucel", page_size=5)
     compounds = to_dict(compounds_result)
 
     assert compounds["items"], "No Tabelecleucel results"
@@ -377,8 +399,8 @@ async def test_cq15_neuro_immunology_targets():
 
     MCP Tool: chembl_search_compounds
     """
-    tool = await mcp.get_tool("chembl_search_compounds")
-    compounds_result = await tool.fn(query="Tolebrutinib", page_size=5)
+    tool = gateway_tool("chembl_search_compounds")
+    compounds_result = await tool.call(query="Tolebrutinib", page_size=5)
     compounds = to_dict(compounds_result)
 
     assert compounds["items"], "No Tolebrutinib results"
@@ -395,8 +417,8 @@ async def test_cq16_advanced_mutation_targeting():
 
     MCP Tool: clinicaltrials_search_trials
     """
-    tool = await mcp.get_tool("clinicaltrials_search_trials")
-    trials_result = await tool.fn(query="KRAS G12D inhibitor", page_size=5)
+    tool = gateway_tool("clinicaltrials_search_trials")
+    trials_result = await tool.call(query="KRAS G12D inhibitor", page_size=5)
     trials = to_dict(trials_result)
 
     assert trials["items"], "No KRAS G12D trials found"
@@ -412,8 +434,8 @@ async def test_cq17_novel_alzheimers_mechanisms():
 
     MCP Tool: chembl_search_compounds
     """
-    tool = await mcp.get_tool("chembl_search_compounds")
-    compounds_result = await tool.fn(query="Mirodenafil", page_size=5)
+    tool = gateway_tool("chembl_search_compounds")
+    compounds_result = await tool.call(query="Mirodenafil", page_size=5)
     compounds = to_dict(compounds_result)
 
     assert compounds["items"], "No Mirodenafil results"
@@ -427,8 +449,8 @@ async def test_cq18_protein_details():
 
     MCP Tool: uniprot_get_protein
     """
-    tool = await mcp.get_tool("uniprot_get_protein")
-    protein_result = await tool.fn(uniprot_id="UniProtKB:P38398", slim=False)
+    tool = gateway_tool("uniprot_get_protein")
+    protein_result = await tool.call(uniprot_id="UniProtKB:P38398", slim=False)
     protein = to_dict(protein_result)
 
     assert protein["id"] == "UniProtKB:P38398", "Protein ID mismatch"
@@ -451,16 +473,13 @@ async def test_cq19_batch_operations():
 
     MCP Tool: chembl_get_compounds_batch
     """
-    tool = await mcp.get_tool("chembl_get_compounds_batch")
-    compounds_result = await tool.fn(
+    tool = gateway_tool("chembl_get_compounds_batch")
+    compounds_result = await tool.call(
         chembl_ids=["CHEMBL:25", "CHEMBL:939", "CHEMBL:521686", "CHEMBL:1946170", "CHEMBL:2105717"],
         slim=True,
     )
-    compounds = (
-        [to_dict(c) for c in compounds_result]
-        if hasattr(compounds_result[0], "model_dump")
-        else compounds_result
-    )
+    assert isinstance(compounds_result, list), f"Expected a list, got {compounds_result}"
+    compounds = compounds_result
 
     assert len(compounds) == 5, "Should return 5 compounds"
     assert compounds[0]["id"] == "CHEMBL:25", "First compound ID mismatch"
@@ -473,18 +492,18 @@ async def test_cq20_pathway_components():
 
     MCP Tools: wikipathways_get_pathway, wikipathways_get_pathway_components
     """
-    get_pathway = await mcp.get_tool("wikipathways_get_pathway")
-    get_comps = await mcp.get_tool("wikipathways_get_pathway_components")
+    get_pathway = gateway_tool("wikipathways_get_pathway")
+    get_comps = gateway_tool("wikipathways_get_pathway_components")
 
     # Step 1: Get pathway metadata
-    pathway_result = await get_pathway.fn(pathway_id="WP:WP1742")
+    pathway_result = await get_pathway.call(pathway_id="WP:WP1742")
     pathway = to_dict(pathway_result)
     assert pathway["id"] == "WP:WP1742", "Pathway ID mismatch"
     assert pathway["title"] == "TP53 network", "Title mismatch"
     assert pathway["component_counts"]["gene_count"] > 0, "Should have genes"
 
     # Step 2: Get pathway components
-    components_result = await get_comps.fn(pathway_id="WP:WP1742")
+    components_result = await get_comps.call(pathway_id="WP:WP1742")
     components = to_dict(components_result)
     assert "genes" in components, "Missing genes"
     assert len(components["genes"]) > 0, "Should have gene entries"
@@ -506,8 +525,8 @@ async def test_cq21_trial_details():
 
     MCP Tool: clinicaltrials_get_trial
     """
-    tool = await mcp.get_tool("clinicaltrials_get_trial")
-    trial_result = await tool.fn(nct_id="NCT:03456076")
+    tool = gateway_tool("clinicaltrials_get_trial")
+    trial_result = await tool.call(nct_id="NCT:03456076")
     trial = to_dict(trial_result)
 
     assert trial["id"] == "NCT:03456076", "Trial ID mismatch"
@@ -520,8 +539,8 @@ async def test_cq22_literature_links():
 
     MCP Tool: entrez_get_pubmed_links
     """
-    tool = await mcp.get_tool("entrez_get_pubmed_links")
-    pubmed_ids = await tool.fn(entrez_id="NCBIGene:7157", limit=5)
+    tool = gateway_tool("entrez_get_pubmed_links")
+    pubmed_ids = await tool.call(entrez_id="NCBIGene:7157", limit=5)
 
     assert isinstance(pubmed_ids, list), "Should return list of PubMed IDs"
     assert len(pubmed_ids) == 5, "Should return 5 PubMed IDs"
@@ -535,8 +554,8 @@ async def test_cq23_gene_pathway_mapping():
 
     MCP Tool: wikipathways_get_pathways_for_gene
     """
-    tool = await mcp.get_tool("wikipathways_get_pathways_for_gene")
-    pathways_result = await tool.fn(
+    tool = gateway_tool("wikipathways_get_pathways_for_gene")
+    pathways_result = await tool.call(
         gene_id="BRCA1",
         organism="Homo sapiens",
         page_size=5,
