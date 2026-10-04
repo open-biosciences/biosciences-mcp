@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="7" time="101.126" timestamp="2026-10-03T21:51:59.557163-07:00" hostname="lapdog"><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq3_therapeutic_insight" time="30.583"><failure message="KeyError: 'items'">@pytest.mark.asyncio
+    async def test_cq3_therapeutic_insight():
+        """CQ-3: Find approved drugs for EGFR (Gefitinib).
+    
+        MCP Tools: opentargets_search_targets, chembl_search_compounds, chembl_get_compound
+        """
+        ot_search = gateway_tool("opentargets_search_targets")
+        chembl_search = gateway_tool("chembl_search_compounds")
+        chembl_get = gateway_tool("chembl_get_compound")
+    
+        # Step 1: Find EGFR target
+        targets_result = await ot_search.call(query="EGFR", page_size=5)
+        targets = to_dict(targets_result)
+        assert targets["items"], "No EGFR targets found"
+        assert targets["items"][0]["id"] == "ENSG00000146648", "EGFR not found"
+    
+        # Step 2: Search Gefitinib
+        compounds_result = await chembl_search.call(query="Gefitinib", page_size=5)
+        compounds = to_dict(compounds_result)
+&gt;       assert compounds["items"], "No Gefitinib results"
+               ^^^^^^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:157: KeyError</failure></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq10_drug_repurposing" time="0.762" /><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq13_pathway_drug_discovery" time="1.051" /><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq14_cell_therapy_mechanism" time="0.727" /><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq15_neuro_immunology_targets" time="0.787" /><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq17_novel_alzheimers_mechanisms" time="30.043"><failure message="KeyError: 'items'">@pytest.mark.asyncio
+    async def test_cq17_novel_alzheimers_mechanisms():
+        """CQ-17: Mirodenafil (PDE5 inhibitor).
+    
+        MCP Tool: chembl_search_compounds
+        """
+        tool = gateway_tool("chembl_search_compounds")
+        compounds_result = await tool.call(query="Mirodenafil", page_size=5)
+        compounds = to_dict(compounds_result)
+    
+&gt;       assert compounds["items"], "No Mirodenafil results"
+               ^^^^^^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:441: KeyError</failure></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq19_batch_operations" time="36.439"><failure message="AssertionError: Expected a list, got {'success': False, 'error': {'code': 'UPSTREAM_ERROR', 'message': 'ChEMBL API error: ChEMBL SDK request timeout after 30.0s', 'recovery_hint': 'ChEMBL API temporarily unavailable. Retry in 60 seconds', 'invalid_input': &quot;['CHEMBL:25', 'CHEMBL:939', 'CHEMBL:521686', 'CHEMBL:1946170', 'CHEMBL:2105717']&quot;}}&#10;assert False&#10; +  where False = isinstance({'error': {'code': 'UPSTREAM_ERROR', 'invalid_input': &quot;['CHEMBL:25', 'CHEMBL:939', 'CHEMBL:521686', 'CHEMBL:1946170', 'CHEMBL:2105717']&quot;, 'message': 'ChEMBL API error: ChEMBL SDK request timeout after 30.0s', 'recovery_hint': 'ChEMBL API temporarily unavailable. Retry in 60 seconds'}, 'success': False}, list)">@pytest.mark.asyncio
+    async def test_cq19_batch_operations():
+        """CQ-19: ChEMBL batch compound lookup.
+    
+        MCP Tool: chembl_get_compounds_batch
+        """
+        tool = gateway_tool("chembl_get_compounds_batch")
+        compounds_result = await tool.call(
+            chembl_ids=["CHEMBL:25", "CHEMBL:939", "CHEMBL:521686", "CHEMBL:1946170", "CHEMBL:2105717"],
+            slim=True,
+        )
+&gt;       assert isinstance(compounds_result, list), f"Expected a list, got {compounds_result}"
+E       AssertionError: Expected a list, got {'success': False, 'error': {'code': 'UPSTREAM_ERROR', 'message': 'ChEMBL API error: ChEMBL SDK request timeout after 30.0s', 'recovery_hint': 'ChEMBL API temporarily unavailable. Retry in 60 seconds', 'invalid_input': "['CHEMBL:25', 'CHEMBL:939', 'CHEMBL:521686', 'CHEMBL:1946170', 'CHEMBL:2105717']"}}
+E       assert False
+E        +  where False = isinstance({'error': {'code': 'UPSTREAM_ERROR', 'invalid_input': "['CHEMBL:25', 'CHEMBL:939', 'CHEMBL:521686', 'CHEMBL:1946170', 'CHEMBL:2105717']", 'message': 'ChEMBL API error: ChEMBL SDK request timeout after 30.0s', 'recovery_hint': 'ChEMBL API temporarily unavailable. Retry in 60 seconds'}, 'success': False}, list)
+
+tests/integration/test_competency_questions_mcp.py:481: AssertionError</failure></testcase></testsuite></testsuites>

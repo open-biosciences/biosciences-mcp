@@ -9,6 +9,20 @@ Requested by the repository owner before production deployment (T027): local uni
 - **Wire contract: unchanged.** Every contract failure is IUPHAR 401 (AGE-734) or an Ensembl timeout, and the same tests fail on 2.14.5. The T018 wire diff (`../core-3.4.7/wire-diff.md`) found 39 of 39 calls identical in `isError` and `structuredContent`.
 - **Horizon's resolved set behaves like the locked set.** Running 706 unit tests and the MCP-layer integration subset on the exact versions from the `02ca1d0` build log (`mcp` 1.30.0, `pydantic` 2.13.5, `uvicorn` 0.54.0) gave the same pass and failure sets as the locked run. `PydanticSerializationUnexpectedValue` appeared 0 times in every log.
 
+## Follow-up 2026-10-04: the 16 new failures are fixed
+
+`tests/integration/test_competency_questions_mcp.py` now calls each tool through `fastmcp.Client` against the in-process gateway (commit `8f4ce55`), the same path an MCP client uses, instead of `get_tool(...).fn(...)`.
+
+| Run (locked set, live APIs) | Result | Files |
+|---|---|---|
+| Full file, 04:29 UTC | 10 passed, 10 failed, 3 skipped. The 10 non-ChEMBL tests pass. 7 ChEMBL tests failed during an EBI ChEMBL outage; CQ-6, CQ-7 and CQ-23 fail as on 2.14.5 | `cq-mcp-ported.txt`, `cq-mcp-ported.junit.xml` |
+| 7 ChEMBL tests, once EBI returned 200 | 4 passed; CQ-3, CQ-17 and CQ-19 got `UPSTREAM_ERROR` from ChEMBL | `cq-mcp-ported-chembl.txt`, `cq-mcp-ported-chembl.junit.xml` |
+| FR-012 re-run of those 3 after 10 s (04:54 UTC) | 3 passed | `cq-mcp-ported-chembl-rerun.junit.xml` |
+
+Net result: every test in the file passes except CQ-6 (IUPHAR 401, AGE-734), CQ-7 and CQ-23 (pathway-count assertions), which fail identically on 2.14.5 (`baseline-2.14.5.txt`). The AGE-718 "no new integration failures" criterion is met for this file.
+
+**EBI outage, 2026-10-04 ~04:08 to ~04:50 UTC.** `chembl_webresource_client` downloads `https://www.ebi.ac.uk/chembl/api/data/spore` at import, with no timeout. While EBI returned 500 or hung, `import biosciences_mcp` failed, and both core production and the PR #20 preview were down (Horizon runtime log 04:10:51: `Error getting schema from url .../spore with status 500`). Edge and psychology-mcp stayed up. Tracked as AGE-703. After recovery, production reported FastMCP **2.14.7** (re-resolved on restart), not the 2.14.5 in `uv.lock`.
+
 ## Layers
 
 - **MCP layer** (through FastMCP: in-process `fastmcp.Client` or the gateway): `tests/contract/*`, `tests/unit/test_iuphar_server.py`, `tests/integration/test_gateway.py`, `tests/integration/test_competency_questions_mcp.py`.

@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="10" skipped="3" tests="23" time="242.421" timestamp="2026-10-03T21:29:06.054466-07:00" hostname="lapdog"><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq1_target_resolvability" time="0.728" /><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq2_cross_domain_mapping" time="0.882" /><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq3_therapeutic_insight" time="29.195"><failure message="KeyError: 'items'">@pytest.mark.asyncio
+    async def test_cq3_therapeutic_insight():
+        """CQ-3: Find approved drugs for EGFR (Gefitinib).
+    
+        MCP Tools: opentargets_search_targets, chembl_search_compounds, chembl_get_compound
+        """
+        ot_search = gateway_tool("opentargets_search_targets")
+        chembl_search = gateway_tool("chembl_search_compounds")
+        chembl_get = gateway_tool("chembl_get_compound")
+    
+        # Step 1: Find EGFR target
+        targets_result = await ot_search.call(query="EGFR", page_size=5)
+        targets = to_dict(targets_result)
+        assert targets["items"], "No EGFR targets found"
+        assert targets["items"][0]["id"] == "ENSG00000146648", "EGFR not found"
+    
+        # Step 2: Search Gefitinib
+        compounds_result = await chembl_search.call(query="Gefitinib", page_size=5)
+        compounds = to_dict(compounds_result)
+&gt;       assert compounds["items"], "No Gefitinib results"
+               ^^^^^^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:157: KeyError</failure></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq4_protein_interaction_network" time="0.396" /><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq5_kras_synthetic_lethality" time="1.885" /><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq6_fusion_protein_therapy" time="1.686"><failure message="fastmcp.exceptions.ToolError: Error calling tool 'search_ligands': API error: 401">check_iuphar_available = False
+
+    @pytest.mark.asyncio
+    @pytest.mark.timeout(30)
+    async def test_cq6_fusion_protein_therapy(check_iuphar_available):
+        """CQ-6: ALK inhibitors (Crizotinib) from IUPHAR.
+    
+        MCP Tool: iuphar_search_ligands
+        """
+        tool = gateway_tool("iuphar_search_ligands")
+&gt;       ligands_result = await tool.call(query="Crizotinib", page_size=5)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_competency_questions_mcp.py:219: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_competency_questions_mcp.py:72: in call
+    result = await client.call_tool(self.name, arguments)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.13/site-packages/fastmcp/client/mixins/tools.py:312: in call_tool
+    return await self._parse_call_tool_result(
+.venv/lib/python3.13/site-packages/fastmcp/client/mixins/tools.py:201: in _parse_call_tool_result
+    return await _parse_call_tool_result(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'iuphar_search_ligands'
+result = CallToolResult(meta=None, content=[TextContent(type='text', text="Error calling tool 'search_ligands': API error: 401", annotations=None, meta=None)], structuredContent=None, isError=True)
+tool_output_schemas = {}
+list_tools_fn = &lt;bound method ClientSession.list_tools of &lt;mcp.client.session.ClientSession object at 0x78fec0920380&gt;&gt;
+client_name = 'Client-eabf', raise_on_error = True
+
+    async def _parse_call_tool_result(
+        name: str,
+        result: mcp.types.CallToolResult,
+        tool_output_schemas: dict[str, dict[str, Any] | None],
+        list_tools_fn: Any,  # Callable[[], Awaitable[None]]
+        client_name: str | None = None,
+        raise_on_error: bool = False,
+    ) -&gt; CallToolResult:
+        """Parse an mcp.types.CallToolResult into our CallToolResult dataclass.
+    
+        Args:
+            name: Tool name (for schema lookup)
+            result: Raw MCP protocol result
+            tool_output_schemas: Dictionary mapping tool names to their output schemas
+            list_tools_fn: Async function to refresh tool schemas if needed
+            client_name: Optional client name for logging
+            raise_on_error: Whether to raise ToolError on errors
+    
+        Returns:
+            CallToolResult: Parsed result with structured data
+        """
+        # Local import: CallToolResult is under TYPE_CHECKING at module level to
+        # avoid a circular import (client.client -&gt; mixins.tools -&gt; client.client),
+        # but we need the concrete class here to construct the return value.
+        from fastmcp.client.client import CallToolResult
+    
+        data = None
+        if result.isError and raise_on_error:
+            if result.content and isinstance(result.content[0], mcp.types.TextContent):
+                msg = result.content[0].text
+            else:
+                msg = f"Tool '{name}' returned an error"
+&gt;           raise ToolError(msg)
+E           fastmcp.exceptions.ToolError: Error calling tool 'search_ligands': API error: 401
+
+.venv/lib/python3.13/site-packages/fastmcp/client/mixins/tools.py:426: ToolError</failure></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq7_pathway_mechanism_analysis" time="0.213"><failure message="AssertionError: Should find &gt;100 TP53 pathways&#10;assert 85 &gt; 100">@pytest.mark.asyncio
+    async def test_cq7_pathway_mechanism_analysis():
+        """CQ-7: TP53 Apoptosis pathways from WikiPathways.
+    
+        MCP Tool: wikipathways_search_pathways
+        """
+        tool = gateway_tool("wikipathways_search_pathways")
+        pathways_result = await tool.call(query="TP53", page_size=5)
+        pathways = to_dict(pathways_result)
+    
+        assert pathways["items"], "No TP53 pathways found"
+&gt;       assert pathways["pagination"]["total_count"] &gt; 100, "Should find &gt;100 TP53 pathways"
+E       AssertionError: Should find &gt;100 TP53 pathways
+E       assert 85 &gt; 100
+
+tests/integration/test_competency_questions_mcp.py:240: AssertionError</failure></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq8_clinical_trial_landscape" time="0.000"><skipped type="pytest.skip" message="ClinicalTrials.gov blocks Python httpx clients via Cloudflare TLS fingerprinting">/home/donbr/open-biosciences/biosciences-mcp/.worktrees/implement-015-core/tests/integration/test_competency_questions_mcp.py:244: ClinicalTrials.gov blocks Python httpx clients via Cloudflare TLS fingerprinting</skipped></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq9_paralog_dependency" time="0.515" /><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq10_drug_repurposing" time="28.428"><failure message="KeyError: 'items'">@pytest.mark.asyncio
+    async def test_cq10_drug_repurposing():
+        """CQ-10: PARP1 inhibitors (Olaparib).
+    
+        MCP Tool: chembl_search_compounds
+        """
+        tool = gateway_tool("chembl_search_compounds")
+        compounds_result = await tool.call(query="Olaparib", page_size=5)
+        compounds = to_dict(compounds_result)
+    
+&gt;       assert compounds["items"], "No Olaparib results"
+               ^^^^^^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:295: KeyError</failure></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq11_genomic_location" time="8.014" /><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq12_molecular_structure" time="1.453" /><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq13_pathway_drug_discovery" time="36.300"><failure message="KeyError: 'items'">@pytest.mark.asyncio
+    async def test_cq13_pathway_drug_discovery():
+        """CQ-13: Pathway-Based Drug Discovery (WikiPathways + ChEMBL)."""
+        wp_search = gateway_tool("wikipathways_search_pathways")
+        wp_comps = gateway_tool("wikipathways_get_pathway_components")
+        chembl_search = gateway_tool("chembl_search_compounds")
+    
+        # Step 1: Find Apoptosis pathway
+        search_result = await wp_search.call(query="Apoptosis", organism="Homo sapiens")
+        search = to_dict(search_result)
+        apoptosis_pathway = next((p for p in search["items"] if "Apoptosis" in p["title"]), None)
+        assert apoptosis_pathway, "Apoptosis pathway not found"
+        wp_id = apoptosis_pathway["id"]
+    
+        # Step 2: Confirm BCL2 in components
+        if "WP254" in wp_id:
+            comps_result = await wp_comps.call(pathway_id=wp_id)
+            comps = to_dict(comps_result)
+            gene_labels = {g.get("label", "") for g in comps.get("genes", [])}
+            protein_labels = {p.get("label", "") for p in comps.get("proteins", [])}
+            all_labels = gene_labels.union(protein_labels)
+    
+            assert any("BCL2" in label for label in all_labels), f"BCL2 not found in pathway {wp_id}"
+    
+        # Step 3: Find Venetoclax in ChEMBL
+        compound_result = await chembl_search.call(query="Venetoclax")
+        compounds = to_dict(compound_result)
+&gt;       assert compounds["items"], "Venetoclax not found"
+               ^^^^^^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:375: KeyError</failure></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq14_cell_therapy_mechanism" time="26.983"><failure message="KeyError: 'items'">@pytest.mark.asyncio
+    async def test_cq14_cell_therapy_mechanism():
+        """CQ-14: Tabelecleucel (cell therapy) from ChEMBL.
+    
+        MCP Tool: chembl_search_compounds
+        """
+        tool = gateway_tool("chembl_search_compounds")
+        compounds_result = await tool.call(query="Tabelecleucel", page_size=5)
+        compounds = to_dict(compounds_result)
+    
+&gt;       assert compounds["items"], "No Tabelecleucel results"
+               ^^^^^^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:391: KeyError</failure></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq15_neuro_immunology_targets" time="30.055"><failure message="KeyError: 'items'">@pytest.mark.asyncio
+    async def test_cq15_neuro_immunology_targets():
+        """CQ-15: Tolebrutinib (BTK inhibitor for MS).
+    
+        MCP Tool: chembl_search_compounds
+        """
+        tool = gateway_tool("chembl_search_compounds")
+        compounds_result = await tool.call(query="Tolebrutinib", page_size=5)
+        compounds = to_dict(compounds_result)
+    
+&gt;       assert compounds["items"], "No Tolebrutinib results"
+               ^^^^^^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:406: KeyError</failure></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq16_advanced_mutation_targeting" time="0.000"><skipped type="pytest.skip" message="ClinicalTrials.gov blocks Python httpx clients via Cloudflare TLS fingerprinting">/home/donbr/open-biosciences/biosciences-mcp/.worktrees/implement-015-core/tests/integration/test_competency_questions_mcp.py:411: ClinicalTrials.gov blocks Python httpx clients via Cloudflare TLS fingerprinting</skipped></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq17_novel_alzheimers_mechanisms" time="27.648"><failure message="KeyError: 'items'">@pytest.mark.asyncio
+    async def test_cq17_novel_alzheimers_mechanisms():
+        """CQ-17: Mirodenafil (PDE5 inhibitor).
+    
+        MCP Tool: chembl_search_compounds
+        """
+        tool = gateway_tool("chembl_search_compounds")
+        compounds_result = await tool.call(query="Mirodenafil", page_size=5)
+        compounds = to_dict(compounds_result)
+    
+&gt;       assert compounds["items"], "No Mirodenafil results"
+               ^^^^^^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:441: KeyError</failure></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq18_protein_details" time="0.978" /><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq19_batch_operations" time="41.934"><failure message="KeyError: 0">@pytest.mark.asyncio
+    async def test_cq19_batch_operations():
+        """CQ-19: ChEMBL batch compound lookup.
+    
+        MCP Tool: chembl_get_compounds_batch
+        """
+        tool = gateway_tool("chembl_get_compounds_batch")
+        compounds_result = await tool.call(
+            chembl_ids=["CHEMBL:25", "CHEMBL:939", "CHEMBL:521686", "CHEMBL:1946170", "CHEMBL:2105717"],
+            slim=True,
+        )
+        compounds = (
+            [to_dict(c) for c in compounds_result]
+&gt;           if hasattr(compounds_result[0], "model_dump")
+                       ^^^^^^^^^^^^^^^^^^^
+            else compounds_result
+        )
+E       KeyError: 0
+
+tests/integration/test_competency_questions_mcp.py:483: KeyError</failure></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq20_pathway_components" time="0.876" /><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq21_trial_details" time="0.000"><skipped type="pytest.skip" message="ClinicalTrials.gov blocks Python httpx clients via Cloudflare TLS fingerprinting">/home/donbr/open-biosciences/biosciences-mcp/.worktrees/implement-015-core/tests/integration/test_competency_questions_mcp.py:522: ClinicalTrials.gov blocks Python httpx clients via Cloudflare TLS fingerprinting</skipped></testcase><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq22_literature_links" time="1.070" /><testcase classname="tests.integration.test_competency_questions_mcp" name="test_cq23_gene_pathway_mapping" time="2.296"><failure message="AssertionError: Should find &gt;100 BRCA1 pathways&#10;assert 20 &gt; 100">@pytest.mark.asyncio
+    async def test_cq23_gene_pathway_mapping():
+        """CQ-23: WikiPathways gene-&gt;pathway reverse lookup (BRCA1).
+    
+        MCP Tool: wikipathways_get_pathways_for_gene
+        """
+        tool = gateway_tool("wikipathways_get_pathways_for_gene")
+        pathways_result = await tool.call(
+            gene_id="BRCA1",
+            organism="Homo sapiens",
+            page_size=5,
+        )
+        pathways = to_dict(pathways_result)
+    
+        assert pathways["items"], "No pathways found for BRCA1"
+&gt;       assert pathways["pagination"]["total_count"] &gt; 100, "Should find &gt;100 BRCA1 pathways"
+E       AssertionError: Should find &gt;100 BRCA1 pathways
+E       assert 20 &gt; 100
+
+tests/integration/test_competency_questions_mcp.py:569: AssertionError</failure></testcase></testsuite></testsuites>
