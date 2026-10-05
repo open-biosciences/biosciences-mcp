@@ -1,0 +1,139 @@
+{
+ "expected_status": [
+  200
+ ],
+ "methods": {
+  "GET_drug_indication_api_dispatch_detail": {
+   "collection_name": "drug_indications",
+   "default_format": "application/xml",
+   "description": "Retrieve single drug_indication object details by ID.",
+   "formats": [
+    "xml",
+    "json",
+    "jsonp",
+    "yaml"
+   ],
+   "method": "GET",
+   "path": "/chembl/api/data/drug_indication/:ID",
+   "required_params": [
+    "ID"
+   ],
+   "resource_name": "drug_indication",
+   "schema": "/chembl/api/data/drug_indication/schema"
+  },
+  "GET_drug_indication_api_dispatch_list": {
+   "collection_name": "drug_indications",
+   "default_format": "application/xml",
+   "description": "Retrieve drug_indication object list.",
+   "formats": [
+    "xml",
+    "json",
+    "jsonp",
+    "yaml"
+   ],
+   "method": "GET",
+   "path": "/chembl/api/data/drug_indication/",
+   "required_params": [],
+   "resource_name": "drug_indication",
+   "schema": "/chembl/api/data/drug_indication/schema"
+  },
+  "GET_drug_indication_api_get_multiple": {
+   "collection_name": "drug_indications",
+   "default_format": "application/xml",
+   "description": "Retrieve multiple drug_indication objects by IDs.",
+   "formats": [
+    "xml",
+    "json",
+    "jsonp",
+    "yaml"
+   ],
+   "method": "GET",
+   "path": "/chembl/api/data/drug_indication/set/:IDs_list",
+   "required_params": [
+    "IDs_list"
+   ],
+   "resource_name": "drug_indication",
+   "schema": "/chembl/api/data/drug_indication/schema"
+  },
+  "GET_molecule_api_dispatch_detail": {
+   "collection_name": "molecules",
+   "default_format": "application/xml",
+   "description": "Retrieve single molecule object details by ID.",
+   "formats": [
+    "xml",
+    "json",
+    "jsonp",
+    "yaml",
+    "mol",
+    "sdf"
+   ],
+   "method": "GET",
+   "path": "/chembl/api/data/molecule/:ID",
+   "required_params": [
+    "ID"
+   ],
+   "resource_name": "molecule",
+   "schema": "/chembl/api/data/molecule/schema"
+  },
+  "GET_molecule_api_dispatch_list": {
+   "collection_name": "molecules",
+   "default_format": "application/xml",
+   "description": "\nRetrieve list of molecules. Apart from the standard set of relation types, there is one specific operator:\n\n*  __flexmatch__ \\- matches _SMILES_ with the same structure, as opposed to exact match, for example:\n    [`COc1ccc2[C@@H]3[C@H](COc2c1)C(C)(C)OC4=C3C(=O)C(=O)C5=C4OC`\n    `(C)(C)[C@H]6COc7cc(OC)ccc7[C@@H]56`](https://www.ebi.ac.uk/chembl/api/data/molecule?molecule_structures__canonical_smiles__flexmatch=COc1ccc2[C@@H]3[C@H]%28COc2c1%29C%28C%29%28C%29OC4=C3C%28=O%29C%28=O%29C5=C4OC%28C%29%28C%29[C@H]6COc7cc%28OC%29ccc7[C@@H]56 \"Example\")\nwill match two molecules with:\n\n*  `COc1ccc2[C@@H]3[C@H](COc2c1)C(C)(C)OC4=C3C(=O)C(=O)C5=C4OC`\n`(C)(C)[C@H]6COc7cc(OC)ccc7[C@@H]56` and\n*  `COc1ccc2[C@@H]3[C@H](COc2c1)C(C)(C)OC4=C3C(=O)C(=O)C5=C4OC`\n`(C)(C)[C@@H]6COc7cc(OC)ccc7[C@H]56`\n\n_SMILES_.\n        ",
+   "formats": [
+    "xml",
+    "json",
+    "jsonp",
+    "yaml",
+    "mol",
+    "sdf"
+   ],
+   "method": "GET",
+   "path": "/chembl/api/data/molecule/",
+   "required_params": [],
+   "resource_name": "molecule",
+   "schema": "/chembl/api/data/molecule/schema"
+  },
+  "GET_molecule_api_get_multiple": {
+   "collection_name": "molecules",
+   "default_format": "application/xml",
+   "description": "Retrieve multiple molecule objects by IDs.",
+   "formats": [
+    "xml",
+    "json",
+    "jsonp",
+    "yaml",
+    "mol",
+    "sdf"
+   ],
+   "method": "GET",
+   "path": "/chembl/api/data/molecule/set/:IDs_list",
+   "required_params": [
+    "IDs_list"
+   ],
+   "resource_name": "molecule",
+   "schema": "/chembl/api/data/molecule/schema"
+  },
+  "GET_molecule_api_get_search": {
+   "collection_name": "molecules",
+   "default_format": "application/xml",
+   "description": "Search molecule using query string.",
+   "formats": [
+    "xml",
+    "json",
+    "jsonp",
+    "yaml",
+    "mol",
+    "sdf"
+   ],
+   "method": "GET",
+   "path": "/chembl/api/data/molecule/search?q=:query",
+   "required_params": [
+    "query"
+   ],
+   "resource_name": "molecule",
+   "schema": "/chembl/api/data/molecule/schema"
+  }
+ },
+ "name": "ChEMBL web services API live documentation",
+ "version": "data"
+}
