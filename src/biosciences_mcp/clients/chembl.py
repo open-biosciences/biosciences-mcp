@@ -5,6 +5,11 @@ for compound and bioactivity data.
 
 Key implementation details:
 - Uses `chembl_webresource_client` SDK (synchronous) wrapped with run_in_executor
+- Never imports `chembl_webresource_client.new_client`: that module downloads
+  EBI's API schema at import with no timeout, so importing it made the whole
+  package unimportable during an EBI outage and could hang forever while
+  holding the import lock (AGE-703). The schema is fetched on first use with a
+  timeout and the two SDK resources used here are built from it
 - Rate limiting: 10 req/s with exponential backoff (Constitution v1.1.0)
 - Thread pool: default ThreadPoolExecutor (ADR-001 §2 exception)
 
@@ -16,11 +21,12 @@ import base64
 import json
 import logging
 import re
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, ClassVar
 
-from chembl_webresource_client.new_client import new_client
+import httpx
 
 from biosciences_mcp.clients.base import LifeSciencesClient
 from biosciences_mcp.models.compound import Compound, CompoundSearchCandidate
@@ -40,6 +46,83 @@ logger = logging.getLogger(__name__)
 
 # CURIE validation pattern
 CHEMBL_CURIE_PATTERN = re.compile(r"^CHEMBL:[0-9]+$")
+
+
+class ChEMBLSchemaUnavailable(RuntimeError):
+    """EBI's ChEMBL API schema could not be fetched (AGE-703)."""
+
+
+_SCHEMA_URL = "https://www.ebi.ac.uk/chembl/api/data/spore"
+_SCHEMA_TIMEOUT = httpx.Timeout(15.0, connect=5.0)
+_SCHEMA_LOCK_WAIT = 20.0  # seconds; longer than one schema fetch can take
+
+_sdk_lock = threading.Lock()
+_sdk_resources: dict[str, Any] = {}
+
+
+def _fetch_schema() -> dict[str, Any]:
+    """Fetch EBI's SPORE schema for the ChEMBL API, with a timeout."""
+    try:
+        response = httpx.get(_SCHEMA_URL, timeout=_SCHEMA_TIMEOUT)
+    except httpx.HTTPError as e:
+        raise ChEMBLSchemaUnavailable(
+            f"ChEMBL schema fetch from EBI failed: {type(e).__name__}"
+        ) from e
+    if response.status_code != 200:
+        raise ChEMBLSchemaUnavailable(
+            f"ChEMBL schema fetch from EBI failed with status {response.status_code}"
+        )
+    try:
+        return response.json()
+    except ValueError as e:
+        raise ChEMBLSchemaUnavailable("ChEMBL schema from EBI was not valid JSON") from e
+
+
+def _build_sdk_resources(schema: dict[str, Any]) -> dict[str, Any]:
+    """Build SDK QuerySets from the schema.
+
+    Mirrors `chembl_webresource_client.new_client.client_from_url` (SDK 0.10.9)
+    without importing that module. QuerySet URLs come from the SDK's Settings,
+    so the schema only supplies resource names and formats.
+    """
+    from chembl_webresource_client.query_set import Model, QuerySet
+
+    methods = schema["methods"]
+    resources: dict[str, Any] = {}
+    for method, definition in methods.items():
+        if not (method.startswith(("GET_", "POST_")) and method.endswith("_detail")):
+            continue
+        name = definition["resource_name"]
+        if not name:
+            continue
+        searchable = method.replace("dispatch_detail", "get_search") in methods
+        formats = [f for f in definition["formats"] if f not in ("jsonp", "html")]
+        default_format = definition["default_format"].split("/")[-1]
+        queryset = QuerySet(model=Model(name, definition["collection_name"], formats, searchable))
+        if default_format not in ("xml", "svg+xml"):
+            queryset.set_format(default_format)
+        resources[name] = queryset
+    return resources
+
+
+def _load_sdk_resource(name: str) -> Any:
+    """Return a ChEMBL SDK resource, fetching the schema on first use.
+
+    Called from inside the SDK functions that `_rate_limited_sdk_call` runs in
+    the executor, never on the event loop. A failed fetch is not cached, so the
+    next call tries again once EBI recovers.
+    """
+    resource = _sdk_resources.get(name)
+    if resource is not None:
+        return resource
+    if not _sdk_lock.acquire(timeout=_SCHEMA_LOCK_WAIT):
+        raise ChEMBLSchemaUnavailable("ChEMBL schema fetch from EBI is still in progress")
+    try:
+        if name not in _sdk_resources:
+            _sdk_resources.update(_build_sdk_resources(_fetch_schema()))
+        return _sdk_resources[name]
+    finally:
+        _sdk_lock.release()
 
 
 class ChEMBLClient(LifeSciencesClient):
@@ -81,10 +164,9 @@ class ChEMBLClient(LifeSciencesClient):
         """
         super().__init__(base_url=self.CHEMBL_BASE_URL)
 
-        # Initialize ChEMBL SDK (synchronous)
-        # Note: ChEMBL SDK lacks type stubs, so we ignore attribute access error
-        self._molecule = new_client.molecule  # type: ignore[attr-defined]
-        self._drug_indication = new_client.drug_indication  # type: ignore[attr-defined]
+        # ChEMBL SDK resources, loaded on first use (see _load_sdk_resource)
+        self._molecule_resource: Any = None
+        self._drug_indication_resource: Any = None
 
         # Lazy-init ThreadPoolExecutor (use Python defaults)
         self._executor: ThreadPoolExecutor | None = None
@@ -92,6 +174,26 @@ class ChEMBLClient(LifeSciencesClient):
         # Rate limiting state (Constitution v1.1.0)
         self._rate_lock = asyncio.Lock()
         self._last_request_time: float = 0.0
+
+    @property
+    def _molecule(self) -> Any:
+        if self._molecule_resource is None:
+            self._molecule_resource = _load_sdk_resource("molecule")
+        return self._molecule_resource
+
+    @_molecule.setter
+    def _molecule(self, value: Any) -> None:
+        self._molecule_resource = value
+
+    @property
+    def _drug_indication(self) -> Any:
+        if self._drug_indication_resource is None:
+            self._drug_indication_resource = _load_sdk_resource("drug_indication")
+        return self._drug_indication_resource
+
+    @_drug_indication.setter
+    def _drug_indication(self, value: Any) -> None:
+        self._drug_indication_resource = value
 
     def _get_executor(self) -> ThreadPoolExecutor:
         """Get or create the thread pool executor."""
@@ -214,6 +316,17 @@ class ChEMBLClient(LifeSciencesClient):
         Returns:
             ErrorEnvelope with appropriate error code and recovery hint
         """
+        if isinstance(error, ChEMBLSchemaUnavailable):
+            logger.warning("ChEMBL schema unavailable: %s", error, exc_info=error.__cause__)
+            return ErrorEnvelope(
+                error=ErrorDetail(
+                    code=ErrorCode.UPSTREAM_ERROR,
+                    message=str(error),
+                    recovery_hint="ChEMBL API temporarily unavailable. Retry in 60 seconds",
+                    invalid_input=input_value,
+                )
+            )
+
         error_str = str(error).lower()
 
         # 404 Not Found
