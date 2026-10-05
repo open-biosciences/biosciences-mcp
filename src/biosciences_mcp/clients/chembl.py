@@ -5,6 +5,9 @@ for compound and bioactivity data.
 
 Key implementation details:
 - Uses `chembl_webresource_client` SDK (synchronous) wrapped with run_in_executor
+- Imports the SDK on first use, not at module load: the SDK downloads EBI's API
+  schema when imported, with no timeout, so a module-level import made the whole
+  package unimportable during an EBI outage (AGE-703)
 - Rate limiting: 10 req/s with exponential backoff (Constitution v1.1.0)
 - Thread pool: default ThreadPoolExecutor (ADR-001 §2 exception)
 
@@ -19,8 +22,6 @@ import re
 import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, ClassVar
-
-from chembl_webresource_client.new_client import new_client
 
 from biosciences_mcp.clients.base import LifeSciencesClient
 from biosciences_mcp.models.compound import Compound, CompoundSearchCandidate
@@ -40,6 +41,35 @@ logger = logging.getLogger(__name__)
 
 # CURIE validation pattern
 CHEMBL_CURIE_PATTERN = re.compile(r"^CHEMBL:[0-9]+$")
+
+
+class ChEMBLSchemaUnavailable(RuntimeError):
+    """The ChEMBL SDK could not download EBI's API schema (AGE-703)."""
+
+
+def _import_new_client() -> Any:
+    from chembl_webresource_client.new_client import new_client
+
+    return new_client
+
+
+def _load_sdk_resource(name: str) -> Any:
+    """Return a ChEMBL SDK resource, importing the SDK on first use.
+
+    Called from inside the SDK functions that `_rate_limited_sdk_call` runs in
+    the executor, so the schema download is bounded by the client timeout and a
+    failure maps to UPSTREAM_ERROR like any other SDK error. The SDK's own
+    exception carries EBI's HTML error page; only the status code is kept.
+    """
+    try:
+        new_client = _import_new_client()
+    except Exception as e:
+        match = re.search(r"with status (\d{3})", str(e))
+        status = match.group(1) if match else "unknown"
+        raise ChEMBLSchemaUnavailable(
+            f"ChEMBL schema fetch from EBI failed with status {status}"
+        ) from e
+    return getattr(new_client, name)
 
 
 class ChEMBLClient(LifeSciencesClient):
@@ -81,10 +111,9 @@ class ChEMBLClient(LifeSciencesClient):
         """
         super().__init__(base_url=self.CHEMBL_BASE_URL)
 
-        # Initialize ChEMBL SDK (synchronous)
-        # Note: ChEMBL SDK lacks type stubs, so we ignore attribute access error
-        self._molecule = new_client.molecule  # type: ignore[attr-defined]
-        self._drug_indication = new_client.drug_indication  # type: ignore[attr-defined]
+        # ChEMBL SDK resources, loaded on first use (see _load_sdk_resource)
+        self._molecule_resource: Any = None
+        self._drug_indication_resource: Any = None
 
         # Lazy-init ThreadPoolExecutor (use Python defaults)
         self._executor: ThreadPoolExecutor | None = None
@@ -92,6 +121,26 @@ class ChEMBLClient(LifeSciencesClient):
         # Rate limiting state (Constitution v1.1.0)
         self._rate_lock = asyncio.Lock()
         self._last_request_time: float = 0.0
+
+    @property
+    def _molecule(self) -> Any:
+        if self._molecule_resource is None:
+            self._molecule_resource = _load_sdk_resource("molecule")
+        return self._molecule_resource
+
+    @_molecule.setter
+    def _molecule(self, value: Any) -> None:
+        self._molecule_resource = value
+
+    @property
+    def _drug_indication(self) -> Any:
+        if self._drug_indication_resource is None:
+            self._drug_indication_resource = _load_sdk_resource("drug_indication")
+        return self._drug_indication_resource
+
+    @_drug_indication.setter
+    def _drug_indication(self, value: Any) -> None:
+        self._drug_indication_resource = value
 
     def _get_executor(self) -> ThreadPoolExecutor:
         """Get or create the thread pool executor."""
