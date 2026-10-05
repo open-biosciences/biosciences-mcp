@@ -43,6 +43,8 @@ async def search_targets(
 
     Returns ranked candidates for resolution. Use this before calling get_target.
 
+    PaginationEnvelope with target candidates, or ErrorEnvelope on failure.
+
     Args:
         query: Search term (gene symbol, name, or natural language query).
                Minimum 2 characters required.
@@ -50,9 +52,6 @@ async def search_targets(
               Default false returns full candidates.
         cursor: Opaque cursor for pagination. Pass from previous response for next page.
         page_size: Number of results per page (1-100, default 50).
-
-    Returns:
-        PaginationEnvelope with target candidates, or ErrorEnvelope on failure.
     """
     client = await get_client()
     return await client.search_targets(
@@ -70,12 +69,11 @@ async def get_target(ensembl_id: str, slim: bool = False) -> dict | ErrorEnvelop
     Returns full Agentic Biolink entity with cross-references.
     Requires resolved CURIE from search_targets.
 
+    Target record with cross_references, or ErrorEnvelope on failure.
+
     Args:
         ensembl_id: Ensembl gene ID CURIE in format 'ENSG[0-9]{11}' (e.g., 'ENSG00000141510').
         slim: If true, return minimal fields for token efficiency.
-
-    Returns:
-        Target record with cross_references, or ErrorEnvelope on failure.
     """
     client = await get_client()
     return await client.get_target(ensembl_id=ensembl_id, slim=slim)
@@ -90,14 +88,13 @@ async def get_associations(
 ) -> PaginationEnvelope | ErrorEnvelope:
     """Get target-disease associations with evidence.
 
+    PaginationEnvelope with association records, or ErrorEnvelope on failure.
+
     Args:
         target_id: Ensembl gene ID CURIE.
         disease_id: Optional EFO disease ID to filter associations.
         cursor: Opaque cursor for pagination.
         page_size: Number of results per page (1-100, default 50).
-
-    Returns:
-        PaginationEnvelope with association records, or ErrorEnvelope on failure.
     """
     client = await get_client()
     return await client.get_associations(

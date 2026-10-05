@@ -1,0 +1,1684 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.9, pytest-9.1.1, pluggy-1.6.0 -- /tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/bin/python
+rootdir: /home/donbr/open-biosciences/biosciences-mcp/.worktrees/implement-015-core
+configfile: pyproject.toml
+plugins: anyio-4.15.1, asyncio-1.4.0, timeout-2.4.0, platformdirs-4.12.2
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 60.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 335 items / 243 deselected / 92 selected
+
+tests/contract/test_wire_contracts.py::test_strict_tool_rejects_raw_string_with_error_envelope[hgnc.get_gene] PASSED [  1%]
+tests/contract/test_wire_contracts.py::test_strict_tool_rejects_raw_string_with_error_envelope[uniprot.get_protein] PASSED [  2%]
+tests/contract/test_wire_contracts.py::test_strict_tool_rejects_raw_string_with_error_envelope[chembl.get_compound] PASSED [  3%]
+tests/contract/test_wire_contracts.py::test_strict_tool_rejects_raw_string_with_error_envelope[opentargets.get_target] PASSED [  4%]
+tests/contract/test_wire_contracts.py::test_strict_tool_rejects_raw_string_with_error_envelope[string.get_interactions] PASSED [  5%]
+tests/contract/test_wire_contracts.py::test_strict_tool_rejects_raw_string_with_error_envelope[ensembl.get_gene] PASSED [  6%]
+tests/contract/test_wire_contracts.py::test_strict_tool_rejects_raw_string_with_error_envelope[entrez.get_gene] PASSED [  7%]
+tests/contract/test_wire_contracts.py::test_strict_tool_rejects_raw_string_with_error_envelope[pubchem.get_compound] PASSED [  8%]
+tests/contract/test_wire_contracts.py::test_strict_tool_rejects_raw_string_with_error_envelope[iuphar.get_ligand] PASSED [  9%]
+tests/contract/test_wire_contracts.py::test_strict_tool_rejects_raw_string_with_error_envelope[iuphar.get_target] PASSED [ 10%]
+tests/contract/test_wire_contracts.py::test_strict_tool_rejects_raw_string_with_error_envelope[wikipathways.get_pathway] PASSED [ 11%]
+tests/contract/test_wire_contracts.py::test_strict_tool_rejects_raw_string_with_error_envelope[clinicaltrials.get_trial] PASSED [ 13%]
+tests/contract/test_wire_contracts.py::test_strict_tool_rejects_raw_string_with_error_envelope[drugbank.get_drug] SKIPPED [ 14%]
+tests/contract/test_wire_contracts.py::test_list_tool_returns_pagination_envelope[hgnc.search_genes] PASSED [ 15%]
+tests/contract/test_wire_contracts.py::test_list_tool_returns_pagination_envelope[uniprot.search_proteins] PASSED [ 16%]
+tests/contract/test_wire_contracts.py::test_list_tool_returns_pagination_envelope[chembl.search_compounds] PASSED [ 17%]
+tests/contract/test_wire_contracts.py::test_list_tool_returns_pagination_envelope[opentargets.search_targets] PASSED [ 18%]
+tests/contract/test_wire_contracts.py::test_list_tool_returns_pagination_envelope[string.search_proteins] PASSED [ 19%]
+tests/contract/test_wire_contracts.py::test_list_tool_returns_pagination_envelope[biogrid.search_genes] PASSED [ 20%]
+tests/contract/test_wire_contracts.py::test_list_tool_returns_pagination_envelope[ensembl.search_genes] FAILED [ 21%]
+tests/contract/test_wire_contracts.py::test_list_tool_returns_pagination_envelope[entrez.search_genes] PASSED [ 22%]
+tests/contract/test_wire_contracts.py::test_list_tool_returns_pagination_envelope[pubchem.search_compounds] PASSED [ 23%]
+tests/contract/test_wire_contracts.py::test_list_tool_returns_pagination_envelope[iuphar.search_ligands] FAILED [ 25%]
+tests/contract/test_wire_contracts.py::test_list_tool_returns_pagination_envelope[iuphar.search_targets] FAILED [ 26%]
+tests/contract/test_wire_contracts.py::test_list_tool_returns_pagination_envelope[wikipathways.search_pathways] PASSED [ 27%]
+tests/contract/test_wire_contracts.py::test_list_tool_returns_pagination_envelope[clinicaltrials.search_trials] PASSED [ 28%]
+tests/contract/test_wire_contracts.py::test_list_tool_returns_pagination_envelope[drugbank.search_drugs] SKIPPED [ 29%]
+tests/contract/test_wire_contracts.py::test_list_items_have_no_null_values[hgnc.search_genes] PASSED [ 30%]
+tests/contract/test_wire_contracts.py::test_list_items_have_no_null_values[uniprot.search_proteins] PASSED [ 31%]
+tests/contract/test_wire_contracts.py::test_list_items_have_no_null_values[chembl.search_compounds] PASSED [ 32%]
+tests/contract/test_wire_contracts.py::test_list_items_have_no_null_values[opentargets.search_targets] PASSED [ 33%]
+tests/contract/test_wire_contracts.py::test_list_items_have_no_null_values[string.search_proteins] PASSED [ 34%]
+tests/contract/test_wire_contracts.py::test_list_items_have_no_null_values[biogrid.search_genes] PASSED [ 35%]
+tests/contract/test_wire_contracts.py::test_list_items_have_no_null_values[ensembl.search_genes] PASSED [ 36%]
+tests/contract/test_wire_contracts.py::test_list_items_have_no_null_values[entrez.search_genes] PASSED [ 38%]
+tests/contract/test_wire_contracts.py::test_list_items_have_no_null_values[pubchem.search_compounds] PASSED [ 39%]
+tests/contract/test_wire_contracts.py::test_list_items_have_no_null_values[iuphar.search_ligands] FAILED [ 40%]
+tests/contract/test_wire_contracts.py::test_list_items_have_no_null_values[iuphar.search_targets] FAILED [ 41%]
+tests/contract/test_wire_contracts.py::test_list_items_have_no_null_values[wikipathways.search_pathways] PASSED [ 42%]
+tests/contract/test_wire_contracts.py::test_list_items_have_no_null_values[clinicaltrials.search_trials] PASSED [ 43%]
+tests/contract/test_wire_contracts.py::test_list_items_have_no_null_values[drugbank.search_drugs] SKIPPED [ 44%]
+tests/contract/test_wire_contracts.py::test_entity_has_no_null_values[hgnc.get_gene] PASSED [ 45%]
+tests/contract/test_wire_contracts.py::test_entity_has_no_null_values[uniprot.get_protein] PASSED [ 46%]
+tests/contract/test_wire_contracts.py::test_entity_has_no_null_values[chembl.get_compound] PASSED [ 47%]
+tests/contract/test_wire_contracts.py::test_entity_has_no_null_values[opentargets.get_target] PASSED [ 48%]
+tests/contract/test_wire_contracts.py::test_entity_has_no_null_values[string.get_interactions] PASSED [ 50%]
+tests/contract/test_wire_contracts.py::test_entity_has_no_null_values[biogrid.get_interactions] PASSED [ 51%]
+tests/contract/test_wire_contracts.py::test_entity_has_no_null_values[ensembl.get_gene] PASSED [ 52%]
+tests/contract/test_wire_contracts.py::test_entity_has_no_null_values[entrez.get_gene] PASSED [ 53%]
+tests/contract/test_wire_contracts.py::test_entity_has_no_null_values[pubchem.get_compound] PASSED [ 54%]
+tests/contract/test_wire_contracts.py::test_entity_has_no_null_values[iuphar.get_ligand] FAILED [ 55%]
+tests/contract/test_wire_contracts.py::test_entity_has_no_null_values[iuphar.get_target] FAILED [ 56%]
+tests/contract/test_wire_contracts.py::test_entity_has_no_null_values[wikipathways.get_pathway] PASSED [ 57%]
+tests/contract/test_wire_contracts.py::test_entity_has_no_null_values[clinicaltrials.get_trial] PASSED [ 58%]
+tests/contract/test_wire_contracts.py::test_entity_has_no_null_values[drugbank.get_drug] SKIPPED [ 59%]
+tests/contract/test_wire_contracts.py::test_entity_cross_references_conform_to_registry[hgnc.get_gene] PASSED [ 60%]
+tests/contract/test_wire_contracts.py::test_entity_cross_references_conform_to_registry[uniprot.get_protein] PASSED [ 61%]
+tests/contract/test_wire_contracts.py::test_entity_cross_references_conform_to_registry[chembl.get_compound] PASSED [ 63%]
+tests/contract/test_wire_contracts.py::test_entity_cross_references_conform_to_registry[opentargets.get_target] PASSED [ 64%]
+tests/contract/test_wire_contracts.py::test_entity_cross_references_conform_to_registry[string.get_interactions] PASSED [ 65%]
+tests/contract/test_wire_contracts.py::test_entity_cross_references_conform_to_registry[biogrid.get_interactions] PASSED [ 66%]
+tests/contract/test_wire_contracts.py::test_entity_cross_references_conform_to_registry[ensembl.get_gene] PASSED [ 67%]
+tests/contract/test_wire_contracts.py::test_entity_cross_references_conform_to_registry[entrez.get_gene] PASSED [ 68%]
+tests/contract/test_wire_contracts.py::test_entity_cross_references_conform_to_registry[pubchem.get_compound] PASSED [ 69%]
+tests/contract/test_wire_contracts.py::test_entity_cross_references_conform_to_registry[iuphar.get_ligand] FAILED [ 70%]
+tests/contract/test_wire_contracts.py::test_entity_cross_references_conform_to_registry[iuphar.get_target] FAILED [ 71%]
+tests/contract/test_wire_contracts.py::test_entity_cross_references_conform_to_registry[wikipathways.get_pathway] XFAIL [ 72%]
+tests/contract/test_wire_contracts.py::test_entity_cross_references_conform_to_registry[clinicaltrials.get_trial] XFAIL [ 73%]
+tests/contract/test_wire_contracts.py::test_entity_cross_references_conform_to_registry[drugbank.get_drug] SKIPPED [ 75%]
+tests/integration/test_competency_questions_mcp.py::test_cq1_target_resolvability FAILED [ 76%]
+tests/integration/test_competency_questions_mcp.py::test_cq2_cross_domain_mapping FAILED [ 77%]
+tests/integration/test_competency_questions_mcp.py::test_cq3_therapeutic_insight FAILED [ 78%]
+tests/integration/test_competency_questions_mcp.py::test_cq4_protein_interaction_network FAILED [ 79%]
+tests/integration/test_competency_questions_mcp.py::test_cq5_kras_synthetic_lethality FAILED [ 80%]
+tests/integration/test_competency_questions_mcp.py::test_cq6_fusion_protein_therapy FAILED [ 81%]
+tests/integration/test_competency_questions_mcp.py::test_cq7_pathway_mechanism_analysis FAILED [ 82%]
+tests/integration/test_competency_questions_mcp.py::test_cq8_clinical_trial_landscape SKIPPED [ 83%]
+tests/integration/test_competency_questions_mcp.py::test_cq9_paralog_dependency FAILED [ 84%]
+tests/integration/test_competency_questions_mcp.py::test_cq10_drug_repurposing FAILED [ 85%]
+tests/integration/test_competency_questions_mcp.py::test_cq11_genomic_location FAILED [ 86%]
+tests/integration/test_competency_questions_mcp.py::test_cq12_molecular_structure FAILED [ 88%]
+tests/integration/test_competency_questions_mcp.py::test_cq13_pathway_drug_discovery FAILED [ 89%]
+tests/integration/test_competency_questions_mcp.py::test_cq14_cell_therapy_mechanism FAILED [ 90%]
+tests/integration/test_competency_questions_mcp.py::test_cq15_neuro_immunology_targets FAILED [ 91%]
+tests/integration/test_competency_questions_mcp.py::test_cq16_advanced_mutation_targeting SKIPPED [ 92%]
+tests/integration/test_competency_questions_mcp.py::test_cq17_novel_alzheimers_mechanisms FAILED [ 93%]
+tests/integration/test_competency_questions_mcp.py::test_cq18_protein_details FAILED [ 94%]
+tests/integration/test_competency_questions_mcp.py::test_cq19_batch_operations FAILED [ 95%]
+tests/integration/test_competency_questions_mcp.py::test_cq20_pathway_components FAILED [ 96%]
+tests/integration/test_competency_questions_mcp.py::test_cq21_trial_details SKIPPED [ 97%]
+tests/integration/test_competency_questions_mcp.py::test_cq22_literature_links FAILED [ 98%]
+tests/integration/test_competency_questions_mcp.py::test_cq23_gene_pathway_mapping FAILED [100%]
+
+=================================== FAILURES ===================================
+_______ test_list_tool_returns_pagination_envelope[ensembl.search_genes] _______
+
+wire_call = <function wire_call.<locals>._call at 0x78a01ed0ede0>
+server_name = 'ensembl'
+case = ListCase(tool='search_genes', args={'query': 'TP53', 'page_size': 2})
+
+    @pytest.mark.parametrize("server_name,case", list_params())
+    async def test_list_tool_returns_pagination_envelope(
+        wire_call, server_name: str, case: ListCase
+    ) -> None:
+        """ADR-001 §8A: list tools wrap items in the canonical pagination envelope."""
+        result = await wire_call(server_name, case.tool, case.args)
+        assert isinstance(result.data, dict), f"not JSON: {result.text[:200]}"
+>       assert "items" in result.data and isinstance(result.data["items"], list), result.text[:300]
+E       AssertionError: {"success":false,"error":{"code":"UPSTREAM_ERROR","message":"Request to Ensembl API timed out.","recovery_hint":"Retry after a short delay."}}
+E       assert ('items' in {'success': False, 'error': {'code': 'UPSTREAM_ERROR', 'message': 'Request to Ensembl API timed out.', 'recovery_hint': 'Retry after a short delay.'}})
+E        +  where {'success': False, 'error': {'code': 'UPSTREAM_ERROR', 'message': 'Request to Ensembl API timed out.', 'recovery_hint': 'Retry after a short delay.'}} = WireResult(text='{"success":false,"error":{"code":"UPSTREAM_ERROR","message":"Request to Ensembl API timed out.","recovery_hint":"Retry after a short delay."}}', data={'success': False, 'error': {'code': 'UPSTREAM_ERROR', 'message': 'Request to Ensembl API timed out.', 'recovery_hint': 'Retry after a short delay.'}}, structured={'result': {'success': False, 'error': {'code': 'UPSTREAM_ERROR', 'message': 'Request to Ensembl API timed out.', 'recovery_hint': 'Retry after a short delay.'}}}, is_error=False).data
+
+tests/contract/test_wire_contracts.py:91: AssertionError
+______ test_list_tool_returns_pagination_envelope[iuphar.search_ligands] _______
+
+wire_call = <function wire_call.<locals>._call at 0x78a01ed349a0>
+server_name = 'iuphar'
+case = ListCase(tool='search_ligands', args={'query': 'morphine', 'page_size': 2})
+
+    @pytest.mark.parametrize("server_name,case", list_params())
+    async def test_list_tool_returns_pagination_envelope(
+        wire_call, server_name: str, case: ListCase
+    ) -> None:
+        """ADR-001 §8A: list tools wrap items in the canonical pagination envelope."""
+        result = await wire_call(server_name, case.tool, case.args)
+>       assert isinstance(result.data, dict), f"not JSON: {result.text[:200]}"
+E       AssertionError: not JSON: Error calling tool 'search_ligands': API error: 401
+E       assert False
+E        +  where False = isinstance(None, dict)
+E        +    where None = WireResult(text="Error calling tool 'search_ligands': API error: 401", data=None, structured=None, is_error=True).data
+
+tests/contract/test_wire_contracts.py:90: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[10/02/26 00:45:42] Error calling tool 'search_ligands'                         
+                    ╭─────────── Traceback (most recent call last) ────────────╮
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/fastm │
+                    │ cp/server/server.py:1312 in call_tool                    │
+                    │                                                          │
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/fastm │
+                    │ cp/tools/base.py:421 in _run                             │
+                    │                                                          │
+                    │                 ... 4 frames hidden ...                  │
+                    │                                                          │
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/biosc │
+                    │ iences_mcp/clients/iuphar.py:337 in search_ligands       │
+                    │                                                          │
+                    │   334 │   │   page_size = min(page_size, 100)            │
+                    │   335 │   │                                              │
+                    │   336 │   │   # Fetch all matching ligands               │
+                    │ ❱ 337 │   │   ligands = await self._fetch_ligands(       │
+                    │   338 │   │   │   name=query, type_filter=type_filter, a │
+                    │   339 │   │   )                                          │
+                    │   340                                                    │
+                    │                                                          │
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/biosc │
+                    │ iences_mcp/clients/iuphar.py:277 in _fetch_ligands       │
+                    │                                                          │
+                    │   274 │   │                                              │
+                    │   275 │   │   # Handle errors                            │
+                    │   276 │   │   if response.status_code != 200:            │
+                    │ ❱ 277 │   │   │   raise ValueError(f"API error: {respons │
+                    │   278 │   │                                              │
+                    │   279 │   │   return response.json()                     │
+                    │   280                                                    │
+                    ╰──────────────────────────────────────────────────────────╯
+                    ValueError: API error: 401                                  
+------------------------------ Captured log call -------------------------------
+ERROR    fastmcp.server.server:server.py:1343 Error calling tool 'search_ligands'
+Traceback (most recent call last):
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/server.py", line 1312, in call_tool
+    return await tool._run(arguments or {}, task_meta=task_meta)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/base.py", line 421, in _run
+    return await self.run(arguments)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py", line 418, in run
+    result = await self._execute(type_adapter, exec_is_async, arguments)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py", line 465, in _execute
+    result = await result
+             ^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py", line 88, in wrapper
+    return await fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/servers/iuphar.py", line 125, in search_ligands
+    return await client.search_ligands(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/clients/iuphar.py", line 337, in search_ligands
+    ligands = await self._fetch_ligands(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/clients/iuphar.py", line 277, in _fetch_ligands
+    raise ValueError(f"API error: {response.status_code}")
+ValueError: API error: 401
+______ test_list_tool_returns_pagination_envelope[iuphar.search_targets] _______
+
+wire_call = <function wire_call.<locals>._call at 0x78a01ed34d60>
+server_name = 'iuphar'
+case = ListCase(tool='search_targets', args={'query': 'opioid', 'page_size': 2})
+
+    @pytest.mark.parametrize("server_name,case", list_params())
+    async def test_list_tool_returns_pagination_envelope(
+        wire_call, server_name: str, case: ListCase
+    ) -> None:
+        """ADR-001 §8A: list tools wrap items in the canonical pagination envelope."""
+        result = await wire_call(server_name, case.tool, case.args)
+>       assert isinstance(result.data, dict), f"not JSON: {result.text[:200]}"
+E       AssertionError: not JSON: Error calling tool 'search_targets': API error: 401
+E       assert False
+E        +  where False = isinstance(None, dict)
+E        +    where None = WireResult(text="Error calling tool 'search_targets': API error: 401", data=None, structured=None, is_error=True).data
+
+tests/contract/test_wire_contracts.py:90: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[10/02/26 00:45:43] Error calling tool 'search_targets'                         
+                    ╭─────────── Traceback (most recent call last) ────────────╮
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/fastm │
+                    │ cp/server/server.py:1312 in call_tool                    │
+                    │                                                          │
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/fastm │
+                    │ cp/tools/base.py:421 in _run                             │
+                    │                                                          │
+                    │                 ... 4 frames hidden ...                  │
+                    │                                                          │
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/biosc │
+                    │ iences_mcp/clients/iuphar.py:557 in search_targets       │
+                    │                                                          │
+                    │   554 │   │   page_size = min(page_size, 100)            │
+                    │   555 │   │                                              │
+                    │   556 │   │   # Fetch all matching targets               │
+                    │ ❱ 557 │   │   targets = await self._fetch_targets(name=q │
+                    │   558 │   │                                              │
+                    │   559 │   │   # Client-side pagination                   │
+                    │   560 │   │   offset = self._decode_cursor(cursor) if cu │
+                    │                                                          │
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/biosc │
+                    │ iences_mcp/clients/iuphar.py:522 in _fetch_targets       │
+                    │                                                          │
+                    │   519 │   │                                              │
+                    │   520 │   │   # Handle other errors                      │
+                    │   521 │   │   if response.status_code != 200:            │
+                    │ ❱ 522 │   │   │   raise ValueError(f"API error: {respons │
+                    │   523 │   │                                              │
+                    │   524 │   │   return response.json()                     │
+                    │   525                                                    │
+                    ╰──────────────────────────────────────────────────────────╯
+                    ValueError: API error: 401                                  
+------------------------------ Captured log call -------------------------------
+ERROR    fastmcp.server.server:server.py:1343 Error calling tool 'search_targets'
+Traceback (most recent call last):
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/server.py", line 1312, in call_tool
+    return await tool._run(arguments or {}, task_meta=task_meta)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/base.py", line 421, in _run
+    return await self.run(arguments)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py", line 418, in run
+    result = await self._execute(type_adapter, exec_is_async, arguments)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py", line 465, in _execute
+    result = await result
+             ^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py", line 88, in wrapper
+    return await fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/servers/iuphar.py", line 288, in search_targets
+    return await client.search_targets(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/clients/iuphar.py", line 557, in search_targets
+    targets = await self._fetch_targets(name=query, type_filter=type_filter)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/clients/iuphar.py", line 522, in _fetch_targets
+    raise ValueError(f"API error: {response.status_code}")
+ValueError: API error: 401
+__________ test_list_items_have_no_null_values[iuphar.search_ligands] __________
+
+wire_call = <function wire_call.<locals>._call at 0x78a01d5ca340>
+server_name = 'iuphar'
+case = ListCase(tool='search_ligands', args={'query': 'morphine', 'page_size': 2})
+
+    @pytest.mark.parametrize("server_name,case", list_params())
+    async def test_list_items_have_no_null_values(wire_call, server_name: str, case: ListCase) -> None:
+        """ADR-001 §4 null policy applies to every candidate in a list."""
+        result = await wire_call(server_name, case.tool, case.args)
+>       assert isinstance(result.data, dict), f"not JSON: {result.text[:200]}"
+E       AssertionError: not JSON: Error calling tool 'search_ligands': API error: 401
+E       assert False
+E        +  where False = isinstance(None, dict)
+E        +    where None = WireResult(text="Error calling tool 'search_ligands': API error: 401", data=None, structured=None, is_error=True).data
+
+tests/contract/test_wire_contracts.py:102: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[10/02/26 00:45:58] Error calling tool 'search_ligands'                         
+                    ╭─────────── Traceback (most recent call last) ────────────╮
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/fastm │
+                    │ cp/server/server.py:1312 in call_tool                    │
+                    │                                                          │
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/fastm │
+                    │ cp/tools/base.py:421 in _run                             │
+                    │                                                          │
+                    │                 ... 4 frames hidden ...                  │
+                    │                                                          │
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/biosc │
+                    │ iences_mcp/clients/iuphar.py:337 in search_ligands       │
+                    │                                                          │
+                    │   334 │   │   page_size = min(page_size, 100)            │
+                    │   335 │   │                                              │
+                    │   336 │   │   # Fetch all matching ligands               │
+                    │ ❱ 337 │   │   ligands = await self._fetch_ligands(       │
+                    │   338 │   │   │   name=query, type_filter=type_filter, a │
+                    │   339 │   │   )                                          │
+                    │   340                                                    │
+                    │                                                          │
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/biosc │
+                    │ iences_mcp/clients/iuphar.py:277 in _fetch_ligands       │
+                    │                                                          │
+                    │   274 │   │                                              │
+                    │   275 │   │   # Handle errors                            │
+                    │   276 │   │   if response.status_code != 200:            │
+                    │ ❱ 277 │   │   │   raise ValueError(f"API error: {respons │
+                    │   278 │   │                                              │
+                    │   279 │   │   return response.json()                     │
+                    │   280                                                    │
+                    ╰──────────────────────────────────────────────────────────╯
+                    ValueError: API error: 401                                  
+------------------------------ Captured log call -------------------------------
+ERROR    fastmcp.server.server:server.py:1343 Error calling tool 'search_ligands'
+Traceback (most recent call last):
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/server.py", line 1312, in call_tool
+    return await tool._run(arguments or {}, task_meta=task_meta)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/base.py", line 421, in _run
+    return await self.run(arguments)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py", line 418, in run
+    result = await self._execute(type_adapter, exec_is_async, arguments)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py", line 465, in _execute
+    result = await result
+             ^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py", line 88, in wrapper
+    return await fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/servers/iuphar.py", line 125, in search_ligands
+    return await client.search_ligands(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/clients/iuphar.py", line 337, in search_ligands
+    ligands = await self._fetch_ligands(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/clients/iuphar.py", line 277, in _fetch_ligands
+    raise ValueError(f"API error: {response.status_code}")
+ValueError: API error: 401
+__________ test_list_items_have_no_null_values[iuphar.search_targets] __________
+
+wire_call = <function wire_call.<locals>._call at 0x78a01d5c8f40>
+server_name = 'iuphar'
+case = ListCase(tool='search_targets', args={'query': 'opioid', 'page_size': 2})
+
+    @pytest.mark.parametrize("server_name,case", list_params())
+    async def test_list_items_have_no_null_values(wire_call, server_name: str, case: ListCase) -> None:
+        """ADR-001 §4 null policy applies to every candidate in a list."""
+        result = await wire_call(server_name, case.tool, case.args)
+>       assert isinstance(result.data, dict), f"not JSON: {result.text[:200]}"
+E       AssertionError: not JSON: Error calling tool 'search_targets': API error: 401
+E       assert False
+E        +  where False = isinstance(None, dict)
+E        +    where None = WireResult(text="Error calling tool 'search_targets': API error: 401", data=None, structured=None, is_error=True).data
+
+tests/contract/test_wire_contracts.py:102: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[10/02/26 00:45:59] Error calling tool 'search_targets'                         
+                    ╭─────────── Traceback (most recent call last) ────────────╮
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/fastm │
+                    │ cp/server/server.py:1312 in call_tool                    │
+                    │                                                          │
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/fastm │
+                    │ cp/tools/base.py:421 in _run                             │
+                    │                                                          │
+                    │                 ... 4 frames hidden ...                  │
+                    │                                                          │
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/biosc │
+                    │ iences_mcp/clients/iuphar.py:557 in search_targets       │
+                    │                                                          │
+                    │   554 │   │   page_size = min(page_size, 100)            │
+                    │   555 │   │                                              │
+                    │   556 │   │   # Fetch all matching targets               │
+                    │ ❱ 557 │   │   targets = await self._fetch_targets(name=q │
+                    │   558 │   │                                              │
+                    │   559 │   │   # Client-side pagination                   │
+                    │   560 │   │   offset = self._decode_cursor(cursor) if cu │
+                    │                                                          │
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/biosc │
+                    │ iences_mcp/clients/iuphar.py:522 in _fetch_targets       │
+                    │                                                          │
+                    │   519 │   │                                              │
+                    │   520 │   │   # Handle other errors                      │
+                    │   521 │   │   if response.status_code != 200:            │
+                    │ ❱ 522 │   │   │   raise ValueError(f"API error: {respons │
+                    │   523 │   │                                              │
+                    │   524 │   │   return response.json()                     │
+                    │   525                                                    │
+                    ╰──────────────────────────────────────────────────────────╯
+                    ValueError: API error: 401                                  
+------------------------------ Captured log call -------------------------------
+ERROR    fastmcp.server.server:server.py:1343 Error calling tool 'search_targets'
+Traceback (most recent call last):
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/server.py", line 1312, in call_tool
+    return await tool._run(arguments or {}, task_meta=task_meta)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/base.py", line 421, in _run
+    return await self.run(arguments)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py", line 418, in run
+    result = await self._execute(type_adapter, exec_is_async, arguments)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py", line 465, in _execute
+    result = await result
+             ^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py", line 88, in wrapper
+    return await fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/servers/iuphar.py", line 288, in search_targets
+    return await client.search_targets(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/clients/iuphar.py", line 557, in search_targets
+    targets = await self._fetch_targets(name=query, type_filter=type_filter)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/clients/iuphar.py", line 522, in _fetch_targets
+    raise ValueError(f"API error: {response.status_code}")
+ValueError: API error: 401
+______________ test_entity_has_no_null_values[iuphar.get_ligand] _______________
+
+wire_call = <function wire_call.<locals>._call at 0x78a01d08f9c0>
+server_name = 'iuphar'
+case = StrictCase(tool='get_ligand', arg='iuphar_id', curie='IUPHAR:2713', raw='morphine', extra={}, has_cross_references=True)
+
+    @pytest.mark.parametrize("server_name,case", strict_params())
+    async def test_entity_has_no_null_values(wire_call, server_name: str, case: StrictCase) -> None:
+        """ADR-001 §4 / Constitution Forbidden Patterns: omit keys, never emit null."""
+        result = await wire_call(server_name, case.tool, {case.arg: case.curie, **case.extra})
+>       assert isinstance(result.data, dict), f"not JSON: {result.text[:200]}"
+E       AssertionError: not JSON: Error calling tool 'get_ligand': API error: 401
+E       assert False
+E        +  where False = isinstance(None, dict)
+E        +    where None = WireResult(text="Error calling tool 'get_ligand': API error: 401", data=None, structured=None, is_error=True).data
+
+tests/contract/test_wire_contracts.py:111: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[10/02/26 00:46:31] Error calling tool 'get_ligand'                             
+                    ╭─────────── Traceback (most recent call last) ────────────╮
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/fastm │
+                    │ cp/server/server.py:1312 in call_tool                    │
+                    │                                                          │
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/fastm │
+                    │ cp/tools/base.py:421 in _run                             │
+                    │                                                          │
+                    │                 ... 4 frames hidden ...                  │
+                    │                                                          │
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/biosc │
+                    │ iences_mcp/clients/iuphar.py:445 in get_ligand           │
+                    │                                                          │
+                    │   442 │   │                                              │
+                    │   443 │   │   # Fetch ligand detail and cross-references │
+                    │   444 │   │   try:                                       │
+                    │ ❱ 445 │   │   │   ligand_data = await self._fetch_ligand │
+                    │   446 │   │   │   db_links = await self._fetch_ligand_db │
+                    │   447 │   │   │   synonyms = await self._fetch_ligand_sy │
+                    │   448 │   │   except ValueError as e:                    │
+                    │                                                          │
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/biosc │
+                    │ iences_mcp/clients/iuphar.py:390 in _fetch_ligand_detail │
+                    │                                                          │
+                    │   387 │   │   │   raise ValueError(f"Ligand not found: { │
+                    │   388 │   │                                              │
+                    │   389 │   │   if response.status_code != 200:            │
+                    │ ❱ 390 │   │   │   raise ValueError(f"API error: {respons │
+                    │   391 │   │                                              │
+                    │   392 │   │   return response.json()                     │
+                    │   393                                                    │
+                    ╰──────────────────────────────────────────────────────────╯
+                    ValueError: API error: 401                                  
+------------------------------ Captured log call -------------------------------
+ERROR    fastmcp.server.server:server.py:1343 Error calling tool 'get_ligand'
+Traceback (most recent call last):
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/server.py", line 1312, in call_tool
+    return await tool._run(arguments or {}, task_meta=task_meta)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/base.py", line 421, in _run
+    return await self.run(arguments)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py", line 418, in run
+    result = await self._execute(type_adapter, exec_is_async, arguments)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py", line 465, in _execute
+    result = await result
+             ^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py", line 88, in wrapper
+    return await fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/servers/iuphar.py", line 200, in get_ligand
+    return await client.get_ligand(iuphar_id=iuphar_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/clients/iuphar.py", line 445, in get_ligand
+    ligand_data = await self._fetch_ligand_detail(ligand_id)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/clients/iuphar.py", line 390, in _fetch_ligand_detail
+    raise ValueError(f"API error: {response.status_code}")
+ValueError: API error: 401
+______________ test_entity_has_no_null_values[iuphar.get_target] _______________
+
+wire_call = <function wire_call.<locals>._call at 0x78a01d08ed40>
+server_name = 'iuphar'
+case = StrictCase(tool='get_target', arg='iuphar_id', curie='IUPHAR:319', raw='opioid', extra={}, has_cross_references=True)
+
+    @pytest.mark.parametrize("server_name,case", strict_params())
+    async def test_entity_has_no_null_values(wire_call, server_name: str, case: StrictCase) -> None:
+        """ADR-001 §4 / Constitution Forbidden Patterns: omit keys, never emit null."""
+        result = await wire_call(server_name, case.tool, {case.arg: case.curie, **case.extra})
+>       assert isinstance(result.data, dict), f"not JSON: {result.text[:200]}"
+E       AssertionError: not JSON: Error calling tool 'get_target': API error: 401
+E       assert False
+E        +  where False = isinstance(None, dict)
+E        +    where None = WireResult(text="Error calling tool 'get_target': API error: 401", data=None, structured=None, is_error=True).data
+
+tests/contract/test_wire_contracts.py:111: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[10/02/26 00:46:32] Error calling tool 'get_target'                             
+                    ╭─────────── Traceback (most recent call last) ────────────╮
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/fastm │
+                    │ cp/server/server.py:1312 in call_tool                    │
+                    │                                                          │
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/fastm │
+                    │ cp/tools/base.py:421 in _run                             │
+                    │                                                          │
+                    │                 ... 4 frames hidden ...                  │
+                    │                                                          │
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/biosc │
+                    │ iences_mcp/clients/iuphar.py:671 in get_target           │
+                    │                                                          │
+                    │   668 │   │                                              │
+                    │   669 │   │   # Fetch target detail and cross-references │
+                    │   670 │   │   try:                                       │
+                    │ ❱ 671 │   │   │   target_data = await self._fetch_target │
+                    │   672 │   │   │   db_links = await self._fetch_target_db │
+                    │   673 │   │   except ValueError as e:                    │
+                    │   674 │   │   │   if "not found" in str(e):              │
+                    │                                                          │
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/biosc │
+                    │ iences_mcp/clients/iuphar.py:616 in _fetch_target_detail │
+                    │                                                          │
+                    │   613 │   │   │   raise ValueError(f"Target not found: { │
+                    │   614 │   │                                              │
+                    │   615 │   │   if response.status_code != 200:            │
+                    │ ❱ 616 │   │   │   raise ValueError(f"API error: {respons │
+                    │   617 │   │                                              │
+                    │   618 │   │   return response.json()                     │
+                    │   619                                                    │
+                    ╰──────────────────────────────────────────────────────────╯
+                    ValueError: API error: 401                                  
+------------------------------ Captured log call -------------------------------
+ERROR    fastmcp.server.server:server.py:1343 Error calling tool 'get_target'
+Traceback (most recent call last):
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/server.py", line 1312, in call_tool
+    return await tool._run(arguments or {}, task_meta=task_meta)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/base.py", line 421, in _run
+    return await self.run(arguments)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py", line 418, in run
+    result = await self._execute(type_adapter, exec_is_async, arguments)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py", line 465, in _execute
+    result = await result
+             ^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py", line 88, in wrapper
+    return await fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/servers/iuphar.py", line 362, in get_target
+    return await client.get_target(iuphar_id=iuphar_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/clients/iuphar.py", line 671, in get_target
+    target_data = await self._fetch_target_detail(target_id)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/clients/iuphar.py", line 616, in _fetch_target_detail
+    raise ValueError(f"API error: {response.status_code}")
+ValueError: API error: 401
+_____ test_entity_cross_references_conform_to_registry[iuphar.get_ligand] ______
+
+wire_call = <function wire_call.<locals>._call at 0x78a01d08ea20>
+server_name = 'iuphar'
+case = StrictCase(tool='get_ligand', arg='iuphar_id', curie='IUPHAR:2713', raw='morphine', extra={}, has_cross_references=True)
+
+    @pytest.mark.parametrize("server_name,case", strict_params())
+    async def test_entity_cross_references_conform_to_registry(
+        wire_call, server_name: str, case: StrictCase
+    ) -> None:
+        """ADR-001 §4 mandate + Appendix A: keys, formats, and cardinality."""
+        if not case.has_cross_references:
+            pytest.skip("tool does not return an entity with cross_references")
+        result = await wire_call(server_name, case.tool, {case.arg: case.curie, **case.extra})
+>       assert isinstance(result.data, dict), f"not JSON: {result.text[:200]}"
+E       AssertionError: not JSON: Error calling tool 'get_ligand': API error: 401
+E       assert False
+E        +  where False = isinstance(None, dict)
+E        +    where None = WireResult(text="Error calling tool 'get_ligand': API error: 401", data=None, structured=None, is_error=True).data
+
+tests/contract/test_wire_contracts.py:125: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[10/02/26 00:46:48] Error calling tool 'get_ligand'                             
+                    ╭─────────── Traceback (most recent call last) ────────────╮
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/fastm │
+                    │ cp/server/server.py:1312 in call_tool                    │
+                    │                                                          │
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/fastm │
+                    │ cp/tools/base.py:421 in _run                             │
+                    │                                                          │
+                    │                 ... 4 frames hidden ...                  │
+                    │                                                          │
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/biosc │
+                    │ iences_mcp/clients/iuphar.py:445 in get_ligand           │
+                    │                                                          │
+                    │   442 │   │                                              │
+                    │   443 │   │   # Fetch ligand detail and cross-references │
+                    │   444 │   │   try:                                       │
+                    │ ❱ 445 │   │   │   ligand_data = await self._fetch_ligand │
+                    │   446 │   │   │   db_links = await self._fetch_ligand_db │
+                    │   447 │   │   │   synonyms = await self._fetch_ligand_sy │
+                    │   448 │   │   except ValueError as e:                    │
+                    │                                                          │
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/biosc │
+                    │ iences_mcp/clients/iuphar.py:390 in _fetch_ligand_detail │
+                    │                                                          │
+                    │   387 │   │   │   raise ValueError(f"Ligand not found: { │
+                    │   388 │   │                                              │
+                    │   389 │   │   if response.status_code != 200:            │
+                    │ ❱ 390 │   │   │   raise ValueError(f"API error: {respons │
+                    │   391 │   │                                              │
+                    │   392 │   │   return response.json()                     │
+                    │   393                                                    │
+                    ╰──────────────────────────────────────────────────────────╯
+                    ValueError: API error: 401                                  
+------------------------------ Captured log call -------------------------------
+ERROR    fastmcp.server.server:server.py:1343 Error calling tool 'get_ligand'
+Traceback (most recent call last):
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/server.py", line 1312, in call_tool
+    return await tool._run(arguments or {}, task_meta=task_meta)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/base.py", line 421, in _run
+    return await self.run(arguments)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py", line 418, in run
+    result = await self._execute(type_adapter, exec_is_async, arguments)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py", line 465, in _execute
+    result = await result
+             ^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py", line 88, in wrapper
+    return await fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/servers/iuphar.py", line 200, in get_ligand
+    return await client.get_ligand(iuphar_id=iuphar_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/clients/iuphar.py", line 445, in get_ligand
+    ligand_data = await self._fetch_ligand_detail(ligand_id)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/clients/iuphar.py", line 390, in _fetch_ligand_detail
+    raise ValueError(f"API error: {response.status_code}")
+ValueError: API error: 401
+_____ test_entity_cross_references_conform_to_registry[iuphar.get_target] ______
+
+wire_call = <function wire_call.<locals>._call at 0x78a01d08e0c0>
+server_name = 'iuphar'
+case = StrictCase(tool='get_target', arg='iuphar_id', curie='IUPHAR:319', raw='opioid', extra={}, has_cross_references=True)
+
+    @pytest.mark.parametrize("server_name,case", strict_params())
+    async def test_entity_cross_references_conform_to_registry(
+        wire_call, server_name: str, case: StrictCase
+    ) -> None:
+        """ADR-001 §4 mandate + Appendix A: keys, formats, and cardinality."""
+        if not case.has_cross_references:
+            pytest.skip("tool does not return an entity with cross_references")
+        result = await wire_call(server_name, case.tool, {case.arg: case.curie, **case.extra})
+>       assert isinstance(result.data, dict), f"not JSON: {result.text[:200]}"
+E       AssertionError: not JSON: Error calling tool 'get_target': API error: 401
+E       assert False
+E        +  where False = isinstance(None, dict)
+E        +    where None = WireResult(text="Error calling tool 'get_target': API error: 401", data=None, structured=None, is_error=True).data
+
+tests/contract/test_wire_contracts.py:125: AssertionError
+----------------------------- Captured stderr call -----------------------------
+[10/02/26 00:46:49] Error calling tool 'get_target'                             
+                    ╭─────────── Traceback (most recent call last) ────────────╮
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/fastm │
+                    │ cp/server/server.py:1312 in call_tool                    │
+                    │                                                          │
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/fastm │
+                    │ cp/tools/base.py:421 in _run                             │
+                    │                                                          │
+                    │                 ... 4 frames hidden ...                  │
+                    │                                                          │
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/biosc │
+                    │ iences_mcp/clients/iuphar.py:671 in get_target           │
+                    │                                                          │
+                    │   668 │   │                                              │
+                    │   669 │   │   # Fetch target detail and cross-references │
+                    │   670 │   │   try:                                       │
+                    │ ❱ 671 │   │   │   target_data = await self._fetch_target │
+                    │   672 │   │   │   db_links = await self._fetch_target_db │
+                    │   673 │   │   except ValueError as e:                    │
+                    │   674 │   │   │   if "not found" in str(e):              │
+                    │                                                          │
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/biosc │
+                    │ iences_mcp/clients/iuphar.py:616 in _fetch_target_detail │
+                    │                                                          │
+                    │   613 │   │   │   raise ValueError(f"Target not found: { │
+                    │   614 │   │                                              │
+                    │   615 │   │   if response.status_code != 200:            │
+                    │ ❱ 616 │   │   │   raise ValueError(f"API error: {respons │
+                    │   617 │   │                                              │
+                    │   618 │   │   return response.json()                     │
+                    │   619                                                    │
+                    ╰──────────────────────────────────────────────────────────╯
+                    ValueError: API error: 401                                  
+------------------------------ Captured log call -------------------------------
+ERROR    fastmcp.server.server:server.py:1343 Error calling tool 'get_target'
+Traceback (most recent call last):
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/server.py", line 1312, in call_tool
+    return await tool._run(arguments or {}, task_meta=task_meta)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/base.py", line 421, in _run
+    return await self.run(arguments)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py", line 418, in run
+    result = await self._execute(type_adapter, exec_is_async, arguments)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py", line 465, in _execute
+    result = await result
+             ^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py", line 88, in wrapper
+    return await fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/servers/iuphar.py", line 362, in get_target
+    return await client.get_target(iuphar_id=iuphar_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/clients/iuphar.py", line 671, in get_target
+    target_data = await self._fetch_target_detail(target_id)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/clients/iuphar.py", line 616, in _fetch_target_detail
+    raise ValueError(f"API error: {response.status_code}")
+ValueError: API error: 401
+________________________ test_cq1_target_resolvability _________________________
+
+    @pytest.mark.asyncio
+    async def test_cq1_target_resolvability():
+        """CQ-1: Resolve TP53 (canonical symbol) to HGNC:11998.
+    
+        MCP Tool: hgnc_search_genes
+        Note: Alias "p53" fails (known issue), use canonical symbol "TP53".
+        """
+        tool = await mcp.get_tool("hgnc_search_genes")
+        result = await tool.fn(query="TP53", page_size=5)
+        data = to_dict(result)
+    
+>       assert data["items"], "No results returned for TP53"
+               ^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:93: KeyError
+________________________ test_cq2_cross_domain_mapping _________________________
+
+    @pytest.mark.asyncio
+    async def test_cq2_cross_domain_mapping():
+        """CQ-2: Map HGNC:1100 (BRCA1) to UniProt ID P38398.
+    
+        MCP Tool: hgnc_get_gene
+        """
+        tool = await mcp.get_tool("hgnc_get_gene")
+        result = await tool.fn(hgnc_id="HGNC:1100")
+        data = to_dict(result)
+    
+>       assert data["id"] == "HGNC:1100", "Gene ID mismatch"
+               ^^^^^^^^^^
+E       KeyError: 'id'
+
+tests/integration/test_competency_questions_mcp.py:109: KeyError
+_________________________ test_cq3_therapeutic_insight _________________________
+
+    @pytest.mark.asyncio
+    async def test_cq3_therapeutic_insight():
+        """CQ-3: Find approved drugs for EGFR (Gefitinib).
+    
+        MCP Tools: opentargets_search_targets, chembl_search_compounds, chembl_get_compound
+        """
+        ot_search = await mcp.get_tool("opentargets_search_targets")
+        chembl_search = await mcp.get_tool("chembl_search_compounds")
+        chembl_get = await mcp.get_tool("chembl_get_compound")
+    
+        # Step 1: Find EGFR target
+        targets_result = await ot_search.fn(query="EGFR", page_size=5)
+        targets = to_dict(targets_result)
+>       assert targets["items"], "No EGFR targets found"
+               ^^^^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:129: KeyError
+_____________________ test_cq4_protein_interaction_network _____________________
+
+    @pytest.mark.asyncio
+    async def test_cq4_protein_interaction_network():
+        """CQ-4: Top physical interaction partners of TP53 (STRING).
+    
+        MCP Tool: string_search_proteins
+        """
+        tool = await mcp.get_tool("string_search_proteins")
+        proteins_result = await tool.fn(query="TP53", species=9606, limit=5)
+        proteins = to_dict(proteins_result)
+>       assert proteins["items"], "No TP53 results from STRING"
+               ^^^^^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:155: KeyError
+______________________ test_cq5_kras_synthetic_lethality _______________________
+
+    @pytest.mark.asyncio
+    @pytest.mark.skipif(
+        not os.getenv("BIOGRID_API_KEY"),
+        reason="BIOGRID_API_KEY not set",
+    )
+    async def test_cq5_kras_synthetic_lethality():
+        """CQ-5: KRAS interactors from BioGRID.
+    
+        MCP Tools: biogrid_search_genes, biogrid_get_interactions
+        """
+        search_tool = await mcp.get_tool("biogrid_search_genes")
+        interactions_tool = await mcp.get_tool("biogrid_get_interactions")
+    
+        # Step 1: Validate KRAS gene
+        validation_result = await search_tool.fn(query="KRAS")
+        validation = to_dict(validation_result)
+>       assert validation["items"], "KRAS not found"
+               ^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:178: KeyError
+_______________________ test_cq6_fusion_protein_therapy ________________________
+
+self = FastMCP('IUPHAR/GtoPdb'), name = 'search_ligands'
+arguments = {'query': 'Crizotinib', 'page_size': 5}, version = None
+run_middleware = False, task_meta = None
+
+    async def call_tool(
+        self,
+        name: str,
+        arguments: dict[str, Any] | None = None,
+        *,
+        version: VersionSpec | None = None,
+        run_middleware: bool = True,
+        task_meta: TaskMeta | None = None,
+    ) -> ToolResult | mcp.types.CreateTaskResult:
+        """Call a tool by name.
+    
+        This is the public API for executing tools. By default, middleware is applied.
+    
+        Args:
+            name: The tool name
+            arguments: Tool arguments (optional)
+            version: Specific version to call. If None, calls highest version.
+            run_middleware: If True (default), apply the middleware chain.
+                Set to False when called from middleware to avoid re-applying.
+            task_meta: If provided, execute as a background task and return
+                CreateTaskResult. If None (default), execute synchronously and
+                return ToolResult.
+    
+        Returns:
+            ToolResult when task_meta is None.
+            CreateTaskResult when task_meta is provided.
+    
+        Raises:
+            NotFoundError: If tool not found or disabled
+            ToolError: If tool execution fails
+            ValidationError: If arguments fail validation
+        """
+        # Note: fn_key enrichment happens here after finding the tool.
+        # For mounted servers, the parent's provider sets fn_key to the
+        # namespaced key before delegating, ensuring correct Docket routing.
+    
+        from fastmcp.server.providers.addressing import (
+            parse_hashed_backend_name,
+        )
+    
+        # Two routing paths:
+        #   1. Hashed-name path — backend tools that opted into
+        #      app-callable visibility. Recognized by their
+        #      `<hash>_<local_name>` format and resolved via the
+        #      reverse-hash map. Address is known eagerly.
+        #   2. Display-name path — everything else. Goes through normal
+        #      `get_tool` aggregation/transforms. Address is determined
+        #      after resolution by walking the registry.
+        async with fastmcp.server.context.Context(fastmcp=self) as ctx:
+            if run_middleware:
+                mw_context = MiddlewareContext[CallToolRequestParams](
+                    message=mcp.types.CallToolRequestParams(
+                        name=name,
+                        arguments=arguments or {},
+                        _meta=_version_request_meta(version),  # type: ignore[unknown-argument]  # pydantic alias
+                    ),
+                    source="client",
+                    type="request",
+                    method="tools/call",
+                    fastmcp_context=ctx,
+                )
+                return await self._run_middleware(
+                    context=mw_context,
+                    call_next=lambda context: self.call_tool(
+                        context.message.name,
+                        context.message.arguments or {},
+                        version=version,
+                        run_middleware=False,
+                        task_meta=task_meta,
+                    ),
+                )
+    
+            # Core logic: find and execute tool
+            with server_span(
+                f"tools/call {name}",
+                "tools/call",
+                self.name,
+                "tool",
+                name,
+                tool_name=name,
+            ) as span:
+                # Try normal display-name resolution first.
+                tool: Tool | None = await self.get_tool(name, version=version)
+    
+                # If that fails, try hashed-name dispatch. This walks
+                # the provider tree recursively (same pattern as the old
+                # get_app_tool) looking for a tool whose stored hash
+                # matches the parsed prefix.
+                if tool is None:
+                    hashed = parse_hashed_backend_name(name)
+                    if hashed is not None:
+                        digest, local_name = hashed
+                        tool = await self.get_tool_by_hash(digest, local_name)
+                        if tool is not None:
+                            # Auth still applies on the bypass path.
+                            skip_auth, token = _get_auth_context()
+                            if not skip_auth and tool.auth is not None:
+                                try:
+                                    auth_ctx = AuthContext(token=token, component=tool)
+                                    if not await run_auth_checks(tool.auth, auth_ctx):
+                                        raise NotFoundError(f"Unknown tool: {name!r}")
+                                except AuthorizationError:
+                                    raise NotFoundError(
+                                        f"Unknown tool: {name!r}"
+                                    ) from None
+    
+                if tool is None:
+                    raise NotFoundError(f"Unknown tool: {name!r}")
+                span.set_attributes(tool.get_span_attributes())
+                if task_meta is not None and task_meta.fn_key is None:
+                    task_meta = replace(task_meta, fn_key=tool.key)
+                try:
+>                   return await tool._run(arguments or {}, task_meta=task_meta)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/server.py:1312: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/base.py:421: in _run
+    return await self.run(arguments)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py:418: in run
+    result = await self._execute(type_adapter, exec_is_async, arguments)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py:465: in _execute
+    result = await result
+             ^^^^^^^^^^^^
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py:88: in wrapper
+    return await fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/servers/iuphar.py:125: in search_ligands
+    return await client.search_ligands(
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/clients/iuphar.py:337: in search_ligands
+    ligands = await self._fetch_ligands(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <biosciences_mcp.clients.iuphar.IUPHARClient object at 0x78a01da9e540>
+name = 'Crizotinib', type_filter = None, approved_only = False
+
+    async def _fetch_ligands(
+        self,
+        name: str | None = None,
+        type_filter: str | None = None,
+        approved_only: bool = False,
+    ) -> list[dict]:
+        """Fetch ligands from GtoPdb API with optional filters.
+    
+        Args:
+            name: Fuzzy substring match on ligand name
+            type_filter: Filter by ligand classification (e.g., "Synthetic organic")
+            approved_only: Filter for approved drugs only
+    
+        Returns:
+            List of ligand dictionaries from API response
+        """
+        params = {}
+        if name:
+            params["name"] = name
+        if type_filter:
+            params["type"] = type_filter
+        if approved_only:
+            params["approved"] = "true"
+    
+        response = await self._rate_limited_get("/ligands", params=params)
+    
+        # Handle empty results
+        # Note: GtoPdb API may return 204 or 404 for no results
+        if response.status_code in (204, 404):
+            return []
+    
+        # Handle errors
+        if response.status_code != 200:
+>           raise ValueError(f"API error: {response.status_code}")
+E           ValueError: API error: 401
+
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/clients/iuphar.py:277: ValueError
+
+The above exception was the direct cause of the following exception:
+
+check_iuphar_available = False
+
+    @pytest.mark.asyncio
+    @pytest.mark.timeout(30)
+    async def test_cq6_fusion_protein_therapy(check_iuphar_available):
+        """CQ-6: ALK inhibitors (Crizotinib) from IUPHAR.
+    
+        MCP Tool: iuphar_search_ligands
+        """
+        tool = await mcp.get_tool("iuphar_search_ligands")
+>       ligands_result = await tool.fn(query="Crizotinib", page_size=5)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_competency_questions_mcp.py:197: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/tool_transform.py:764: in _forward
+    return await parent_tool.run(parent_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/providers/fastmcp_provider.py:133: in run
+    result = await self._server.call_tool(
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/server.py:1261: in call_tool
+    return await self._run_middleware(
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/server.py:525: in _run_middleware
+    return await chain(context)
+           ^^^^^^^^^^^^^^^^^^^^
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/server.py:522: in wrapped
+    return await mw(context, call_next)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/middleware/middleware.py:101: in __call__
+    return await handler_chain(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/middleware/middleware.py:83: in wrapper
+    return await handler(context, call_next=call_next)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/middleware/middleware.py:145: in on_message
+    return await call_next(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/middleware/middleware.py:83: in wrapper
+    return await handler(context, call_next=call_next)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/middleware/middleware.py:152: in on_request
+    return await call_next(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/middleware/middleware.py:83: in wrapper
+    return await handler(context, call_next=call_next)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/middleware/middleware.py:173: in on_call_tool
+    return await call_next(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = FastMCP('IUPHAR/GtoPdb'), name = 'search_ligands'
+arguments = {'query': 'Crizotinib', 'page_size': 5}, version = None
+run_middleware = False, task_meta = None
+
+    async def call_tool(
+        self,
+        name: str,
+        arguments: dict[str, Any] | None = None,
+        *,
+        version: VersionSpec | None = None,
+        run_middleware: bool = True,
+        task_meta: TaskMeta | None = None,
+    ) -> ToolResult | mcp.types.CreateTaskResult:
+        """Call a tool by name.
+    
+        This is the public API for executing tools. By default, middleware is applied.
+    
+        Args:
+            name: The tool name
+            arguments: Tool arguments (optional)
+            version: Specific version to call. If None, calls highest version.
+            run_middleware: If True (default), apply the middleware chain.
+                Set to False when called from middleware to avoid re-applying.
+            task_meta: If provided, execute as a background task and return
+                CreateTaskResult. If None (default), execute synchronously and
+                return ToolResult.
+    
+        Returns:
+            ToolResult when task_meta is None.
+            CreateTaskResult when task_meta is provided.
+    
+        Raises:
+            NotFoundError: If tool not found or disabled
+            ToolError: If tool execution fails
+            ValidationError: If arguments fail validation
+        """
+        # Note: fn_key enrichment happens here after finding the tool.
+        # For mounted servers, the parent's provider sets fn_key to the
+        # namespaced key before delegating, ensuring correct Docket routing.
+    
+        from fastmcp.server.providers.addressing import (
+            parse_hashed_backend_name,
+        )
+    
+        # Two routing paths:
+        #   1. Hashed-name path — backend tools that opted into
+        #      app-callable visibility. Recognized by their
+        #      `<hash>_<local_name>` format and resolved via the
+        #      reverse-hash map. Address is known eagerly.
+        #   2. Display-name path — everything else. Goes through normal
+        #      `get_tool` aggregation/transforms. Address is determined
+        #      after resolution by walking the registry.
+        async with fastmcp.server.context.Context(fastmcp=self) as ctx:
+            if run_middleware:
+                mw_context = MiddlewareContext[CallToolRequestParams](
+                    message=mcp.types.CallToolRequestParams(
+                        name=name,
+                        arguments=arguments or {},
+                        _meta=_version_request_meta(version),  # type: ignore[unknown-argument]  # pydantic alias
+                    ),
+                    source="client",
+                    type="request",
+                    method="tools/call",
+                    fastmcp_context=ctx,
+                )
+                return await self._run_middleware(
+                    context=mw_context,
+                    call_next=lambda context: self.call_tool(
+                        context.message.name,
+                        context.message.arguments or {},
+                        version=version,
+                        run_middleware=False,
+                        task_meta=task_meta,
+                    ),
+                )
+    
+            # Core logic: find and execute tool
+            with server_span(
+                f"tools/call {name}",
+                "tools/call",
+                self.name,
+                "tool",
+                name,
+                tool_name=name,
+            ) as span:
+                # Try normal display-name resolution first.
+                tool: Tool | None = await self.get_tool(name, version=version)
+    
+                # If that fails, try hashed-name dispatch. This walks
+                # the provider tree recursively (same pattern as the old
+                # get_app_tool) looking for a tool whose stored hash
+                # matches the parsed prefix.
+                if tool is None:
+                    hashed = parse_hashed_backend_name(name)
+                    if hashed is not None:
+                        digest, local_name = hashed
+                        tool = await self.get_tool_by_hash(digest, local_name)
+                        if tool is not None:
+                            # Auth still applies on the bypass path.
+                            skip_auth, token = _get_auth_context()
+                            if not skip_auth and tool.auth is not None:
+                                try:
+                                    auth_ctx = AuthContext(token=token, component=tool)
+                                    if not await run_auth_checks(tool.auth, auth_ctx):
+                                        raise NotFoundError(f"Unknown tool: {name!r}")
+                                except AuthorizationError:
+                                    raise NotFoundError(
+                                        f"Unknown tool: {name!r}"
+                                    ) from None
+    
+                if tool is None:
+                    raise NotFoundError(f"Unknown tool: {name!r}")
+                span.set_attributes(tool.get_span_attributes())
+                if task_meta is not None and task_meta.fn_key is None:
+                    task_meta = replace(task_meta, fn_key=tool.key)
+                try:
+                    return await tool._run(arguments or {}, task_meta=task_meta)
+                except ValidationError as e:
+                    # Argument-validation failure (a bad call). FunctionTool
+                    # converts pydantic's call-validation error into fastmcp's
+                    # ValidationError (see #4128) so it can be filtered as a
+                    # client error. Log the underlying detail without a URL or
+                    # traceback, matching the previous pydantic-error logging.
+                    cause = e.__cause__
+                    detail = (
+                        cause.errors(include_url=False)
+                        if isinstance(cause, PydanticValidationError)
+                        else str(e)
+                    )
+                    logger.warning("Invalid arguments for tool %r: %s", name, detail)
+                    raise
+                except FastMCPError as e:
+                    logger.log(
+                        e.log_level, f"Error calling tool {name!r}", exc_info=False
+                    )
+                    raise
+                except PydanticValidationError as e:
+                    # A pydantic error that is NOT an argument-validation failure
+                    # (e.g. raised by a non-FunctionTool's own validation). Kept
+                    # for backward compatibility.
+                    logger.warning(
+                        "Invalid arguments for tool %r: %s",
+                        name,
+                        e.errors(include_url=False),
+                    )
+                    raise
+                except Exception as e:
+                    logger.exception(f"Error calling tool {name!r}")
+                    # Handle actionable errors that should reach the LLM
+                    # even when masking is enabled
+                    if isinstance(e, httpx.HTTPStatusError):
+                        if e.response.status_code == 429:
+                            raise ToolError(
+                                "Rate limited by upstream API, please retry later"
+                            ) from e
+                    if isinstance(e, httpx.TimeoutException):
+                        raise ToolError(
+                            "Upstream request timed out, please retry"
+                        ) from e
+                    # Standard masking logic
+                    if self._mask_error_details:
+                        raise ToolError(f"Error calling tool {name!r}") from e
+>                   raise ToolError(f"Error calling tool {name!r}: {e}") from e
+E                   fastmcp.exceptions.ToolError: Error calling tool 'search_ligands': API error: 401
+
+/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/server.py:1358: ToolError
+----------------------------- Captured stderr call -----------------------------
+[10/02/26 00:46:54] Error calling tool 'search_ligands'                         
+                    ╭─────────── Traceback (most recent call last) ────────────╮
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/fastm │
+                    │ cp/server/server.py:1312 in call_tool                    │
+                    │                                                          │
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/fastm │
+                    │ cp/tools/base.py:421 in _run                             │
+                    │                                                          │
+                    │                 ... 4 frames hidden ...                  │
+                    │                                                          │
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/biosc │
+                    │ iences_mcp/clients/iuphar.py:337 in search_ligands       │
+                    │                                                          │
+                    │   334 │   │   page_size = min(page_size, 100)            │
+                    │   335 │   │                                              │
+                    │   336 │   │   # Fetch all matching ligands               │
+                    │ ❱ 337 │   │   ligands = await self._fetch_ligands(       │
+                    │   338 │   │   │   name=query, type_filter=type_filter, a │
+                    │   339 │   │   )                                          │
+                    │   340                                                    │
+                    │                                                          │
+                    │ /tmp/claude-1000/-home-donbr-open-biosciences-bioscience │
+                    │ s-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/pr │
+                    │ erelease/venv-horizon/lib/python3.12/site-packages/biosc │
+                    │ iences_mcp/clients/iuphar.py:277 in _fetch_ligands       │
+                    │                                                          │
+                    │   274 │   │                                              │
+                    │   275 │   │   # Handle errors                            │
+                    │   276 │   │   if response.status_code != 200:            │
+                    │ ❱ 277 │   │   │   raise ValueError(f"API error: {respons │
+                    │   278 │   │                                              │
+                    │   279 │   │   return response.json()                     │
+                    │   280                                                    │
+                    ╰──────────────────────────────────────────────────────────╯
+                    ValueError: API error: 401                                  
+------------------------------ Captured log call -------------------------------
+ERROR    fastmcp.server.server:server.py:1343 Error calling tool 'search_ligands'
+Traceback (most recent call last):
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/server/server.py", line 1312, in call_tool
+    return await tool._run(arguments or {}, task_meta=task_meta)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/base.py", line 421, in _run
+    return await self.run(arguments)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py", line 418, in run
+    result = await self._execute(type_adapter, exec_is_async, arguments)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py", line 465, in _execute
+    result = await result
+             ^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/fastmcp/tools/function_tool.py", line 88, in wrapper
+    return await fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/servers/iuphar.py", line 125, in search_ligands
+    return await client.search_ligands(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/clients/iuphar.py", line 337, in search_ligands
+    ligands = await self._fetch_ligands(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/venv-horizon/lib/python3.12/site-packages/biosciences_mcp/clients/iuphar.py", line 277, in _fetch_ligands
+    raise ValueError(f"API error: {response.status_code}")
+ValueError: API error: 401
+_____________________ test_cq7_pathway_mechanism_analysis ______________________
+
+    @pytest.mark.asyncio
+    async def test_cq7_pathway_mechanism_analysis():
+        """CQ-7: TP53 Apoptosis pathways from WikiPathways.
+    
+        MCP Tool: wikipathways_search_pathways
+        """
+        tool = await mcp.get_tool("wikipathways_search_pathways")
+        pathways_result = await tool.fn(query="TP53", page_size=5)
+        pathways = to_dict(pathways_result)
+    
+>       assert pathways["items"], "No TP53 pathways found"
+               ^^^^^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:217: KeyError
+_________________________ test_cq9_paralog_dependency __________________________
+
+    @pytest.mark.asyncio
+    @pytest.mark.skipif(
+        not os.getenv("BIOGRID_API_KEY"),
+        reason="BIOGRID_API_KEY not set",
+    )
+    async def test_cq9_paralog_dependency():
+        """CQ-9: ARID1A interactions (chromatin remodeling complex).
+    
+        MCP Tool: biogrid_get_interactions
+        """
+        tool = await mcp.get_tool("biogrid_get_interactions")
+        interactions_result = await tool.fn(gene_symbol="ARID1A", max_results=50)
+        interactions = to_dict(interactions_result)
+    
+>       assert interactions["query_gene"] == "ARID1A", "Query gene mismatch"
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'query_gene'
+
+tests/integration/test_competency_questions_mcp.py:258: KeyError
+__________________________ test_cq10_drug_repurposing __________________________
+
+    @pytest.mark.asyncio
+    async def test_cq10_drug_repurposing():
+        """CQ-10: PARP1 inhibitors (Olaparib).
+    
+        MCP Tool: chembl_search_compounds
+        """
+        tool = await mcp.get_tool("chembl_search_compounds")
+        compounds_result = await tool.fn(query="Olaparib", page_size=5)
+        compounds = to_dict(compounds_result)
+    
+>       assert compounds["items"], "No Olaparib results"
+               ^^^^^^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:273: KeyError
+__________________________ test_cq11_genomic_location __________________________
+
+    @pytest.mark.asyncio
+    async def test_cq11_genomic_location():
+        """CQ-11: Genomic location of BRCA2 (Ensembl).
+    
+        MCP Tools: ensembl_search_genes, ensembl_get_gene
+        """
+        search_tool = await mcp.get_tool("ensembl_search_genes")
+        get_tool = await mcp.get_tool("ensembl_get_gene")
+    
+        # Step 1: Search
+        search_result = await search_tool.fn(query="BRCA2", species="human")
+        search = to_dict(search_result)
+>       assert search["items"], "No BRCA2 results"
+               ^^^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:290: KeyError
+________________________ test_cq12_molecular_structure _________________________
+
+    @pytest.mark.asyncio
+    async def test_cq12_molecular_structure():
+        """CQ-12: Molecular formula of Caffeine (PubChem).
+    
+        MCP Tools: pubchem_search_compounds, pubchem_get_compound
+        """
+        search_tool = await mcp.get_tool("pubchem_search_compounds")
+        get_tool = await mcp.get_tool("pubchem_get_compound")
+    
+        # Step 1: Search
+        search_result = await search_tool.fn(query="caffeine", page_size=5)
+        search = to_dict(search_result)
+>       assert search["items"], "No Caffeine results"
+               ^^^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:314: KeyError
+_______________________ test_cq13_pathway_drug_discovery _______________________
+
+    @pytest.mark.asyncio
+    async def test_cq13_pathway_drug_discovery():
+        """CQ-13: Pathway-Based Drug Discovery (WikiPathways + ChEMBL)."""
+        wp_search = await mcp.get_tool("wikipathways_search_pathways")
+        wp_comps = await mcp.get_tool("wikipathways_get_pathway_components")
+        chembl_search = await mcp.get_tool("chembl_search_compounds")
+    
+        # Step 1: Find Apoptosis pathway
+        search_result = await wp_search.fn(query="Apoptosis", organism="Homo sapiens")
+        search = to_dict(search_result)
+>       apoptosis_pathway = next((p for p in search["items"] if "Apoptosis" in p["title"]), None)
+                                             ^^^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:336: KeyError
+_______________________ test_cq14_cell_therapy_mechanism _______________________
+
+    @pytest.mark.asyncio
+    async def test_cq14_cell_therapy_mechanism():
+        """CQ-14: Tabelecleucel (cell therapy) from ChEMBL.
+    
+        MCP Tool: chembl_search_compounds
+        """
+        tool = await mcp.get_tool("chembl_search_compounds")
+        compounds_result = await tool.fn(query="Tabelecleucel", page_size=5)
+        compounds = to_dict(compounds_result)
+    
+>       assert compounds["items"], "No Tabelecleucel results"
+               ^^^^^^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:369: KeyError
+______________________ test_cq15_neuro_immunology_targets ______________________
+
+    @pytest.mark.asyncio
+    async def test_cq15_neuro_immunology_targets():
+        """CQ-15: Tolebrutinib (BTK inhibitor for MS).
+    
+        MCP Tool: chembl_search_compounds
+        """
+        tool = await mcp.get_tool("chembl_search_compounds")
+        compounds_result = await tool.fn(query="Tolebrutinib", page_size=5)
+        compounds = to_dict(compounds_result)
+    
+>       assert compounds["items"], "No Tolebrutinib results"
+               ^^^^^^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:384: KeyError
+____________________ test_cq17_novel_alzheimers_mechanisms _____________________
+
+    @pytest.mark.asyncio
+    async def test_cq17_novel_alzheimers_mechanisms():
+        """CQ-17: Mirodenafil (PDE5 inhibitor).
+    
+        MCP Tool: chembl_search_compounds
+        """
+        tool = await mcp.get_tool("chembl_search_compounds")
+        compounds_result = await tool.fn(query="Mirodenafil", page_size=5)
+        compounds = to_dict(compounds_result)
+    
+>       assert compounds["items"], "No Mirodenafil results"
+               ^^^^^^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:419: KeyError
+__________________________ test_cq18_protein_details ___________________________
+
+    @pytest.mark.asyncio
+    async def test_cq18_protein_details():
+        """CQ-18: UniProt strict lookup with complete cross-references (BRCA1).
+    
+        MCP Tool: uniprot_get_protein
+        """
+        tool = await mcp.get_tool("uniprot_get_protein")
+        protein_result = await tool.fn(uniprot_id="UniProtKB:P38398", slim=False)
+        protein = to_dict(protein_result)
+    
+>       assert protein["id"] == "UniProtKB:P38398", "Protein ID mismatch"
+               ^^^^^^^^^^^^^
+E       KeyError: 'id'
+
+tests/integration/test_competency_questions_mcp.py:434: KeyError
+__________________________ test_cq19_batch_operations __________________________
+
+    @pytest.mark.asyncio
+    async def test_cq19_batch_operations():
+        """CQ-19: ChEMBL batch compound lookup.
+    
+        MCP Tool: chembl_get_compounds_batch
+        """
+        tool = await mcp.get_tool("chembl_get_compounds_batch")
+        compounds_result = await tool.fn(
+            chembl_ids=["CHEMBL:25", "CHEMBL:939", "CHEMBL:521686", "CHEMBL:1946170", "CHEMBL:2105717"],
+            slim=True,
+        )
+        compounds = (
+            [to_dict(c) for c in compounds_result]
+>           if hasattr(compounds_result[0], "model_dump")
+                       ^^^^^^^^^^^^^^^^^^^
+            else compounds_result
+        )
+E       TypeError: 'ToolResult' object is not subscriptable
+
+tests/integration/test_competency_questions_mcp.py:461: TypeError
+_________________________ test_cq20_pathway_components _________________________
+
+    @pytest.mark.asyncio
+    async def test_cq20_pathway_components():
+        """CQ-20: WikiPathways component extraction (TP53 network).
+    
+        MCP Tools: wikipathways_get_pathway, wikipathways_get_pathway_components
+        """
+        get_pathway = await mcp.get_tool("wikipathways_get_pathway")
+        get_comps = await mcp.get_tool("wikipathways_get_pathway_components")
+    
+        # Step 1: Get pathway metadata
+        pathway_result = await get_pathway.fn(pathway_id="WP:WP1742")
+        pathway = to_dict(pathway_result)
+>       assert pathway["id"] == "WP:WP1742", "Pathway ID mismatch"
+               ^^^^^^^^^^^^^
+E       KeyError: 'id'
+
+tests/integration/test_competency_questions_mcp.py:482: KeyError
+__________________________ test_cq22_literature_links __________________________
+
+    @pytest.mark.asyncio
+    async def test_cq22_literature_links():
+        """CQ-22: Entrez PubMed links for TP53 (NCBIGene:7157).
+    
+        MCP Tool: entrez_get_pubmed_links
+        """
+        tool = await mcp.get_tool("entrez_get_pubmed_links")
+        pubmed_ids = await tool.fn(entrez_id="NCBIGene:7157", limit=5)
+    
+>       assert isinstance(pubmed_ids, list), "Should return list of PubMed IDs"
+E       AssertionError: Should return list of PubMed IDs
+E       assert False
+E        +  where False = isinstance(ToolResult(content=[TextContent(type='text', text='["20060114","27852141","20071787","20068186","20066118"]', annotations=None, meta=None)], structured_content={'result': ['20060114', '27852141', '20071787', '20068186', '20066118']}, meta={'fastmcp': {'wrap_result': True}}, is_error=False), list)
+
+tests/integration/test_competency_questions_mcp.py:526: AssertionError
+________________________ test_cq23_gene_pathway_mapping ________________________
+
+    @pytest.mark.asyncio
+    async def test_cq23_gene_pathway_mapping():
+        """CQ-23: WikiPathways gene->pathway reverse lookup (BRCA1).
+    
+        MCP Tool: wikipathways_get_pathways_for_gene
+        """
+        tool = await mcp.get_tool("wikipathways_get_pathways_for_gene")
+        pathways_result = await tool.fn(
+            gene_id="BRCA1",
+            organism="Homo sapiens",
+            page_size=5,
+        )
+        pathways = to_dict(pathways_result)
+    
+>       assert pathways["items"], "No pathways found for BRCA1"
+               ^^^^^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+tests/integration/test_competency_questions_mcp.py:546: KeyError
+- generated xml file: /tmp/claude-1000/-home-donbr-open-biosciences-biosciences-mcp/5ec7f1e1-a625-4a9d-a23e-90abfb7c2935/scratchpad/prerelease/horizon-mcp-integration.junit.xml -
+=========================== short test summary info ============================
+FAILED tests/contract/test_wire_contracts.py::test_list_tool_returns_pagination_envelope[ensembl.search_genes]
+FAILED tests/contract/test_wire_contracts.py::test_list_tool_returns_pagination_envelope[iuphar.search_ligands]
+FAILED tests/contract/test_wire_contracts.py::test_list_tool_returns_pagination_envelope[iuphar.search_targets]
+FAILED tests/contract/test_wire_contracts.py::test_list_items_have_no_null_values[iuphar.search_ligands]
+FAILED tests/contract/test_wire_contracts.py::test_list_items_have_no_null_values[iuphar.search_targets]
+FAILED tests/contract/test_wire_contracts.py::test_entity_has_no_null_values[iuphar.get_ligand]
+FAILED tests/contract/test_wire_contracts.py::test_entity_has_no_null_values[iuphar.get_target]
+FAILED tests/contract/test_wire_contracts.py::test_entity_cross_references_conform_to_registry[iuphar.get_ligand]
+FAILED tests/contract/test_wire_contracts.py::test_entity_cross_references_conform_to_registry[iuphar.get_target]
+FAILED tests/integration/test_competency_questions_mcp.py::test_cq1_target_resolvability
+FAILED tests/integration/test_competency_questions_mcp.py::test_cq2_cross_domain_mapping
+FAILED tests/integration/test_competency_questions_mcp.py::test_cq3_therapeutic_insight
+FAILED tests/integration/test_competency_questions_mcp.py::test_cq4_protein_interaction_network
+FAILED tests/integration/test_competency_questions_mcp.py::test_cq5_kras_synthetic_lethality
+FAILED tests/integration/test_competency_questions_mcp.py::test_cq6_fusion_protein_therapy
+FAILED tests/integration/test_competency_questions_mcp.py::test_cq7_pathway_mechanism_analysis
+FAILED tests/integration/test_competency_questions_mcp.py::test_cq9_paralog_dependency
+FAILED tests/integration/test_competency_questions_mcp.py::test_cq10_drug_repurposing
+FAILED tests/integration/test_competency_questions_mcp.py::test_cq11_genomic_location
+FAILED tests/integration/test_competency_questions_mcp.py::test_cq12_molecular_structure
+FAILED tests/integration/test_competency_questions_mcp.py::test_cq13_pathway_drug_discovery
+FAILED tests/integration/test_competency_questions_mcp.py::test_cq14_cell_therapy_mechanism
+FAILED tests/integration/test_competency_questions_mcp.py::test_cq15_neuro_immunology_targets
+FAILED tests/integration/test_competency_questions_mcp.py::test_cq17_novel_alzheimers_mechanisms
+FAILED tests/integration/test_competency_questions_mcp.py::test_cq18_protein_details
+FAILED tests/integration/test_competency_questions_mcp.py::test_cq19_batch_operations
+FAILED tests/integration/test_competency_questions_mcp.py::test_cq20_pathway_components
+FAILED tests/integration/test_competency_questions_mcp.py::test_cq22_literature_links
+FAILED tests/integration/test_competency_questions_mcp.py::test_cq23_gene_pathway_mapping
+SKIPPED [5] tests/contract/conftest.py:211: DRUGBANK_API_KEY not set
+SKIPPED [1] tests/integration/test_competency_questions_mcp.py:222: ClinicalTrials.gov blocks Python httpx clients via Cloudflare TLS fingerprinting
+SKIPPED [1] tests/integration/test_competency_questions_mcp.py:389: ClinicalTrials.gov blocks Python httpx clients via Cloudflare TLS fingerprinting
+SKIPPED [1] tests/integration/test_competency_questions_mcp.py:500: ClinicalTrials.gov blocks Python httpx clients via Cloudflare TLS fingerprinting
+XFAIL tests/contract/test_wire_contracts.py::test_entity_cross_references_conform_to_registry[wikipathways.get_pathway] - deferred to ADR-001 v1.5 (AGE-700): pathway membership lists under entrez/ensembl_gene and symbols under hgnc need a registry decision, not a client fix
+XFAIL tests/contract/test_wire_contracts.py::test_entity_cross_references_conform_to_registry[clinicaltrials.get_trial] - deferred to ADR-001 v1.5 (AGE-700): clinicaltrials_gov, mesh_conditions, mesh_interventions are not registry keys (pubmed is fixed)
+= 29 failed, 53 passed, 8 skipped, 243 deselected, 2 xfailed in 157.19s (0:02:37) =
+exit=1

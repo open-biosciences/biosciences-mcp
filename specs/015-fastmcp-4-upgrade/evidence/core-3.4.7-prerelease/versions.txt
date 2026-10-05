@@ -1,0 +1,5 @@
+head: 8b9195f (implement/015-fastmcp-4-upgrade-core)
+locked (worktree, uv.lock): python 3.13.2 fastmcp 3.4.7 mcp 1.26.0 pydantic 2.12.5 uvicorn 0.41.0 pytest 9.0.2
+horizon-resolved (02ca1d0 build log pins): python 3.12.9 fastmcp 3.4.7 mcp 1.30.0 pydantic 2.13.5 uvicorn 0.54.0 pytest 9.1.1 (Horizon itself: python 3.12.13)
+baseline (main 0430e52, uv.lock): python 3.13.2 fastmcp 2.14.5 mcp 1.26.0
+unit: 2026-10-02T07:10:21Z -> 2026-10-02T07:10:35Z; integration: 2026-10-02T07:10:45Z -> 2026-10-02T07:26:47Z

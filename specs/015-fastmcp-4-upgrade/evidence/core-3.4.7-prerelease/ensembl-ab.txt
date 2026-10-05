@@ -1,0 +1,4 @@
+07:38:44 round1 main: 3 failed, 5 passed, 1 skipped in 143.54s (0:02:23)
+07:41:23 round1 upg: 4 failed, 4 passed, 1 skipped in 155.94s (0:02:35)
+07:43:39 round2 main: 3 failed, 1 passed, 5 skipped in 133.88s (0:02:13)
+07:44:43 round2 upg: 1 failed, 1 passed, 7 skipped in 61.68s (0:01:01)

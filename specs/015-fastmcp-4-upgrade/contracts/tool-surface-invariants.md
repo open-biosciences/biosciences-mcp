@@ -23,7 +23,9 @@ The tool surface is the interface these repositories expose to agent callers. Th
 
    *Why line-level*: FastMCP 3.2.4+ keeps only the first text section of a docstring as the description (research R6). The test proves that nothing a caller could read on 2.14.5 has disappeared, without fixing where in the docstring it lives.
 
-   *Why every header form*: FastMCP 3.4.7 treats any column-0 `Name:` line as the start of a section and drops it and everything after it. A simulation on 2026-10-01 restructured all 30 affected docstrings this way (header lines deleted, bodies moved above `Args:`, `Args:` kept) and found 0 missing lines on 3.4.7. Keeping even one `Example:` header lost 24 lines.
+   *Why every header form*: Measured 2026-10-01 on 3.4.7 and 4.0.10: when a docstring has an `Args:` section, the first column-0 line ending in `:` *that is followed by an indented block*, whatever its name, starts a section, and it and everything after it are dropped from the description. A column-0 `…:` line followed by unindented text is kept as plain text. A docstring with no `Args:` section (the 4 IUPHAR tools) is kept whole; adding `Args:` to such a docstring would drop its `Returns:`/`Examples:`/`Workflow:` blocks. A simulation on 2026-10-01 restructured all 30 affected docstrings this way (header lines deleted, bodies moved above `Args:`, `Args:` kept) and found 0 missing lines on 3.4.7. Keeping even one `Example:` header lost 24 lines. The test ignores every column-0 `Name:` line in the baseline, which is conservative: it can't miss a section that FastMCP drops. (Corrected 2026-10-01, convergence T055: the earlier wording said any column-0 `Name:` line starts a section.)
+
+   *Scope*: the baseline and the test cover the 34 gateway tools. `servers/drugbank.py` is not mounted on the gateway, so it's outside the guard; its two docstrings were restructured the same way (T054).
 4. **Parameter guidance.** Each baseline `Args:` entry's text, and each baseline parameter `description` (the 11 IUPHAR parameters), appears in that parameter's current `description` or in the tool's `description`. On 2.14.5 the `Args:` text lives in the tool description; on 3.4.7 FastMCP moves it to the parameter, and both satisfy the invariant.
 5. **Undeclared arguments stay rejected** (FR-003). A call with one undeclared argument returns `isError: true`. The message text may differ between versions; it is recorded for FR-007, not asserted. The test uses a call that is rejected before any network access.
 6. **Output and metadata unchanged** (FR-004).
@@ -43,6 +45,7 @@ All observed on 2026-10-01 against the PR #18 gateway and edge `91f6bab`, compar
 | Tool `_meta` key renamed from `_fastmcp` to `fastmcp` | core 34/34; edge already `fastmcp` on 3.0.2 | None known. No consumer reads `_meta` (research D, PR #19 review). Tags are unchanged. |
 | Call results carry `_meta: {"fastmcp": {"wrap_result": true}}` | every call to a tool whose output schema sets `x-fastmcp-wrap-result` (core 30/34; edge 2/2) | None known. deepagents reads only `content[].text`; no consumer reads result `_meta`. |
 | Gateway validation messages use FastMCP text (`Missing required argument(s): …`) | core, through the gateway only | No downstream parser (research D) |
+| Unhandled upstream exceptions get FastMCP's error text instead of the raw exception string | core: `pubchem_get_compound` under a 429 (core wire capture, 2026-10-01). PubChem doesn't map 429 to `RATE_LIMITED` (AGE-698). | Still `isError: true`; the text no longer echoes the request URL |
 
 Any change not in this table is a contract change and needs its own decision.
 

@@ -1,0 +1,1064 @@
+{
+ "cases": {
+  "raw_string:chembl_get_compound": {
+   "content": [
+    {
+     "text": "{\"success\":false,\"error\":{\"code\":\"UNRESOLVED_ENTITY\",\"message\":\"Invalid ChEMBL CURIE format: 'aspirin'\",\"recovery_hint\":\"Invalid ChEMBL CURIE format. Use 'CHEMBL:NNNNN' (e.g., 'CHEMBL:25')\",\"invalid_input\":\"aspirin\"}}",
+     "text_parsed": {
+      "error": {
+       "code": "UNRESOLVED_ENTITY",
+       "invalid_input": "aspirin",
+       "message": "Invalid ChEMBL CURIE format: 'aspirin'",
+       "recovery_hint": "Invalid ChEMBL CURIE format. Use 'CHEMBL:NNNNN' (e.g., 'CHEMBL:25')"
+      },
+      "success": false
+     },
+     "type": "text"
+    }
+   ],
+   "isError": false,
+   "meta": {
+    "fastmcp": {
+     "wrap_result": true
+    }
+   },
+   "structuredContent": {
+    "result": {
+     "error": {
+      "code": "UNRESOLVED_ENTITY",
+      "invalid_input": "aspirin",
+      "message": "Invalid ChEMBL CURIE format: 'aspirin'",
+      "recovery_hint": "Invalid ChEMBL CURIE format. Use 'CHEMBL:NNNNN' (e.g., 'CHEMBL:25')"
+     },
+     "success": false
+    }
+   }
+  },
+  "raw_string:clinicaltrials_get_trial": {
+   "content": [
+    {
+     "text": "{\"success\":false,\"error\":{\"code\":\"UNRESOLVED_ENTITY\",\"message\":\"The input 'cancer' is not a valid NCT CURIE.\",\"recovery_hint\":\"Call search_trials to resolve the identifier first, then use the returned NCT CURIE.\",\"invalid_input\":\"cancer\"}}",
+     "text_parsed": {
+      "error": {
+       "code": "UNRESOLVED_ENTITY",
+       "invalid_input": "cancer",
+       "message": "The input 'cancer' is not a valid NCT CURIE.",
+       "recovery_hint": "Call search_trials to resolve the identifier first, then use the returned NCT CURIE."
+      },
+      "success": false
+     },
+     "type": "text"
+    }
+   ],
+   "isError": false,
+   "meta": {
+    "fastmcp": {
+     "wrap_result": true
+    }
+   },
+   "structuredContent": {
+    "result": {
+     "error": {
+      "code": "UNRESOLVED_ENTITY",
+      "invalid_input": "cancer",
+      "message": "The input 'cancer' is not a valid NCT CURIE.",
+      "recovery_hint": "Call search_trials to resolve the identifier first, then use the returned NCT CURIE."
+     },
+     "success": false
+    }
+   }
+  },
+  "raw_string:ensembl_get_gene": {
+   "content": [
+    {
+     "text": "{\"success\":false,\"error\":{\"code\":\"UNRESOLVED_ENTITY\",\"message\":\"Invalid Ensembl Gene ID format: 'TP53'.\",\"recovery_hint\":\"Use search_genes to find valid Ensembl Gene IDs. Format: ENSG + 11 digits (e.g., ENSG00000141510).\",\"invalid_input\":\"TP53\"}}",
+     "text_parsed": {
+      "error": {
+       "code": "UNRESOLVED_ENTITY",
+       "invalid_input": "TP53",
+       "message": "Invalid Ensembl Gene ID format: 'TP53'.",
+       "recovery_hint": "Use search_genes to find valid Ensembl Gene IDs. Format: ENSG + 11 digits (e.g., ENSG00000141510)."
+      },
+      "success": false
+     },
+     "type": "text"
+    }
+   ],
+   "isError": false,
+   "meta": {
+    "fastmcp": {
+     "wrap_result": true
+    }
+   },
+   "structuredContent": {
+    "result": {
+     "error": {
+      "code": "UNRESOLVED_ENTITY",
+      "invalid_input": "TP53",
+      "message": "Invalid Ensembl Gene ID format: 'TP53'.",
+      "recovery_hint": "Use search_genes to find valid Ensembl Gene IDs. Format: ENSG + 11 digits (e.g., ENSG00000141510)."
+     },
+     "success": false
+    }
+   }
+  },
+  "raw_string:entrez_get_gene": {
+   "content": [
+    {
+     "text": "{\"success\":false,\"error\":{\"code\":\"UNRESOLVED_ENTITY\",\"message\":\"The input 'TP53' is not a valid NCBIGene CURIE.\",\"recovery_hint\":\"Call search_genes to resolve the identifier first. Expected format: NCBIGene:<numeric_id>\",\"invalid_input\":\"TP53\"}}",
+     "text_parsed": {
+      "error": {
+       "code": "UNRESOLVED_ENTITY",
+       "invalid_input": "TP53",
+       "message": "The input 'TP53' is not a valid NCBIGene CURIE.",
+       "recovery_hint": "Call search_genes to resolve the identifier first. Expected format: NCBIGene:<numeric_id>"
+      },
+      "success": false
+     },
+     "type": "text"
+    }
+   ],
+   "isError": false,
+   "meta": {
+    "fastmcp": {
+     "wrap_result": true
+    }
+   },
+   "structuredContent": {
+    "result": {
+     "error": {
+      "code": "UNRESOLVED_ENTITY",
+      "invalid_input": "TP53",
+      "message": "The input 'TP53' is not a valid NCBIGene CURIE.",
+      "recovery_hint": "Call search_genes to resolve the identifier first. Expected format: NCBIGene:<numeric_id>"
+     },
+     "success": false
+    }
+   }
+  },
+  "raw_string:hgnc_get_gene": {
+   "content": [
+    {
+     "text": "{\"success\":false,\"error\":{\"code\":\"UNRESOLVED_ENTITY\",\"message\":\"The input 'BRCA1' is not a valid HGNC CURIE.\",\"recovery_hint\":\"Call search_genes to resolve the identifier first.\",\"invalid_input\":\"BRCA1\"}}",
+     "text_parsed": {
+      "error": {
+       "code": "UNRESOLVED_ENTITY",
+       "invalid_input": "BRCA1",
+       "message": "The input 'BRCA1' is not a valid HGNC CURIE.",
+       "recovery_hint": "Call search_genes to resolve the identifier first."
+      },
+      "success": false
+     },
+     "type": "text"
+    }
+   ],
+   "isError": false,
+   "meta": {
+    "fastmcp": {
+     "wrap_result": true
+    }
+   },
+   "structuredContent": {
+    "result": {
+     "error": {
+      "code": "UNRESOLVED_ENTITY",
+      "invalid_input": "BRCA1",
+      "message": "The input 'BRCA1' is not a valid HGNC CURIE.",
+      "recovery_hint": "Call search_genes to resolve the identifier first."
+     },
+     "success": false
+    }
+   }
+  },
+  "raw_string:iuphar_get_ligand": {
+   "content": [
+    {
+     "text": "{\"success\":false,\"error\":{\"code\":\"UNRESOLVED_ENTITY\",\"message\":\"Invalid IUPHAR CURIE format: 'morphine'\",\"recovery_hint\":\"Use search_ligands() to find the correct IUPHAR CURIE (format: 'IUPHAR:12345')\",\"invalid_input\":\"morphine\"}}",
+     "text_parsed": {
+      "error": {
+       "code": "UNRESOLVED_ENTITY",
+       "invalid_input": "morphine",
+       "message": "Invalid IUPHAR CURIE format: 'morphine'",
+       "recovery_hint": "Use search_ligands() to find the correct IUPHAR CURIE (format: 'IUPHAR:12345')"
+      },
+      "success": false
+     },
+     "type": "text"
+    }
+   ],
+   "isError": false,
+   "meta": null,
+   "structuredContent": {
+    "error": {
+     "code": "UNRESOLVED_ENTITY",
+     "invalid_input": "morphine",
+     "message": "Invalid IUPHAR CURIE format: 'morphine'",
+     "recovery_hint": "Use search_ligands() to find the correct IUPHAR CURIE (format: 'IUPHAR:12345')"
+    },
+    "success": false
+   }
+  },
+  "raw_string:iuphar_get_target": {
+   "content": [
+    {
+     "text": "{\"success\":false,\"error\":{\"code\":\"UNRESOLVED_ENTITY\",\"message\":\"Invalid IUPHAR CURIE format: 'opioid'\",\"recovery_hint\":\"Use search_targets() to find the correct IUPHAR CURIE (format: 'IUPHAR:12345')\",\"invalid_input\":\"opioid\"}}",
+     "text_parsed": {
+      "error": {
+       "code": "UNRESOLVED_ENTITY",
+       "invalid_input": "opioid",
+       "message": "Invalid IUPHAR CURIE format: 'opioid'",
+       "recovery_hint": "Use search_targets() to find the correct IUPHAR CURIE (format: 'IUPHAR:12345')"
+      },
+      "success": false
+     },
+     "type": "text"
+    }
+   ],
+   "isError": false,
+   "meta": null,
+   "structuredContent": {
+    "error": {
+     "code": "UNRESOLVED_ENTITY",
+     "invalid_input": "opioid",
+     "message": "Invalid IUPHAR CURIE format: 'opioid'",
+     "recovery_hint": "Use search_targets() to find the correct IUPHAR CURIE (format: 'IUPHAR:12345')"
+    },
+    "success": false
+   }
+  },
+  "raw_string:opentargets_get_target": {
+   "content": [
+    {
+     "text": "{\"success\":false,\"error\":{\"code\":\"UNRESOLVED_ENTITY\",\"message\":\"Invalid Ensembl gene ID format: 'TP53'\",\"recovery_hint\":\"Ensembl ID must match format ENSG[11 digits] (e.g., ENSG00000141510). Use search_targets to find the correct ID.\",\"invalid_input\":\"TP53\"}}",
+     "text_parsed": {
+      "error": {
+       "code": "UNRESOLVED_ENTITY",
+       "invalid_input": "TP53",
+       "message": "Invalid Ensembl gene ID format: 'TP53'",
+       "recovery_hint": "Ensembl ID must match format ENSG[11 digits] (e.g., ENSG00000141510). Use search_targets to find the correct ID."
+      },
+      "success": false
+     },
+     "type": "text"
+    }
+   ],
+   "isError": false,
+   "meta": {
+    "fastmcp": {
+     "wrap_result": true
+    }
+   },
+   "structuredContent": {
+    "result": {
+     "error": {
+      "code": "UNRESOLVED_ENTITY",
+      "invalid_input": "TP53",
+      "message": "Invalid Ensembl gene ID format: 'TP53'",
+      "recovery_hint": "Ensembl ID must match format ENSG[11 digits] (e.g., ENSG00000141510). Use search_targets to find the correct ID."
+     },
+     "success": false
+    }
+   }
+  },
+  "raw_string:pubchem_get_compound": {
+   "content": [
+    {
+     "text": "{\"success\":false,\"error\":{\"code\":\"UNRESOLVED_ENTITY\",\"message\":\"Invalid PubChem CURIE format: 'aspirin'\",\"recovery_hint\":\"Use format 'PubChem:CID{number}' (e.g., 'PubChem:CID2244'). CID must be numeric.\",\"invalid_input\":\"aspirin\"}}",
+     "text_parsed": {
+      "error": {
+       "code": "UNRESOLVED_ENTITY",
+       "invalid_input": "aspirin",
+       "message": "Invalid PubChem CURIE format: 'aspirin'",
+       "recovery_hint": "Use format 'PubChem:CID{number}' (e.g., 'PubChem:CID2244'). CID must be numeric."
+      },
+      "success": false
+     },
+     "type": "text"
+    }
+   ],
+   "isError": false,
+   "meta": null,
+   "structuredContent": {
+    "error": {
+     "code": "UNRESOLVED_ENTITY",
+     "invalid_input": "aspirin",
+     "message": "Invalid PubChem CURIE format: 'aspirin'",
+     "recovery_hint": "Use format 'PubChem:CID{number}' (e.g., 'PubChem:CID2244'). CID must be numeric."
+    },
+    "success": false
+   }
+  },
+  "raw_string:string_get_interactions": {
+   "content": [
+    {
+     "text": "{\"success\":false,\"error\":{\"code\":\"UNRESOLVED_ENTITY\",\"message\":\"The input 'TP53' is not a valid STRING CURIE.\",\"recovery_hint\":\"Call search_proteins to resolve the identifier first. Expected format: STRING:<taxid>.ENSP<id>\",\"invalid_input\":\"TP53\"}}",
+     "text_parsed": {
+      "error": {
+       "code": "UNRESOLVED_ENTITY",
+       "invalid_input": "TP53",
+       "message": "The input 'TP53' is not a valid STRING CURIE.",
+       "recovery_hint": "Call search_proteins to resolve the identifier first. Expected format: STRING:<taxid>.ENSP<id>"
+      },
+      "success": false
+     },
+     "type": "text"
+    }
+   ],
+   "isError": false,
+   "meta": {
+    "fastmcp": {
+     "wrap_result": true
+    }
+   },
+   "structuredContent": {
+    "result": {
+     "error": {
+      "code": "UNRESOLVED_ENTITY",
+      "invalid_input": "TP53",
+      "message": "The input 'TP53' is not a valid STRING CURIE.",
+      "recovery_hint": "Call search_proteins to resolve the identifier first. Expected format: STRING:<taxid>.ENSP<id>"
+     },
+     "success": false
+    }
+   }
+  },
+  "raw_string:uniprot_get_protein": {
+   "content": [
+    {
+     "text": "{\"success\":false,\"error\":{\"code\":\"UNRESOLVED_ENTITY\",\"message\":\"Invalid UniProt CURIE format: 'BRCA1'\",\"recovery_hint\":\"Use search_proteins to find valid UniProt IDs, then call get_protein with the resolved CURIE (e.g., 'UniProtKB:P04637')\",\"invalid_input\":\"BRCA1\"}}",
+     "text_parsed": {
+      "error": {
+       "code": "UNRESOLVED_ENTITY",
+       "invalid_input": "BRCA1",
+       "message": "Invalid UniProt CURIE format: 'BRCA1'",
+       "recovery_hint": "Use search_proteins to find valid UniProt IDs, then call get_protein with the resolved CURIE (e.g., 'UniProtKB:P04637')"
+      },
+      "success": false
+     },
+     "type": "text"
+    }
+   ],
+   "isError": false,
+   "meta": {
+    "fastmcp": {
+     "wrap_result": true
+    }
+   },
+   "structuredContent": {
+    "result": {
+     "error": {
+      "code": "UNRESOLVED_ENTITY",
+      "invalid_input": "BRCA1",
+      "message": "Invalid UniProt CURIE format: 'BRCA1'",
+      "recovery_hint": "Use search_proteins to find valid UniProt IDs, then call get_protein with the resolved CURIE (e.g., 'UniProtKB:P04637')"
+     },
+     "success": false
+    }
+   }
+  },
+  "raw_string:wikipathways_get_pathway": {
+   "content": [
+    {
+     "text": "{\"success\":false,\"error\":{\"code\":\"UNRESOLVED_ENTITY\",\"message\":\"Invalid pathway ID format 'glycolysis'. Expected WP:WPNNNNN format\",\"recovery_hint\":\"Call search_pathways to resolve pathway identifier first\",\"invalid_input\":\"glycolysis\"}}",
+     "text_parsed": {
+      "error": {
+       "code": "UNRESOLVED_ENTITY",
+       "invalid_input": "glycolysis",
+       "message": "Invalid pathway ID format 'glycolysis'. Expected WP:WPNNNNN format",
+       "recovery_hint": "Call search_pathways to resolve pathway identifier first"
+      },
+      "success": false
+     },
+     "type": "text"
+    }
+   ],
+   "isError": false,
+   "meta": {
+    "fastmcp": {
+     "wrap_result": true
+    }
+   },
+   "structuredContent": {
+    "result": {
+     "error": {
+      "code": "UNRESOLVED_ENTITY",
+      "invalid_input": "glycolysis",
+      "message": "Invalid pathway ID format 'glycolysis'. Expected WP:WPNNNNN format",
+      "recovery_hint": "Call search_pathways to resolve pathway identifier first"
+     },
+     "success": false
+    }
+   }
+  },
+  "upstream_429:biogrid_get_interactions": {
+   "content": [
+    {
+     "text": "{\"success\":false,\"error\":{\"code\":\"RATE_LIMITED\",\"message\":\"BioGRID API rate limit exceeded after retries\",\"recovery_hint\":\"Wait 1 second before retrying. Rate limit: 2 req/sec\",\"invalid_input\":\"TP53\"}}",
+     "text_parsed": {
+      "error": {
+       "code": "RATE_LIMITED",
+       "invalid_input": "TP53",
+       "message": "BioGRID API rate limit exceeded after retries",
+       "recovery_hint": "Wait 1 second before retrying. Rate limit: 2 req/sec"
+      },
+      "success": false
+     },
+     "type": "text"
+    }
+   ],
+   "isError": false,
+   "meta": {
+    "fastmcp": {
+     "wrap_result": true
+    }
+   },
+   "structuredContent": {
+    "result": {
+     "error": {
+      "code": "RATE_LIMITED",
+      "invalid_input": "TP53",
+      "message": "BioGRID API rate limit exceeded after retries",
+      "recovery_hint": "Wait 1 second before retrying. Rate limit: 2 req/sec"
+     },
+     "success": false
+    }
+   }
+  },
+  "upstream_429:chembl_get_compound": {
+   "not_simulated": "SDK client (requests), not httpx"
+  },
+  "upstream_429:clinicaltrials_get_trial": {
+   "content": [
+    {
+     "text": "{\"success\":false,\"error\":{\"code\":\"RATE_LIMITED\",\"message\":\"ClinicalTrials.gov API rate limit exceeded.\",\"recovery_hint\":\"Retry after 0 seconds.\"}}",
+     "text_parsed": {
+      "error": {
+       "code": "RATE_LIMITED",
+       "message": "ClinicalTrials.gov API rate limit exceeded.",
+       "recovery_hint": "Retry after 0 seconds."
+      },
+      "success": false
+     },
+     "type": "text"
+    }
+   ],
+   "isError": false,
+   "meta": {
+    "fastmcp": {
+     "wrap_result": true
+    }
+   },
+   "structuredContent": {
+    "result": {
+     "error": {
+      "code": "RATE_LIMITED",
+      "message": "ClinicalTrials.gov API rate limit exceeded.",
+      "recovery_hint": "Retry after 0 seconds."
+     },
+     "success": false
+    }
+   }
+  },
+  "upstream_429:ensembl_get_gene": {
+   "content": [
+    {
+     "text": "{\"success\":false,\"error\":{\"code\":\"RATE_LIMITED\",\"message\":\"Exceeded Ensembl rate limit (15 requests/second).\",\"recovery_hint\":\"Wait 0 seconds before retrying.\"}}",
+     "text_parsed": {
+      "error": {
+       "code": "RATE_LIMITED",
+       "message": "Exceeded Ensembl rate limit (15 requests/second).",
+       "recovery_hint": "Wait 0 seconds before retrying."
+      },
+      "success": false
+     },
+     "type": "text"
+    }
+   ],
+   "isError": false,
+   "meta": {
+    "fastmcp": {
+     "wrap_result": true
+    }
+   },
+   "structuredContent": {
+    "result": {
+     "error": {
+      "code": "RATE_LIMITED",
+      "message": "Exceeded Ensembl rate limit (15 requests/second).",
+      "recovery_hint": "Wait 0 seconds before retrying."
+     },
+     "success": false
+    }
+   }
+  },
+  "upstream_429:entrez_get_gene": {
+   "content": [
+    {
+     "text": "{\"success\":false,\"error\":{\"code\":\"RATE_LIMITED\",\"message\":\"Exceeded NCBI rate limit\",\"recovery_hint\":\"Wait and retry. Add NCBI_API_KEY environment variable for 10 req/s limit (free from NCBI)\"}}",
+     "text_parsed": {
+      "error": {
+       "code": "RATE_LIMITED",
+       "message": "Exceeded NCBI rate limit",
+       "recovery_hint": "Wait and retry. Add NCBI_API_KEY environment variable for 10 req/s limit (free from NCBI)"
+      },
+      "success": false
+     },
+     "type": "text"
+    }
+   ],
+   "isError": false,
+   "meta": {
+    "fastmcp": {
+     "wrap_result": true
+    }
+   },
+   "structuredContent": {
+    "result": {
+     "error": {
+      "code": "RATE_LIMITED",
+      "message": "Exceeded NCBI rate limit",
+      "recovery_hint": "Wait and retry. Add NCBI_API_KEY environment variable for 10 req/s limit (free from NCBI)"
+     },
+     "success": false
+    }
+   }
+  },
+  "upstream_429:hgnc_get_gene": {
+   "content": [
+    {
+     "text": "{\"success\":false,\"error\":{\"code\":\"RATE_LIMITED\",\"message\":\"HGNC API rate limit exceeded.\",\"recovery_hint\":\"Retry after a few seconds.\"}}",
+     "text_parsed": {
+      "error": {
+       "code": "RATE_LIMITED",
+       "message": "HGNC API rate limit exceeded.",
+       "recovery_hint": "Retry after a few seconds."
+      },
+      "success": false
+     },
+     "type": "text"
+    }
+   ],
+   "isError": false,
+   "meta": {
+    "fastmcp": {
+     "wrap_result": true
+    }
+   },
+   "structuredContent": {
+    "result": {
+     "error": {
+      "code": "RATE_LIMITED",
+      "message": "HGNC API rate limit exceeded.",
+      "recovery_hint": "Retry after a few seconds."
+     },
+     "success": false
+    }
+   }
+  },
+  "upstream_429:iuphar_get_ligand": {
+   "timeout": ">60s"
+  },
+  "upstream_429:opentargets_get_target": {
+   "content": [
+    {
+     "text": "{\"success\":false,\"error\":{\"code\":\"RATE_LIMITED\",\"message\":\"Open Targets API rate limit exceeded after retries\",\"recovery_hint\":\"Wait 60.0s before retrying\"}}",
+     "text_parsed": {
+      "error": {
+       "code": "RATE_LIMITED",
+       "message": "Open Targets API rate limit exceeded after retries",
+       "recovery_hint": "Wait 60.0s before retrying"
+      },
+      "success": false
+     },
+     "type": "text"
+    }
+   ],
+   "isError": false,
+   "meta": {
+    "fastmcp": {
+     "wrap_result": true
+    }
+   },
+   "structuredContent": {
+    "result": {
+     "error": {
+      "code": "RATE_LIMITED",
+      "message": "Open Targets API rate limit exceeded after retries",
+      "recovery_hint": "Wait 60.0s before retrying"
+     },
+     "success": false
+    }
+   }
+  },
+  "upstream_429:pubchem_get_compound": {
+   "content": [
+    {
+     "text": "Rate limited by upstream API, please retry later",
+     "type": "text"
+    }
+   ],
+   "isError": true,
+   "meta": null,
+   "structuredContent": null
+  },
+  "upstream_429:string_get_interactions": {
+   "content": [
+    {
+     "text": "{\"success\":false,\"error\":{\"code\":\"RATE_LIMITED\",\"message\":\"HGNC API rate limit exceeded.\",\"recovery_hint\":\"Retry after a few seconds.\"}}",
+     "text_parsed": {
+      "error": {
+       "code": "RATE_LIMITED",
+       "message": "HGNC API rate limit exceeded.",
+       "recovery_hint": "Retry after a few seconds."
+      },
+      "success": false
+     },
+     "type": "text"
+    }
+   ],
+   "isError": false,
+   "meta": {
+    "fastmcp": {
+     "wrap_result": true
+    }
+   },
+   "structuredContent": {
+    "result": {
+     "error": {
+      "code": "RATE_LIMITED",
+      "message": "HGNC API rate limit exceeded.",
+      "recovery_hint": "Retry after a few seconds."
+     },
+     "success": false
+    }
+   }
+  },
+  "upstream_429:uniprot_get_protein": {
+   "content": [
+    {
+     "text": "{\"success\":false,\"error\":{\"code\":\"UPSTREAM_ERROR\",\"message\":\"UniProt API error: 429\",\"recovery_hint\":\"UniProt API is currently unavailable. Try again in a few moments.\",\"invalid_input\":\"UniProtKB:P38398\"}}",
+     "text_parsed": {
+      "error": {
+       "code": "UPSTREAM_ERROR",
+       "invalid_input": "UniProtKB:P38398",
+       "message": "UniProt API error: 429",
+       "recovery_hint": "UniProt API is currently unavailable. Try again in a few moments."
+      },
+      "success": false
+     },
+     "type": "text"
+    }
+   ],
+   "isError": false,
+   "meta": {
+    "fastmcp": {
+     "wrap_result": true
+    }
+   },
+   "structuredContent": {
+    "result": {
+     "error": {
+      "code": "UPSTREAM_ERROR",
+      "invalid_input": "UniProtKB:P38398",
+      "message": "UniProt API error: 429",
+      "recovery_hint": "UniProt API is currently unavailable. Try again in a few moments."
+     },
+     "success": false
+    }
+   }
+  },
+  "upstream_429:wikipathways_get_pathway": {
+   "content": [
+    {
+     "text": "{\"success\":false,\"error\":{\"code\":\"UPSTREAM_ERROR\",\"message\":\"Pathway lookup failed: Client error '429 Too Many Requests' for url 'https://www.wikipathways.org/json/findPathwaysByText.json'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429\",\"recovery_hint\":\"Check WikiPathways API status and retry\"}}",
+     "text_parsed": {
+      "error": {
+       "code": "UPSTREAM_ERROR",
+       "message": "Pathway lookup failed: Client error '429 Too Many Requests' for url 'https://www.wikipathways.org/json/findPathwaysByText.json'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429",
+       "recovery_hint": "Check WikiPathways API status and retry"
+      },
+      "success": false
+     },
+     "type": "text"
+    }
+   ],
+   "isError": false,
+   "meta": {
+    "fastmcp": {
+     "wrap_result": true
+    }
+   },
+   "structuredContent": {
+    "result": {
+     "error": {
+      "code": "UPSTREAM_ERROR",
+      "message": "Pathway lookup failed: Client error '429 Too Many Requests' for url 'https://www.wikipathways.org/json/findPathwaysByText.json'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429",
+      "recovery_hint": "Check WikiPathways API status and retry"
+     },
+     "success": false
+    }
+   }
+  },
+  "upstream_500:biogrid_get_interactions": {
+   "content": [
+    {
+     "text": "{\"success\":false,\"error\":{\"code\":\"UPSTREAM_ERROR\",\"message\":\"BioGRID API error: 500\",\"recovery_hint\":\"Check BioGRID API status or try again later\",\"invalid_input\":\"TP53\"}}",
+     "text_parsed": {
+      "error": {
+       "code": "UPSTREAM_ERROR",
+       "invalid_input": "TP53",
+       "message": "BioGRID API error: 500",
+       "recovery_hint": "Check BioGRID API status or try again later"
+      },
+      "success": false
+     },
+     "type": "text"
+    }
+   ],
+   "isError": false,
+   "meta": {
+    "fastmcp": {
+     "wrap_result": true
+    }
+   },
+   "structuredContent": {
+    "result": {
+     "error": {
+      "code": "UPSTREAM_ERROR",
+      "invalid_input": "TP53",
+      "message": "BioGRID API error: 500",
+      "recovery_hint": "Check BioGRID API status or try again later"
+     },
+     "success": false
+    }
+   }
+  },
+  "upstream_500:chembl_get_compound": {
+   "not_simulated": "SDK client (requests), not httpx"
+  },
+  "upstream_500:clinicaltrials_get_trial": {
+   "content": [
+    {
+     "text": "{\"success\":false,\"error\":{\"code\":\"UPSTREAM_ERROR\",\"message\":\"ClinicalTrials.gov API returned error 500.\",\"recovery_hint\":\"ClinicalTrials.gov API may be temporarily unavailable. Retry later.\"}}",
+     "text_parsed": {
+      "error": {
+       "code": "UPSTREAM_ERROR",
+       "message": "ClinicalTrials.gov API returned error 500.",
+       "recovery_hint": "ClinicalTrials.gov API may be temporarily unavailable. Retry later."
+      },
+      "success": false
+     },
+     "type": "text"
+    }
+   ],
+   "isError": false,
+   "meta": {
+    "fastmcp": {
+     "wrap_result": true
+    }
+   },
+   "structuredContent": {
+    "result": {
+     "error": {
+      "code": "UPSTREAM_ERROR",
+      "message": "ClinicalTrials.gov API returned error 500.",
+      "recovery_hint": "ClinicalTrials.gov API may be temporarily unavailable. Retry later."
+     },
+     "success": false
+    }
+   }
+  },
+  "upstream_500:ensembl_get_gene": {
+   "content": [
+    {
+     "text": "{\"success\":false,\"error\":{\"code\":\"UPSTREAM_ERROR\",\"message\":\"Ensembl API returned error 500.\",\"recovery_hint\":\"Ensembl service may be temporarily unavailable. Retry after a few seconds.\"}}",
+     "text_parsed": {
+      "error": {
+       "code": "UPSTREAM_ERROR",
+       "message": "Ensembl API returned error 500.",
+       "recovery_hint": "Ensembl service may be temporarily unavailable. Retry after a few seconds."
+      },
+      "success": false
+     },
+     "type": "text"
+    }
+   ],
+   "isError": false,
+   "meta": {
+    "fastmcp": {
+     "wrap_result": true
+    }
+   },
+   "structuredContent": {
+    "result": {
+     "error": {
+      "code": "UPSTREAM_ERROR",
+      "message": "Ensembl API returned error 500.",
+      "recovery_hint": "Ensembl service may be temporarily unavailable. Retry after a few seconds."
+     },
+     "success": false
+    }
+   }
+  },
+  "upstream_500:entrez_get_gene": {
+   "content": [
+    {
+     "text": "{\"success\":false,\"error\":{\"code\":\"UPSTREAM_ERROR\",\"message\":\"NCBI E-utilities API error: 500\",\"recovery_hint\":\"NCBI E-utilities may be temporarily unavailable. Retry after a few seconds.\"}}",
+     "text_parsed": {
+      "error": {
+       "code": "UPSTREAM_ERROR",
+       "message": "NCBI E-utilities API error: 500",
+       "recovery_hint": "NCBI E-utilities may be temporarily unavailable. Retry after a few seconds."
+      },
+      "success": false
+     },
+     "type": "text"
+    }
+   ],
+   "isError": false,
+   "meta": {
+    "fastmcp": {
+     "wrap_result": true
+    }
+   },
+   "structuredContent": {
+    "result": {
+     "error": {
+      "code": "UPSTREAM_ERROR",
+      "message": "NCBI E-utilities API error: 500",
+      "recovery_hint": "NCBI E-utilities may be temporarily unavailable. Retry after a few seconds."
+     },
+     "success": false
+    }
+   }
+  },
+  "upstream_500:hgnc_get_gene": {
+   "content": [
+    {
+     "text": "{\"success\":false,\"error\":{\"code\":\"UPSTREAM_ERROR\",\"message\":\"HGNC API returned error 500.\",\"recovery_hint\":\"HGNC API may be temporarily unavailable. Retry later.\"}}",
+     "text_parsed": {
+      "error": {
+       "code": "UPSTREAM_ERROR",
+       "message": "HGNC API returned error 500.",
+       "recovery_hint": "HGNC API may be temporarily unavailable. Retry later."
+      },
+      "success": false
+     },
+     "type": "text"
+    }
+   ],
+   "isError": false,
+   "meta": {
+    "fastmcp": {
+     "wrap_result": true
+    }
+   },
+   "structuredContent": {
+    "result": {
+     "error": {
+      "code": "UPSTREAM_ERROR",
+      "message": "HGNC API returned error 500.",
+      "recovery_hint": "HGNC API may be temporarily unavailable. Retry later."
+     },
+     "success": false
+    }
+   }
+  },
+  "upstream_500:iuphar_get_ligand": {
+   "content": [
+    {
+     "text": "Error calling tool 'get_ligand': API error: 500",
+     "type": "text"
+    }
+   ],
+   "isError": true,
+   "meta": null,
+   "structuredContent": null
+  },
+  "upstream_500:opentargets_get_target": {
+   "content": [
+    {
+     "text": "{\"success\":false,\"error\":{\"code\":\"UPSTREAM_ERROR\",\"message\":\"Open Targets API returned error 500\",\"recovery_hint\":\"Open Targets API temporarily unavailable - retry in 60 seconds\",\"invalid_input\":\"ENSG00000141510\"}}",
+     "text_parsed": {
+      "error": {
+       "code": "UPSTREAM_ERROR",
+       "invalid_input": "ENSG00000141510",
+       "message": "Open Targets API returned error 500",
+       "recovery_hint": "Open Targets API temporarily unavailable - retry in 60 seconds"
+      },
+      "success": false
+     },
+     "type": "text"
+    }
+   ],
+   "isError": false,
+   "meta": {
+    "fastmcp": {
+     "wrap_result": true
+    }
+   },
+   "structuredContent": {
+    "result": {
+     "error": {
+      "code": "UPSTREAM_ERROR",
+      "invalid_input": "ENSG00000141510",
+      "message": "Open Targets API returned error 500",
+      "recovery_hint": "Open Targets API temporarily unavailable - retry in 60 seconds"
+     },
+     "success": false
+    }
+   }
+  },
+  "upstream_500:pubchem_get_compound": {
+   "content": [
+    {
+     "text": "Error calling tool 'get_compound': Server error '500 Internal Server Error' for url 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/2244/property/Title,IUPACName,MolecularFormula,MolecularWeight,CanonicalSMILES,IsomericSMILES,InChI,InChIKey/JSON'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500",
+     "type": "text"
+    }
+   ],
+   "isError": true,
+   "meta": null,
+   "structuredContent": null
+  },
+  "upstream_500:string_get_interactions": {
+   "content": [
+    {
+     "text": "{\"success\":false,\"error\":{\"code\":\"UPSTREAM_ERROR\",\"message\":\"HGNC API returned error 500.\",\"recovery_hint\":\"HGNC API may be temporarily unavailable. Retry later.\"}}",
+     "text_parsed": {
+      "error": {
+       "code": "UPSTREAM_ERROR",
+       "message": "HGNC API returned error 500.",
+       "recovery_hint": "HGNC API may be temporarily unavailable. Retry later."
+      },
+      "success": false
+     },
+     "type": "text"
+    }
+   ],
+   "isError": false,
+   "meta": {
+    "fastmcp": {
+     "wrap_result": true
+    }
+   },
+   "structuredContent": {
+    "result": {
+     "error": {
+      "code": "UPSTREAM_ERROR",
+      "message": "HGNC API returned error 500.",
+      "recovery_hint": "HGNC API may be temporarily unavailable. Retry later."
+     },
+     "success": false
+    }
+   }
+  },
+  "upstream_500:uniprot_get_protein": {
+   "content": [
+    {
+     "text": "{\"success\":false,\"error\":{\"code\":\"UPSTREAM_ERROR\",\"message\":\"UniProt API error: 500\",\"recovery_hint\":\"UniProt API is currently unavailable. Try again in a few moments.\",\"invalid_input\":\"UniProtKB:P38398\"}}",
+     "text_parsed": {
+      "error": {
+       "code": "UPSTREAM_ERROR",
+       "invalid_input": "UniProtKB:P38398",
+       "message": "UniProt API error: 500",
+       "recovery_hint": "UniProt API is currently unavailable. Try again in a few moments."
+      },
+      "success": false
+     },
+     "type": "text"
+    }
+   ],
+   "isError": false,
+   "meta": {
+    "fastmcp": {
+     "wrap_result": true
+    }
+   },
+   "structuredContent": {
+    "result": {
+     "error": {
+      "code": "UPSTREAM_ERROR",
+      "invalid_input": "UniProtKB:P38398",
+      "message": "UniProt API error: 500",
+      "recovery_hint": "UniProt API is currently unavailable. Try again in a few moments."
+     },
+     "success": false
+    }
+   }
+  },
+  "upstream_500:wikipathways_get_pathway": {
+   "content": [
+    {
+     "text": "{\"success\":false,\"error\":{\"code\":\"UPSTREAM_ERROR\",\"message\":\"Pathway lookup failed: Server error '500 Internal Server Error' for url 'https://www.wikipathways.org/json/findPathwaysByText.json'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500\",\"recovery_hint\":\"Check WikiPathways API status and retry\"}}",
+     "text_parsed": {
+      "error": {
+       "code": "UPSTREAM_ERROR",
+       "message": "Pathway lookup failed: Server error '500 Internal Server Error' for url 'https://www.wikipathways.org/json/findPathwaysByText.json'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500",
+       "recovery_hint": "Check WikiPathways API status and retry"
+      },
+      "success": false
+     },
+     "type": "text"
+    }
+   ],
+   "isError": false,
+   "meta": {
+    "fastmcp": {
+     "wrap_result": true
+    }
+   },
+   "structuredContent": {
+    "result": {
+     "error": {
+      "code": "UPSTREAM_ERROR",
+      "message": "Pathway lookup failed: Server error '500 Internal Server Error' for url 'https://www.wikipathways.org/json/findPathwaysByText.json'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500",
+      "recovery_hint": "Check WikiPathways API status and retry"
+     },
+     "success": false
+    }
+   }
+  },
+  "validation:missing_argument": {
+   "content": [
+    {
+     "text": "Error calling tool 'hgnc_get_gene': Missing required argument(s): hgnc_id",
+     "type": "text"
+    }
+   ],
+   "isError": true,
+   "meta": null,
+   "structuredContent": null
+  },
+  "validation:undeclared_argument": {
+   "content": [
+    {
+     "text": "Error calling tool 'hgnc_get_gene': Got unexpected keyword argument(s): bogus_extra",
+     "type": "text"
+    }
+   ],
+   "isError": true,
+   "meta": null,
+   "structuredContent": null
+  },
+  "validation:wrong_type": {
+   "content": [
+    {
+     "text": "1 validation error for call[get_gene]\nhgnc_id\n  Input should be a valid string [type=string_type, input_value=1100, input_type=int]\n    For further information visit https://errors.pydantic.dev/2.12/v/string_type",
+     "type": "text"
+    }
+   ],
+   "isError": true,
+   "meta": null,
+   "structuredContent": null
+  }
+ },
+ "not_on_gateway": [
+  "drugbank_get_drug"
+ ],
+ "versions": {
+  "fastmcp": "3.4.7",
+  "httpx": "0.28.1",
+  "mcp": "1.26.0",
+  "pydantic": "2.12.5"
+ }
+}

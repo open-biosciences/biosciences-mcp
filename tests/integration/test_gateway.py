@@ -6,7 +6,7 @@ from biosciences_mcp.servers.gateway import mcp
 @pytest.mark.asyncio
 async def test_gateway_tools_exposed():
     """Verify that the gateway exposes the expected tools, including search_genes."""
-    tools = await mcp.get_tools()
+    tools = await mcp.list_tools()
 
     # Handle dict (when using mounts) or list return type
     if isinstance(tools, dict):

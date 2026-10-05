@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="8" skipped="5" tests="41" time="229.050" timestamp="2026-10-02T00:32:17.514460-07:00" hostname="lapdog"><testcase classname="tests.integration.test_ensembl_api.TestSearchGenes" name="test_search_genes_brca1" time="9.828" /><testcase classname="tests.integration.test_ensembl_api.TestSearchGenes" name="test_search_genes_tumor_protein" time="5.633"><skipped type="pytest.skip" message="Ensembl API unavailable:">/home/donbr/open-biosciences/biosciences-mcp/.worktrees/implement-015-core/tests/integration/test_ensembl_api.py:59: Ensembl API unavailable:</skipped></testcase><testcase classname="tests.integration.test_ensembl_api.TestSearchGenes" name="test_search_genes_species_filter" time="33.407"><failure message="AssertionError: assert False&#10; +  where False = isinstance(ErrorEnvelope(success=False, error=ErrorDetail(code=&lt;ErrorCode.UPSTREAM_ERROR: 'UPSTREAM_ERROR'&gt;, message='Request to Ensembl API timed out.', recovery_hint='Retry after a short delay.', invalid_input=None)), PaginationEnvelope)">self = &lt;tests.integration.test_ensembl_api.TestSearchGenes object at 0x7edbf531d5b0&gt;
+client = &lt;biosciences_mcp.clients.ensembl.EnsemblClient object at 0x7edbf5108910&gt;
+
+    async def test_search_genes_species_filter(self, client: EnsemblClient):
+        """T021: Species filter restricts results to specified species."""
+        result = await client.search_genes("TP53", species="human")
+    
+&gt;       assert isinstance(result, PaginationEnvelope)
+E       AssertionError: assert False
+E        +  where False = isinstance(ErrorEnvelope(success=False, error=ErrorDetail(code=&lt;ErrorCode.UPSTREAM_ERROR: 'UPSTREAM_ERROR'&gt;, message='Request to Ensembl API timed out.', recovery_hint='Retry after a short delay.', invalid_input=None)), PaginationEnvelope)
+
+tests/integration/test_ensembl_api.py:74: AssertionError</failure></testcase><testcase classname="tests.integration.test_ensembl_api.TestSearchGenes" name="test_search_genes_short_query" time="3.272" /><testcase classname="tests.integration.test_ensembl_api.TestSearchGenes" name="test_search_genes_species_alias" time="36.472"><failure message="AssertionError: assert False&#10; +  where False = isinstance(ErrorEnvelope(success=False, error=ErrorDetail(code=&lt;ErrorCode.UPSTREAM_ERROR: 'UPSTREAM_ERROR'&gt;, message='Request to Ensembl API timed out.', recovery_hint='Retry after a short delay.', invalid_input=None)), PaginationEnvelope)">self = &lt;tests.integration.test_ensembl_api.TestSearchGenes object at 0x7edbf5222e70&gt;
+client = &lt;biosciences_mcp.clients.ensembl.EnsemblClient object at 0x7edbf507b6f0&gt;
+
+    async def test_search_genes_species_alias(self, client: EnsemblClient):
+        """Species alias 'human' resolves to 'homo_sapiens'."""
+        result = await client.search_genes("BRCA1", species="human")
+    
+&gt;       assert isinstance(result, PaginationEnvelope)
+E       AssertionError: assert False
+E        +  where False = isinstance(ErrorEnvelope(success=False, error=ErrorDetail(code=&lt;ErrorCode.UPSTREAM_ERROR: 'UPSTREAM_ERROR'&gt;, message='Request to Ensembl API timed out.', recovery_hint='Retry after a short delay.', invalid_input=None)), PaginationEnvelope)
+
+tests/integration/test_ensembl_api.py:93: AssertionError</failure></testcase><testcase classname="tests.integration.test_ensembl_api.TestSearchGenes" name="test_search_genes_pagination" time="5.551"><skipped type="pytest.skip" message="Ensembl API unavailable:">/home/donbr/open-biosciences/biosciences-mcp/.worktrees/implement-015-core/tests/integration/test_ensembl_api.py:97: Ensembl API unavailable:</skipped></testcase><testcase classname="tests.integration.test_ensembl_api.TestSearchGenes" name="test_search_genes_no_results" time="6.710" /><testcase classname="tests.integration.test_ensembl_api.TestFuzzyToFactWorkflow" name="test_search_then_lookup_gene" time="31.240"><failure message="AssertionError: assert False&#10; +  where False = isinstance(ErrorEnvelope(success=False, error=ErrorDetail(code=&lt;ErrorCode.UPSTREAM_ERROR: 'UPSTREAM_ERROR'&gt;, message='Request to Ensembl API timed out.', recovery_hint='Retry after a short delay.', invalid_input=None)), PaginationEnvelope)">self = &lt;tests.integration.test_ensembl_api.TestFuzzyToFactWorkflow object at 0x7edbf516de50&gt;
+client = &lt;biosciences_mcp.clients.ensembl.EnsemblClient object at 0x7edbf5223890&gt;
+
+    async def test_search_then_lookup_gene(self, client: EnsemblClient):
+        """Complete Fuzzy-to-Fact workflow for genes."""
+        # Phase 1: Fuzzy search
+        search_result = await client.search_genes("TP53", species="human")
+&gt;       assert isinstance(search_result, PaginationEnvelope)
+E       AssertionError: assert False
+E        +  where False = isinstance(ErrorEnvelope(success=False, error=ErrorDetail(code=&lt;ErrorCode.UPSTREAM_ERROR: 'UPSTREAM_ERROR'&gt;, message='Request to Ensembl API timed out.', recovery_hint='Retry after a short delay.', invalid_input=None)), PaginationEnvelope)
+
+tests/integration/test_ensembl_api.py:334: AssertionError</failure></testcase><testcase classname="tests.integration.test_ensembl_api.TestFuzzyToFactWorkflow" name="test_gene_to_transcript_workflow" time="5.347" /><testcase classname="tests.integration.test_entrez_api.TestEntrezClientSearchGenes" name="test_search_genes_empty_results" time="0.812" /><testcase classname="tests.integration.test_performance.TestPerformanceRequirements" name="test_search_performance_common_proteins" time="5.945" /><testcase classname="tests.integration.test_performance.TestPerformanceRequirements" name="test_get_protein_performance" time="3.841"><failure message="AssertionError: Max get_protein time (2.38s) should be &lt;2s (cold start). Times: ['2.38s', '0.30s', '0.30s', '0.43s', '0.43s']&#10;assert 2.3768069744110107 &lt; 2.0">self = &lt;tests.integration.test_performance.TestPerformanceRequirements object at 0x7edbf516e490&gt;
+client = &lt;biosciences_mcp.clients.uniprot.UniProtClient object at 0x7edbf5109310&gt;
+
+    async def test_get_protein_performance(self, client: UniProtClient):
+        """Test get_protein response time for well-known proteins.
+    
+        Validates that strict CURIE lookup meets performance requirements.
+        """
+        # Well-known protein CURIEs
+        test_curies = [
+            "UniProtKB:P04637",  # TP53 (human)
+            "UniProtKB:P38398",  # BRCA1 (human)
+            "UniProtKB:P01308",  # Insulin (human)
+            "UniProtKB:P68871",  # Hemoglobin beta (human)
+            "UniProtKB:P02768",  # Albumin (human)
+        ]
+    
+        response_times = []
+    
+        for curie in test_curies:
+            start_time = time.time()
+    
+            result = await client.get_protein(curie)
+            elapsed = time.time() - start_time
+            response_times.append(elapsed)
+    
+            # Verify successful response
+            assert isinstance(result, Protein), f"CURIE '{curie}' should return Protein"
+    
+        # All get_protein calls should be fast (&lt;2s for cold start, &lt;1s for warm)
+        # First call may have cold start overhead, subsequent calls should be faster
+        max_time = max(response_times)
+        avg_time = sum(response_times) / len(response_times)
+    
+&gt;       assert max_time &lt; 2.0, (
+            f"Max get_protein time ({max_time:.2f}s) should be &lt;2s (cold start). "
+            f"Times: {[f'{t:.2f}s' for t in response_times]}"
+        )
+E       AssertionError: Max get_protein time (2.38s) should be &lt;2s (cold start). Times: ['2.38s', '0.30s', '0.30s', '0.43s', '0.43s']
+E       assert 2.3768069744110107 &lt; 2.0
+
+tests/integration/test_performance.py:126: AssertionError</failure></testcase><testcase classname="tests.integration.test_performance.TestPerformanceRequirements" name="test_concurrent_search_performance" time="3.933" /><testcase classname="tests.integration.test_performance.TestChEMBLPerformanceRequirements" name="test_search_compounds_sc001" time="0.408" /><testcase classname="tests.integration.test_performance.TestChEMBLPerformanceRequirements" name="test_get_compound_sc002" time="0.517" /><testcase classname="tests.integration.test_performance.TestChEMBLPerformanceRequirements" name="test_get_compounds_batch_sc007" time="0.004" /><testcase classname="tests.integration.test_performance.TestChEMBLPerformanceRequirements" name="test_batch_faster_than_sequential" time="0.619" /><testcase classname="tests.contract.test_wire_contracts" name="test_list_tool_returns_pagination_envelope[ensembl.search_genes]" time="30.902"><failure message="AssertionError: {&quot;success&quot;:false,&quot;error&quot;:{&quot;code&quot;:&quot;UPSTREAM_ERROR&quot;,&quot;message&quot;:&quot;Request to Ensembl API timed out.&quot;,&quot;recovery_hint&quot;:&quot;Retry after a short delay.&quot;}}&#10;assert ('items' in {'error': {'code': 'UPSTREAM_ERROR', 'message': 'Request to Ensembl API timed out.', 'recovery_hint': 'Retry after a short delay.'}, 'success': False})&#10; +  where {'error': {'code': 'UPSTREAM_ERROR', 'message': 'Request to Ensembl API timed out.', 'recovery_hint': 'Retry after a short delay.'}, 'success': False} = WireResult(text='{&quot;success&quot;:false,&quot;error&quot;:{&quot;code&quot;:&quot;UPSTREAM_ERROR&quot;,&quot;message&quot;:&quot;Request to Ensembl API timed out.&quot;,&quot;recovery_hint&quot;:&quot;Retry after a short delay.&quot;}}', data={'success': False, 'error': {'code': 'UPSTREAM_ERROR', 'message': 'Request to Ensembl API timed out.', 'recovery_hint': 'Retry after a short delay.'}}, structured={'result': {'success': False, 'error': {'code': 'UPSTREAM_ERROR', 'message': 'Request to Ensembl API timed out.', 'recovery_hint': 'Retry after a short delay.'}}}, is_error=False).data">wire_call = &lt;function wire_call.&lt;locals&gt;._call at 0x7edbef3c74c0&gt;
+server_name = 'ensembl'
+case = ListCase(tool='search_genes', args={'query': 'TP53', 'page_size': 2})
+
+    @pytest.mark.parametrize("server_name,case", list_params())
+    async def test_list_tool_returns_pagination_envelope(
+        wire_call, server_name: str, case: ListCase
+    ) -&gt; None:
+        """ADR-001 §8A: list tools wrap items in the canonical pagination envelope."""
+        result = await wire_call(server_name, case.tool, case.args)
+        assert isinstance(result.data, dict), f"not JSON: {result.text[:200]}"
+&gt;       assert "items" in result.data and isinstance(result.data["items"], list), result.text[:300]
+E       AssertionError: {"success":false,"error":{"code":"UPSTREAM_ERROR","message":"Request to Ensembl API timed out.","recovery_hint":"Retry after a short delay."}}
+E       assert ('items' in {'error': {'code': 'UPSTREAM_ERROR', 'message': 'Request to Ensembl API timed out.', 'recovery_hint': 'Retry after a short delay.'}, 'success': False})
+E        +  where {'error': {'code': 'UPSTREAM_ERROR', 'message': 'Request to Ensembl API timed out.', 'recovery_hint': 'Retry after a short delay.'}, 'success': False} = WireResult(text='{"success":false,"error":{"code":"UPSTREAM_ERROR","message":"Request to Ensembl API timed out.","recovery_hint":"Retry after a short delay."}}', data={'success': False, 'error': {'code': 'UPSTREAM_ERROR', 'message': 'Request to Ensembl API timed out.', 'recovery_hint': 'Retry after a short delay.'}}, structured={'result': {'success': False, 'error': {'code': 'UPSTREAM_ERROR', 'message': 'Request to Ensembl API timed out.', 'recovery_hint': 'Retry after a short delay.'}}}, is_error=False).data
+
+tests/contract/test_wire_contracts.py:91: AssertionError</failure></testcase><testcase classname="tests.integration.test_competency_questions_client" name="test_cq1_target_resolvability" time="0.995" /><testcase classname="tests.integration.test_competency_questions_client" name="test_cq2_cross_domain_mapping" time="0.744" /><testcase classname="tests.integration.test_competency_questions_client" name="test_cq3_therapeutic_insight" time="0.623" /><testcase classname="tests.integration.test_competency_questions_client" name="test_cq4_protein_interaction_network" time="0.410" /><testcase classname="tests.integration.test_competency_questions_client" name="test_cq5_kras_synthetic_lethality" time="1.905" /><testcase classname="tests.integration.test_competency_questions_client" name="test_cq6_fusion_protein_therapy" time="1.845"><failure message="ValueError: API error: 401">check_iuphar_available = False
+
+    @pytest.mark.asyncio
+    @pytest.mark.timeout(30)
+    async def test_cq6_fusion_protein_therapy(check_iuphar_available):
+        """CQ-6: ALK inhibitors (Crizotinib) from IUPHAR.
+    
+        MCP Tool: iuphar.search_ligands
+        """
+        client = IUPHARClient()
+        try:
+&gt;           ligands_result = await client.search_ligands(query="Crizotinib", page_size=5)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_competency_questions_client.py:216: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/biosciences_mcp/clients/iuphar.py:337: in search_ligands
+    ligands = await self._fetch_ligands(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;biosciences_mcp.clients.iuphar.IUPHARClient object at 0x7edbef2ef770&gt;
+name = 'Crizotinib', type_filter = None, approved_only = False
+
+    async def _fetch_ligands(
+        self,
+        name: str | None = None,
+        type_filter: str | None = None,
+        approved_only: bool = False,
+    ) -&gt; list[dict]:
+        """Fetch ligands from GtoPdb API with optional filters.
+    
+        Args:
+            name: Fuzzy substring match on ligand name
+            type_filter: Filter by ligand classification (e.g., "Synthetic organic")
+            approved_only: Filter for approved drugs only
+    
+        Returns:
+            List of ligand dictionaries from API response
+        """
+        params = {}
+        if name:
+            params["name"] = name
+        if type_filter:
+            params["type"] = type_filter
+        if approved_only:
+            params["approved"] = "true"
+    
+        response = await self._rate_limited_get("/ligands", params=params)
+    
+        # Handle empty results
+        # Note: GtoPdb API may return 204 or 404 for no results
+        if response.status_code in (204, 404):
+            return []
+    
+        # Handle errors
+        if response.status_code != 200:
+&gt;           raise ValueError(f"API error: {response.status_code}")
+E           ValueError: API error: 401
+
+src/biosciences_mcp/clients/iuphar.py:277: ValueError</failure></testcase><testcase classname="tests.integration.test_competency_questions_client" name="test_cq7_pathway_mechanism_analysis" time="0.493" /><testcase classname="tests.integration.test_competency_questions_client" name="test_cq8_clinical_trial_landscape" time="0.000"><skipped type="pytest.skip" message="ClinicalTrials.gov blocks Python httpx clients via Cloudflare TLS fingerprinting - see CLAUDE.md">/home/donbr/open-biosciences/biosciences-mcp/.worktrees/implement-015-core/tests/integration/test_competency_questions_client.py:247: ClinicalTrials.gov blocks Python httpx clients via Cloudflare TLS fingerprinting - see CLAUDE.md</skipped></testcase><testcase classname="tests.integration.test_competency_questions_client" name="test_cq9_paralog_dependency" time="0.444" /><testcase classname="tests.integration.test_competency_questions_client" name="test_cq10_drug_repurposing" time="0.003" /><testcase classname="tests.integration.test_competency_questions_client" name="test_cq11_genomic_location" time="30.552"><failure message="KeyError: 'items'">@pytest.mark.asyncio
+    async def test_cq11_genomic_location():
+        """CQ-11: Genomic location of BRCA2 (Ensembl).
+    
+        MCP Tool: ensembl.search_genes, ensembl.get_gene
+        """
+        client = EnsemblClient()
+        try:
+            # Step 1: Search
+            search_result = await client.search_genes(query="BRCA2", species="human")
+            search = to_dict(search_result)
+&gt;           assert search["items"], "No BRCA2 results"
+                   ^^^^^^^^^^^^^^^
+E           KeyError: 'items'
+
+tests/integration/test_competency_questions_client.py:329: KeyError</failure></testcase><testcase classname="tests.integration.test_competency_questions_client" name="test_cq12_molecular_structure" time="2.610" /><testcase classname="tests.integration.test_competency_questions_client" name="test_cq13_pathway_drug_discovery" time="0.494" /><testcase classname="tests.integration.test_competency_questions_client" name="test_cq14_cell_therapy_mechanism" time="0.008" /><testcase classname="tests.integration.test_competency_questions_client" name="test_cq15_neuro_immunology_targets" time="0.007" /><testcase classname="tests.integration.test_competency_questions_client" name="test_cq16_advanced_mutation_targeting" time="0.000"><skipped type="pytest.skip" message="ClinicalTrials.gov blocks Python httpx clients via Cloudflare TLS fingerprinting - see CLAUDE.md">/home/donbr/open-biosciences/biosciences-mcp/.worktrees/implement-015-core/tests/integration/test_competency_questions_client.py:458: ClinicalTrials.gov blocks Python httpx clients via Cloudflare TLS fingerprinting - see CLAUDE.md</skipped></testcase><testcase classname="tests.integration.test_competency_questions_client" name="test_cq17_novel_alzheimers_mechanisms" time="0.006" /><testcase classname="tests.integration.test_competency_questions_client" name="test_cq18_protein_details" time="1.089" /><testcase classname="tests.integration.test_competency_questions_client" name="test_cq19_batch_operations" time="0.004" /><testcase classname="tests.integration.test_competency_questions_client" name="test_cq20_pathway_components" time="0.519" /><testcase classname="tests.integration.test_competency_questions_client" name="test_cq21_trial_details" time="0.000"><skipped type="pytest.skip" message="ClinicalTrials.gov blocks Python httpx clients via Cloudflare TLS fingerprinting - see CLAUDE.md">/home/donbr/open-biosciences/biosciences-mcp/.worktrees/implement-015-core/tests/integration/test_competency_questions_client.py:614: ClinicalTrials.gov blocks Python httpx clients via Cloudflare TLS fingerprinting - see CLAUDE.md</skipped></testcase><testcase classname="tests.integration.test_competency_questions_client" name="test_cq22_literature_links" time="1.299" /><testcase classname="tests.integration.test_competency_questions_client" name="test_cq23_gene_pathway_mapping" time="0.341"><failure message="AssertionError: Should find &gt;100 BRCA1 pathways&#10;assert 20 &gt; 100">@pytest.mark.asyncio
+    async def test_cq23_gene_pathway_mapping():
+        """CQ-23: WikiPathways gene-&gt;pathway reverse lookup (BRCA1).
+    
+        MCP Tool: wikipathways.get_pathways_for_gene
+        """
+        client = WikiPathwaysClient()
+        try:
+            pathways_result = await client.get_pathways_for_gene(
+                gene_id="BRCA1",
+                organism="Homo sapiens",
+                page_size=5,
+            )
+            pathways = to_dict(pathways_result)
+    
+            assert pathways["items"], "No pathways found for BRCA1"
+&gt;           assert pathways["pagination"]["total_count"] &gt; 100, "Should find &gt;100 BRCA1 pathways"
+E           AssertionError: Should find &gt;100 BRCA1 pathways
+E           assert 20 &gt; 100
+
+tests/integration/test_competency_questions_client.py:692: AssertionError</failure></testcase></testsuite></testsuites>

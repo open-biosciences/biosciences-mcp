@@ -44,6 +44,8 @@ async def search_genes(
 
     Returns ranked candidates for resolution. Use this before calling get_gene.
 
+    PaginationEnvelope with SearchCandidate items, or ErrorEnvelope on failure.
+
     Args:
         query: Search term (gene symbol, name, synonym, or natural language query).
                Minimum 2 characters required.
@@ -51,9 +53,6 @@ async def search_genes(
               Default false returns full candidates.
         cursor: Opaque cursor for pagination. Pass from previous response for next page.
         page_size: Number of results per page (1-100, default 50).
-
-    Returns:
-        PaginationEnvelope with SearchCandidate items, or ErrorEnvelope on failure.
     """
     client = await get_client()
     return await client.search_genes(
@@ -71,11 +70,10 @@ async def get_gene(hgnc_id: str) -> Gene | ErrorEnvelope:
     Returns full Agentic Biolink entity with cross-references.
     Requires resolved CURIE from search_genes.
 
+    Gene record with cross_references, or ErrorEnvelope on failure.
+
     Args:
         hgnc_id: HGNC CURIE in format 'HGNC:NNNNN' (e.g., 'HGNC:1100' for BRCA1).
-
-    Returns:
-        Gene record with cross_references, or ErrorEnvelope on failure.
     """
     client = await get_client()
     return await client.get_gene(hgnc_id=hgnc_id)
